@@ -27,6 +27,7 @@
 *.stash
 *.in
 *.out
+*~
 
 # Packages #
 ############

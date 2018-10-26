@@ -1,7 +1,7 @@
 % Ce script Matlab automatise la production de resultats
 % lorsqu'on doit faire une serie de simulations en
 % variant un des parametres d'entree.
-% 
+%
 % Il utilise les arguments du programme (voir ConfigFile.h)
 % pour remplacer la valeur d'un parametre du fichier d'input
 % par la valeur scannee.
@@ -16,7 +16,7 @@ input = 'configuration.in'; % Nom du fichier d'entree de base
 
 nsimul = 20; % Nombre de simulations a faire
 
-dt = ones(1,nsimul); % TODO: Choisir des valeurs de dt pour faire une etude de convergence
+dt = logspace(-2,-4,nsimul); % TODO: Choisir des valeurs de dt pour faire une etude de convergence
 Omega = ones(1,nsimul); % TODO: Choisir des valeurs de Omega pour trouver la resonance
 
 paramstr = 'dt'; % Nom du parametre a scanner (changer ici 'dt' ou 'Omega' ou autre)
@@ -27,7 +27,7 @@ param = dt; % Valeurs du parametre a scanner (changer ici dt ou Omega ou autre)
 
 output = cell(1, nsimul); % Tableau de cellules contenant le nom des fichiers de sortie
 for i = 1:nsimul
-    output{i} = [paramstr, '=', num2str(param(i)), '.out'];
+    output{i} = ['simulations/',paramstr, '=', num2str(param(i)), '.out'];
     % Execution du programme en lui envoyant la valeur a scanner en argument
     cmd = sprintf('%s%s %s %s=%.15g output=%s', repertoire, executable, input, paramstr, param(i), output{i});
     disp(cmd)
@@ -43,15 +43,24 @@ elseif strcmp(paramstr, 'Omega')
     Emax = zeros(1,nsimul);
 end
 
+g=9.81;
+L=0.01;
+theta0=1e-6;
+w0=sqrt(g/L);
+
 for i = 1:nsimul % Parcours des resultats de toutes les simulations
     data = load(output{i}); % Chargement du fichier de sortie de la i-ieme simulation
-    
+
     if strcmp(paramstr, 'dt')
-        error(i) = 0; % TODO: Calculer l'erreur a partir de l'output
+      t = data(end,1);
+      theta = data(end,2);
+      theta_th = theta0*cos(w0*t);
+      error(i) = abs(theta-theta_th);
     elseif strcmp(paramstr, 'Omega')
-        Emax(i) = 0; % TODO: Calculer le maximum de l'energie
+      Emax(i) = 0; % TODO: Calculer le maximum de l'energie
     end
 end
+
 
 %% Figures %%
 %%%%%%%%%%%%%
@@ -69,5 +78,3 @@ elseif strcmp(paramstr, 'Omega')
     ylabel('max(E_{mec}(t)) [J]')
     grid on
 end
-
-

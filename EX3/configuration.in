@@ -6,7 +6,7 @@ kappa    = 0
 m        = 0.1
 g        = 9.81
 L        = 0.1
-theta0   = 0.000001
+theta0   = 1e-6
 thetadot0 = 0
 
 % Parametres numeriques :
