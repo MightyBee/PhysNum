@@ -33,9 +33,9 @@ private:
       last++;
     }
   }
-  
 
   double a(double x, double v, double t){
+    double resultat;
     return -(g+d*Omega*Omega/m*sin(Omega*t))*sin(x)/L -kappa/m*v;
   }
 
