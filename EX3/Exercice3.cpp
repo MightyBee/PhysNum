@@ -35,10 +35,6 @@ private:
   }
 
   double a(double x, double v, double t){
-<<<<<<< HEAD
-    double resultat(0);
-=======
->>>>>>> abe88116aec1871b86d7250173df40cfc237bb88
     return -(g+d*Omega*Omega/m*sin(Omega*t))*sin(x)/L -kappa/m*v;
   }
 
