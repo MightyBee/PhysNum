@@ -25,7 +25,7 @@ P = output(:,5);
 x = 0.1*sin(theta)
 y= -0.1*cos(theta)
 clear output
-caca
+
 % Figures
 
 figure
@@ -42,7 +42,7 @@ plot(t,theta);
 %axis equal
 grid on
 xlabel('t [s]')
-ylabel('y [m]')
+ylabel('theta [rad]')
 
 figure
 %subplot(2,3,2)
