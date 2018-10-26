@@ -37,7 +37,7 @@ private:
   double a(double x, double v, double t){
     return -(g+d*Omega*Omega/m*sin(Omega*t))*sin(x)/L -kappa/m*v;
   }
-
+caca
   void step()
   {
     double thetaOld(theta);
