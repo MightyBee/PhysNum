@@ -1,0 +1,112 @@
+% debut d'un fichier latex standard
+\documentclass[12pt,twoside]{article}
+% pour l'inclusion de figures en eps,pdf,jpg,....
+\usepackage{graphicx}
+% quelques symboles mathematiques en plus
+\usepackage{amsmath}
+% le tout en langue francaise
+\usepackage[french]{babel}
+% on peut ecrire directement les characteres avec l'accent
+% a utiliser sur Linux/Windows
+\usepackage[utf8]{inputenc}
+% a utiliser sur le Mac
+%\usepackage[applemac]{inputenc}
+% pour l'inclusion de links dans le document (pdflatex)
+\usepackage[colorlinks,bookmarks=false,linkcolor=blue,urlcolor=blue]{hyperref}
+%
+% quelques abreviations utiles
+\def \be {\begin{equation}}
+\def \ee {\end{equation}}
+\def \dd  {{\rm d}}
+%
+\newcommand{\mail}[1]{{\href{mailto:#1}{#1}}}
+\newcommand{\ftplink}[1]{{\href{ftp://#1}{#1}}}
+%
+% le document commence ici
+\begin{document}
+% le titre et l'auteur
+\title{Physique numérique I : exercice 2}
+\date{\today}
+\author{Victor Despland, Timothée Dao\\{\small \mail{victor.despland@epfl.ch}, \mail{timothee.dao@epfl.ch}}}
+\maketitle
+\tableofcontents
+\section{Introduction}
+
+Un proton de masse $m = 1.6726  \times 10^{-27 } \rm kg$, de charge $ = 1.6022 \times 10^{-19} \rm C$, avec une position initiale $(x_0, y_0 )$ et une vitesse initiale $\textbf{v}_0 = (v_{x0} , v_{y0} )$, est plongé dans un champ électrique uniforme $\textbf{E} = E\hat{y}$ et un champ magnétique uniforme $\textbf{B} = B\hat{z} $ . Il est alors soumis à la force de Lorentz $\textbf{F} = q(\textbf{E} + \textbf{v} \times\textbf{ B})$.
+
+\section{Calculs analytiques}
+
+De la 2ème loi de Newton, $\vec{F}=m\vec{a}$, on tire :
+\be
+\frac{\dd }{\dd t} 
+\left( \begin{array}{c} v_x \\ v_y \\ x \\ y \end{array} \right)
+=
+\left( \begin{array}{c}
+   \frac{q}{m} v_y B\\ \frac{q}{m} (E-v_x B) \\ 
+   v_x \\ v_y
+\end{array} \right)
+\ee
+Dans le cas où $E=0$, il s'agit de résoudre dans un premier temps l'équation differentielle suivante 
+\be
+\frac{\dd }{\dd t} 
+\left( \begin{array}{c} v_x \\ v_y \end{array} \right)
+=
+\lambda
+\left( \begin{matrix}
+ 0 & 1 \\
+ -1 & 0
+\end{matrix} \right)
+\left( \begin{array}{c}
+   v_{x_0} \\ v_{y_0}
+\end{array} \right),
+\textbf{v}(0) = \textbf{v}_0
+\ee
+avec $\lambda=\frac{qB_0}{m}$.
+La solution est donnée par 
+\be
+\textbf{v}(t)=\exp(At) \textbf{v}_0=
+\left( \begin{array}{c}
+   v_{x_0}  \cos (\lambda t) + v_{y_0} \sin (\lambda t) \\
+   -v_{x_0} \sin (\lambda t) + v_{y_0} \cos (\lambda t)
+\end{array} \right)
+\ee
+On résout finalemement 
+\be
+\frac{\dd }{\dd t} 
+\left( \begin{array}{c} x \\ y \end{array} \right)
+=
+\left( \begin{array}{c} v_x \\ v_y \end{array} \right) , 
+\left( \begin{array}{c} x(0) \\ y(0) \end{array} \right)
+=
+\left( \begin{array}{c}  x_0 \\ y_0 \end{array} \right) 
+\ee
+La solution est donnée par 
+\be
+\left( \begin{array}{c} x \\ y \end{array} \right) (t)
+=
+\frac{1}{\lambda} \left( \begin{array}{c}
+   v_{x_0}  \sin (\lambda t) - v_{y_0} \cos (\lambda t) + v_{y_0} + \lambda x_0 \\
+   v_{x_0} \cos (\lambda t) + v_{y_0} \sin (\lambda t) - v_{x_0} + \lambda y_0
+\end{array} \right) 
+\ee
+\subsection{ABC}
+
+\subsection{Figures} \label{sec:figures}
+
+% une figure 'flottante', c'est a dire que c'est Latex qui va vous placer
+% la figure la ou il lui semble bon.
+\begin{figure}
+% decommenter la ligne suivante quand vous avez prepare les fichiers
+% eps ou pdf
+%\centerline{\includegraphics[width=0.9\linewidth,angle=0]{Plot}}
+% la legende est dans caption
+\caption{\em
+ la l\'egende.
+ \label{fig:Plot}
+}
+\end{figure}
+\begin{thebibliography}{99}
+\bibitem{ref1} 
+ Une premi\`ere r\'ef\'erence.
+ \end{thebibliography}
+\end{document}

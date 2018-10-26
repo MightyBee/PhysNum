@@ -1,0 +1,17 @@
+% Parametres physiques :
+tfin   = 1.09e-7
+q      = 1.6022e-19
+m      = 1.6726e-27
+B0     = 3
+E      = 0
+Kappa  = 0
+x0     = -1.39e-3
+y0     = 0
+vx0    = 0
+vy0    = 4e5
+
+% Parametres numeriques :
+schema   = RK2
+nsteps   = 5000
+output   = RK2.out
+sampling = 1

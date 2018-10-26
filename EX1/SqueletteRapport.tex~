@@ -1,0 +1,176 @@
+% debut d'un fichier latex standard
+\documentclass[a4paper,12pt,twoside]{article}
+
+% pour l'inclusion de figures en eps,pdf,jpg
+\usepackage{graphicx}
+% quelques symboles mathematiques en plus
+\usepackage{amsmath}
+% le tout en langue francaise
+\usepackage[francais]{babel}
+% on peut ecrire directement les caracteres avec l'accent
+% a utiliser sur Linux/Windows
+\usepackage[latin1]{inputenc}
+% a utiliser sur le Mac
+%\usepackage[applemac]{inputenc}
+% pour l'inclusion de links dans le document 
+\usepackage[colorlinks,bookmarks=false,linkcolor=blue,urlcolor=blue]{hyperref}
+
+\paperheight=297mm
+\paperwidth=210mm
+
+\setlength{\textheight}{235mm}
+\setlength{\topmargin}{-1.2cm} % pour centrer la page verticalement
+%\setlength{\footskip}{5mm}
+\setlength{\textwidth}{15cm}
+\setlength{\oddsidemargin}{0.56cm}
+\setlength{\evensidemargin}{0.56cm}
+
+\pagestyle{plain}
+
+% quelques abreviations utiles
+\def \be {\begin{equation}}
+\def \ee {\end{equation}}
+\def \dd  {{\rm d}}
+
+\newcommand{\mail}[1]{{\href{mailto:#1}{#1}}}
+\newcommand{\ftplink}[1]{{\href{ftp://#1}{#1}}}
+%
+% latex SqueletteRapport.tex      % compile la source LaTeX
+% xdvi SqueletteRapport.dvi &     % visualise le resultat
+% dvips -t a4 -o SqueletteRapport.ps SqueletteRapport % produit un PostScript
+% ps2pdf SqueletteRapport.ps      % convertit en pdf
+
+% pdflatex SqueletteRapport.pdf    % compile et produit un pdf
+
+% ======= Le document commence ici ======
+
+\begin{document}
+% Le titre, l'auteur et la date
+\title{Squelette d'un rapport en \LaTeX}
+\date{\today}
+\author{Votre Nom\\{\small \mail{votre.nom@epfl.ch}}}
+\maketitle
+\tableofcontents % Table des matieres
+
+% Quelques options pour les espacements entre lignes, l'identation 
+% des nouveaux paragraphes, et l'espacement entre paragraphes
+\baselineskip=16pt
+\parindent=15pt
+\parskip=5pt
+
+\section{Introduction} %------------------------------------------
+
+Bonjour!
+ 
+En guise             d'introduction, on r\'ep\'etera les commandes \LaTeX.
+Les accents grave (g\`ele), aig\"u (d\'ebut), circonflexe (b\^ete), tr\'ema 
+sur le i : (na\"\i ve), et la c\'edille s'\'ecrivent comme \c{c}a (voir aussi 
+pp.11-12): 
+\begin{verbatim} 
+Les accents grave (g\`ele), aig\"u (d\'ebut), circonflexe (b\^ete), 
+tr\'ema sur le i : (na\"\i ve), et la c\'edille s'\'ecrivent comme 
+\c{c}a.
+\end{verbatim}
+
+On a plac\'e les lignes ci-dessus entre \verb|\begin{verbatim}| et 
+\verb|\end{verbatim}| pour qu'elles apparaissent exactement comme elles 
+sont dans le fichier source. Pour faire de m\^eme dans un paragraphe, 
+on place le texte entre \verb|\verb|$|$ et  $|$.
+Une ligne vide dans le fichier source veut dire qu'un nouveau paragraphe 
+commence dessous. 
+
+Les \'equations sont soit des expressions ins\'er\'ees dans un paragraphe, par 
+exemple 
+$F=ma$, 
+\(E=mc^2\) ou 
+\begin{math} p=mv \end{math}, 
+ins\'er\'ees entre \$ et \$, 
+ou occupent une ligne s\'epar\'ee, entre \verb|\[| et \verb|\]|,\[ E=mc^2, \] 
+ou, avec num\'erotation {\it automatique}, entre \verb|\begin{equation}| 
+et \verb|\end{equation}|:
+\begin{equation}
+\frac{dy}{dt} = f(y,t)
+\end{equation}
+
+\begin{equation}
+E=mc^2        . % Commentaire: les espaces du fichier source sont ignor\'es
+\end{equation}
+
+On rajoute des ``d\'ecorations'' sur les symboles, par exemple pour un vecteur 
+$\vec{F}=m\vec{a}$, ou $\vec{AB}=\vec{OB}-\vec{OA}$, ou 
+$\overrightarrow{AB}$.  Voir p.33 des transparents.
+
+\subsection{R\'ef\'erences crois\'ees} \label{sec:figures} %---------------
+
+\LaTeX a un syst\`eme de r\'ef\'rences crois\'ees pour plusieurs choses. 
+Par exemple pour les \'equations. On place \verb|\label{NOMDULABEL}| entre 
+\verb|\begin{equation}| et \verb|\end{equation}|.   Soit
+
+\begin{equation} \label{NOMDULABEL}
+\vec{F}=m\vec{a}
+\end{equation}
+
+On fait r\'ef\'erence \`a cette \'equation avec la commande \verb|\ref{NOMDULABEL}|: de l'Eq.(\ref{NOMDULABEL}), on en tire $F_x=mx''$.
+
+On fait r\'ef\'erence \`a la sous-section \ref{SABC} avec la commande 
+\verb|\ref{SABC}|.
+%
+% Voici une figure 'flottante', c'est a dire que c'est Latex qui va vous placer
+% la figure la ou il lui semble bon.
+\begin{figure} %------------------------------------------------
+% si on utilise latex, les fichiers graphiques doivent etre au format .eps
+% si on utilise pdflatex, ils doivent etre au format pdf, png ou jpg
+%\centerline{\includegraphics[width=0.9\linewidth,angle=0]{Plot}} 
+% ou
+\begin{center}
+\includegraphics[width=5cm,angle=90]{aa}
+\includegraphics[width=7cm,angle=0]{aa}
+% Il est mieux de ne PAS mettre explicitement l'extension (.eps ou .pdf ou 
+% .png ou .jpg). latex cherchera aa.eps, pdflatex cherchera aa.pdf ou  
+% aa.png ou aa.jpg
+\end{center}
+% la legende est dans \caption{...}
+\caption{\em  \label{fig:Plot}
+ Ceci est une l\'egende.
+}
+\end{figure} %---------------------------------------------------
+
+On fait r\'ef\'erence \`a la FIG.\ref{fig:Plot} avec la commande 
+\verb|\ref{fig:Plot}|.
+
+Les r\'ef\'erences bibliographiques \cite{Duschmoll_PRL} 
+s'obtiennent avec \verb|\cite{Duschmoll_PRL}| 
+ou avec \cite{Abi_Science} \verb|\cite{Abi_Science}|.
+
+\subsection{ABC} \label{SABC}
+%--------------------------------------
+Remarque: On a plac\'e un label dans cette sous-section: \verb|\label{SABC}|.
+
+On compile la source \LaTeX avec la commande 
+\begin{verbatim}
+latex SqueletteRapport.tex
+\end{verbatim}
+(auquel cas les figures doivent \^etre au format \verb|eps|), 
+ce qui produit un fichier\\ % double backslash => a la ligne
+ \verb|SqueletteRapport.dvi|. 
+Pour convertir celui-ci en PostScript, utiliser la commande 
+\begin{verbatim}
+dvips -t a4 -o SqueletteRapport.ps SqueletteRapport
+\end{verbatim}
+puis \verb|ps2pdf SqueletteRapport.ps|.
+
+Autrement, on compile avec la commande
+\begin{verbatim}
+pdflatex SqueletteRapport.tex
+\end{verbatim}
+(auquel cas les figures doivent \^etre au format \verb|pdf| ou \verb|png| 
+ou \verb|jpeg|).
+
+\begin{thebibliography}{99}
+\bibitem{Duschmoll_PRL} 
+ A. Duschmoll, R. Schnok, {\it Phys. Rev. Lett.} {\bf 112} 010015 (2010)
+\bibitem{Abi_Science}
+ D.D. Abi, {\it et al}, {\it Science} {\bf 22} 1242 (2007)
+\end{thebibliography}
+
+\end{document} %%%% THE END %%%%

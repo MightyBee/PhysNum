@@ -1,0 +1,10 @@
+\babel@toc {french}{}
+\contentsline {section}{\numberline {1}Introduction}{1}{section.1}
+\contentsline {section}{\numberline {2}Calculs analytiques}{1}{section.2}
+\contentsline {subsection}{\numberline {2.1}\IeC {\'E}quations diff\IeC {\'e}rentielles}{2}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}Position d'\IeC {\'e}quilibre $z_E$}{2}{subsection.2.2}
+\contentsline {subsection}{\numberline {2.3}Vitesse initiale $v_0$ pour atteindre $z_E$}{2}{subsection.2.3}
+\contentsline {section}{\numberline {3}Simulation num\IeC {\'e}riques}{3}{section.3}
+\contentsline {subsection}{\numberline {3.1}Cas sans atmosph\IeC {\`e}re $(\rho _0=0kg/m^3)$}{3}{subsection.3.1}
+\contentsline {subsection}{\numberline {3.2}Cas avec atmosph\IeC {\`e}re $(\rho _0=1.3kg/m^3)$}{3}{subsection.3.2}
+\contentsline {subsection}{\numberline {3.3}Recherche de vitesses initiales $v_0$}{3}{subsection.3.3}

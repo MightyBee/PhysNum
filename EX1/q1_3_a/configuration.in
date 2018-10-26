@@ -1,0 +1,21 @@
+% Parametres physiques :
+tfin   = 86400
+% 350400 86400
+G      = 6.674e-11
+mT     = 5.972e24
+mL     = 7.342e22
+zT     = 0
+zL     = 384400000
+m      = 1000
+R      = 0.5
+rho0   = 0
+lambda = 1e4
+Cx     = 0.3
+z0     = 6378000
+v0     = 11065.712280
+%11065.712280 11127.766111
+
+% Parametres numeriques :
+nsteps   = 1000
+output   = output.out
+sampling = 1

@@ -1,0 +1,17 @@
+% Parametres physiques :
+tfin   = 109.32e-8
+q      = 1.6022e-19
+m      = 1.6726e-27
+B0     = 3
+E      = 0
+Kappa  = 0
+x0     = -1391.92
+y0     = 0
+vx0    = 0
+vy0    = 4e5
+
+% Parametres numeriques :
+schema   = Euler
+nsteps   = 500000
+output   = Euler.out
+sampling = 1
