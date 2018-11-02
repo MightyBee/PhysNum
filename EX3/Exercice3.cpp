@@ -24,6 +24,7 @@ private:
     {
       double emec = 1/2*m*pow(L*thetadot,2)+m*L*g*(1-cos(theta)); // TODO: Evaluer l'energie mecanique
       double pnc = -kappa*pow(L*thetadot,2)-m*pow(Omega,3)*pow(d,2)*sin(Omega*t)*cos(Omega*t); // TODO: Evaluer la puissance des forces non conservatives
+      //double pnc = -(kappa*L*thetadot + m*pow(Omega,2)*d*sin(Omega*t)*sin(theta))*(L*thetadot);
 
       *outputFile << t << " " << theta << " " << thetadot << " " << emec << " " << pnc << endl;
       last = 1;
