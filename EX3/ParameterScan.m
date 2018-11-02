@@ -17,7 +17,7 @@ input = 'configuration.in'; % Nom du fichier d'entree de base
 nsimul = 10; % Nombre de simulations a faire
 
 dt = logspace(-2,-3,nsimul);
-Omega = ones(1,nsimul); %                     TODO: Choisir des valeurs de Omega pour trouver la resonance
+Omega = linspace(9.5,10.5,nsimul); %                     TODO: Choisir des valeurs de Omega pour trouver la resonance
 theta0 = linspace(1e-7,pi-1e-7,nsimul);
 
 paramstr = 'Omega'; % Nom du parametre a scanner (changer ici 'dt' ou 'Omega' ou autre)
@@ -58,6 +58,7 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
       theta = data(end,2);
       theta_th = theta0petit*cos(w0*t);
       error(i) = abs(theta-theta_th);
+   
     elseif strcmp(paramstr, 'Omega')
         v=0;
         for l=(data(:,4)+data(:,5))
@@ -65,11 +66,8 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
                 v=l;
             end
         end
-
-
-
+        
         Emax(i)= v; % TODO: Calculer le maximum de l'energie
-      Emax(i) = 0; %                           TODO: Calculer le maximum de l'energie
     elseif strcmp(paramstr, 'theta0')
       t = data(:,1);
       theta = data(:,2);
