@@ -10,6 +10,6 @@ theta0   = 1e-6
 thetadot0 = 0
 
 % Parametres numeriques :
-dt       = 0.02
+dt       = 0.00002
 output   = a.out
 sampling = 1
