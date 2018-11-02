@@ -1,5 +1,5 @@
 % Nom du fichier d'output a analyser
-repertoireOut = '';
+repertoireOut = 'simulations/';
 filename = 'a';
 repertoireExe = './'; % Chemin d'acces au code compile (NB: enlever le ./ sous Windows)
 executable = 'Exercice3'; % Nom de l'executable (NB: ajouter .exe sous Windows)
@@ -22,16 +22,16 @@ theta = output(:,2);
 thetadot = output(:,3);
 energy= output(:,4);
 P = output(:,5);
-x = 0.1*sin(theta)
-y= -0.1*cos(theta)
+x =  0.1*sin(theta);
+y = -0.1*cos(theta);
 clear output
 
 % Figures
 
 figure
 %subplot(2,3,1)
-plot(x,y);
-%axis equal
+comet(x,y)
+axis equal
 grid on
 xlabel('x [m]')
 ylabel('y [m]')
@@ -84,5 +84,4 @@ grid on
 %grid on
 %xlabel('t [s]')
 %ylabel('\mu [J/T]')
-
-%print([repertoireOut,'/',filename], '-depsc');
+%print(['figures/',filename], '-depsc');
