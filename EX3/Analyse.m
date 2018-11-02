@@ -46,7 +46,7 @@ ylabel('theta [rad]')
 
 figure
 %subplot(2,3,2)
-plot(thetadot,t)
+plot(t,thetadot)
 %axis equal
 grid on
 xlabel('t [s]')
@@ -54,11 +54,17 @@ ylabel('thetadot [rad/s]')
 
 figure
 %subplot(2,3,3)
-plot(t,x,t,y)
-%grid on
-%label('tx [s]')
-%ylabel('x,y [m]')
+Esim=plot(t,energy,'b',[0 20],[0.1*9.81*0.1*(1-cos(0.000001)) 0.1*9.81*0.1*(1-cos(0.000001))], 'r')
+
+
+grid on
+xlabel('t [s]')
+ylabel('energy[J]')
 %legend('x','y')
+
+figure
+plot(t,P+energy)
+grid on
 
 %subplot(2,3,4)
 %plot(t,vx,t,vy)

@@ -14,13 +14,13 @@ repertoire = './'; % Chemin d'acces au code compile (NB: enlever le ./ sous Wind
 executable = 'Exercice3'; % Nom de l'executable (NB: ajouter .exe sous Windows)
 input = 'configuration.in'; % Nom du fichier d'entree de base
 
-nsimul = 20; % Nombre de simulations a faire
+nsimul = 10; % Nombre de simulations a faire
 
 dt = ones(1,nsimul); % TODO: Choisir des valeurs de dt pour faire une etude de convergence
 Omega = ones(1,nsimul); % TODO: Choisir des valeurs de Omega pour trouver la resonance
 
-paramstr = 'dt'; % Nom du parametre a scanner (changer ici 'dt' ou 'Omega' ou autre)
-param = dt; % Valeurs du parametre a scanner (changer ici dt ou Omega ou autre)
+paramstr = 'Omega'; % Nom du parametre a scanner (changer ici 'dt' ou 'Omega' ou autre)
+param = Omega; % Valeurs du parametre a scanner (changer ici dt ou Omega ou autre)
 
 %% Simulations %%
 %%%%%%%%%%%%%%%%%
@@ -49,7 +49,16 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
     if strcmp(paramstr, 'dt')
         error(i) = 0; % TODO: Calculer l'erreur a partir de l'output
     elseif strcmp(paramstr, 'Omega')
-        Emax(i) = 0; % TODO: Calculer le maximum de l'energie
+        v=0;
+        for l=(data(:,4)+data(:,5))
+            if l>v
+                v=l;
+            end
+        end
+        
+              
+           
+        Emax(i)= v; % TODO: Calculer le maximum de l'energie
     end
 end
 
