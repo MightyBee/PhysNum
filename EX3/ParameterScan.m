@@ -60,9 +60,10 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
       error(i) = abs(theta-theta_th);
    
     elseif strcmp(paramstr, 'Omega')
-        v=0;
-        for l=(data(:,4)+data(:,5))
+        v=-10;
+        for l=(data(:,4))
             if l>v
+
                 v=l;
             end
         end
