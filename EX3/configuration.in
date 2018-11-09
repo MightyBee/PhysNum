@@ -1,13 +1,13 @@
 % Parametres physiques :
 tFin     = 250
 d        = 0.03
-Omega    = 0.990454441
+Omega    = 0
 kappa    = 0
 m        = 0.1
 g        = 9.81
 L        = 0.1
 theta0   = 0
-thetadot0 = 0.01
+thetadot0 = 1e-2
 
 % Parametres numeriques :
 dt       = 0.02
