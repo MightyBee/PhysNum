@@ -1,8 +1,8 @@
 % Nom du fichier d'output a analyser
 repertoireOut = 'simulations/';
 filename = 'a';
-repertoireExe = './'; % Chemin d'acces au code compile (NB: enlever le ./ sous Windows)
-executable = 'Exercice3'; % Nom de l'executable (NB: ajouter .exe sous Windows)
+repertoireExe = './'; % Chemin d'acces au code compile
+executable = 'Exercice3'; % Nom de l'executable
 input = 'configuration.in'; % Nom du fichier d'entree de base
 
 %% Simulations %%
@@ -24,13 +24,20 @@ energy= output(:,4);
 P = output(:,5);
 x =  0.1*sin(theta);
 y = -0.1*cos(theta);
+yAbs = y + 0.03*sin(9.9045*t);
 clear output
+
 
 % Figures
 
 figure
+plot3(theta.*cos(t),theta.*sin(t),thetadot);
+grid on 
+
+
+figure
 %subplot(2,3,1)
-comet(x,y)
+plot(x,y)
 axis equal
 grid on
 xlabel('x [m]')
@@ -62,26 +69,4 @@ xlabel('t [s]')
 ylabel('energy[J]')
 %legend('x','y')
 
-figure
-plot(t,P+energy)
-grid on
 
-%subplot(2,3,4)
-%plot(t,vx,t,vy)
-%grid on
-%xlabel('t [s]')
-%ylabel('v_x,v_y [m/s]')
-%legend('v_x','v_y')
-
-%subplot(2,3,5)
-%plot(t,energy)
-%grid on
-%xlabel('t [s]')
-%ylabel('E [J]')
-
-%subplot(2,3,6)
-%plot(t,mu)
-%grid on
-%xlabel('t [s]')
-%ylabel('\mu [J/T]')
-%print(['figures/',filename], '-depsc');
