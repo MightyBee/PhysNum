@@ -67,19 +67,11 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
       error(i) = abs(theta-theta_th);
 
     elseif strcmp(paramstr, 'Omega')
-<<<<<<< HEAD
-        v=-10;
-        for l=(data(:,4))
-            if l>v
-
-                v=l;
-=======
         Emec=data(:,4);
         v=Emec(1);
         for l=1:size(Emec,1)
             if Emec(l)>v
                 v=Emec(l);
->>>>>>> 30c57a5bf2cde01101cd7afee9ff0263328e1f7a
             end
         end
         Emax(i)= v; % TODO: Calculer le maximum de l'energie
