@@ -29,6 +29,7 @@
 *.in
 *.out
 *~
+*.eps
 Exercice?
 
 # Packages #
