@@ -1,12 +1,12 @@
 % Parametres physiques :
-tFin     = 20%12.6875
+tFin     = 20
 d        = 0
-Omega    = 9.904544411531507
+Omega    = 0
 kappa    = 0
 m        = 0.1
 g        = 9.81
 L        = 0.1
-theta0   = 0
+theta0   = 0.000001
 thetadot0 = 0
 
 % Parametres numeriques :
