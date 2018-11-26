@@ -1,15 +1,15 @@
 % Parametres physiques :
-tFin     = 250
-d        = 0.03
-Omega    = 0
+tFin     = 20%12.6875
+d        = 0
+Omega    = 9.904544411531507
 kappa    = 0
 m        = 0.1
 g        = 9.81
 L        = 0.1
 theta0   = 0
-thetadot0 = 1e-2
+thetadot0 = 0
 
 % Parametres numeriques :
-dt       = 0.02
+dt       = 0.0002
 output   = a.out
 sampling = 1

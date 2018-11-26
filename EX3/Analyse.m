@@ -7,15 +7,21 @@ input = 'configuration.in'; % Nom du fichier d'entree de base
 
 %% Simulations %%
 %%%%%%%%%%%%%%%%%
+Omega=6*sqrt(9.81/0.1);
 % Execution du programme en lui envoyant la valeur a scanner en argument
 outputFile = [repertoireOut,filename, '.out'];
-cmd = sprintf('%s%s %s output=%s', repertoireExe, executable, input, outputFile);
+cmd = sprintf('%s%s %s Omega=%.20g output=%s', repertoireExe, executable, input, Omega, outputFile);
 disp(cmd)
 system(cmd);
 
 % Chargement des donnees
 output = load(outputFile);
 
+
+g=9.81;
+L=0.1;
+theta0petit=1e-6;
+w0=sqrt(g/L);
 % Extraction des quantites d'interet
 t = output(:,1);
 theta = output(:,2);
@@ -25,13 +31,14 @@ P = output(:,5);
 x =  0.1*sin(theta);
 y = -0.1*cos(theta);
 yAbs = y + 0.03*sin(9.9045*t);
+theta_th = theta0petit*cos(w0*t);
 clear output
 
 
 % Figures
 
 figure
-plot3(theta.*cos(t),theta.*sin(t),thetadot);
+plot3(theta.*cos(t*w0),theta.*sin(t*w0),thetadot);
 grid on 
 
 
@@ -45,7 +52,7 @@ ylabel('y [m]')
 
 figure
 %subplot(2,3,1)
-plot(t,theta);
+plot(t,abs(theta-theta_th));
 %axis equal
 grid on
 xlabel('t [s]')
@@ -58,6 +65,14 @@ plot(t,thetadot)
 grid on
 xlabel('t [s]')
 ylabel('thetadot [rad/s]')
+
+fig1=figure('Position',[50,50,600,400]);
+plot(t,theta)
+xlabel('t [s]')
+ylabel('\theta [rad]')
+set(gca,'fontsize',15);
+grid on
+print(fig1,'figures/stabilisationPIsansFrot', '-depsc');
 
 figure
 %subplot(2,3,3)

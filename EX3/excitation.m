@@ -7,17 +7,18 @@ input = 'configuration.in'; % Nom du fichier d'entree de base
 
 theta0=0;
 thetadot0=1e-2;
-Omega=2*sqrt(9.81/0.1);
-d=0.005;
-kappa=0.05;
+w0=sqrt(9.81/0.1);
+Omega=1*w0;
+d=0.03;
+kappa=0;
 dt=0.002;
-tFin=100;
+tFin=250;
 
 %% Simulations %%
 %%%%%%%%%%%%%%%%%
 % Execution du programme en lui envoyant la valeur a scanner en argument
 outputFile = [repertoireOut,filename,'_kappa=',num2str(kappa),'_dt=',num2str(dt), '.out'];
-cmd = sprintf('%s%s %s tFin=%.15g d=%.15g Omega=%.15g theta0=%.15g thetadot0=%.15g dt=%.15g output=%s', repertoireExe, executable, input, tFin, d, Omega, theta0, thetadot0, dt, outputFile);
+cmd = sprintf('%s%s %s tFin=%.15g d=%.15g Omega=%.15g kappa=%.15g theta0=%.15g thetadot0=%.15g dt=%.15g output=%s', repertoireExe, executable, input, tFin, d, Omega, kappa, theta0, thetadot0, dt, outputFile);
 disp(cmd)
 system(cmd);
 
@@ -26,8 +27,6 @@ output = load(outputFile);
 
 % Extraction des quantites d'interet
 t = output(:,1);
-theta = output(:,2);
-thetadot = output(:,3);
 energy= output(:,4);
 P = output(:,5);
 clear output
@@ -39,11 +38,39 @@ end
 
 
 % Figures
-figure('Position',[50,50,600,400]);
+fig1=figure('Position',[50,50,600,400]);
 plot(t,energy,t, W,'k.',t,energy-W, 'r.')
+title(['$\Omega$=' num2str(Omega/w0) '$\omega_0$  d=' num2str(d) '  $\kappa$=' num2str(kappa)], 'Fontweight','normal','Interpreter','latex');
+xlabel('t [s]')
+ylabel('Energy [J]')
+xlim([0 tFin])
+ylim([-0.005 0.04]);
+set(gca,'fontsize',15);
+lgd = legend('$E_{mec}$', '$W_{\rm{NC}}$','$E_{mec}-W_{\rm{NC}}$', 'Location', 'northwest','Interpreter','latex');
+set(lgd,'FontSize', 13);
+grid on
+print(fig1,'figures/energyW', '-depsc');
+
+indexOfInterest = (t < 95) & (t > 90); % range of t near perturbation
+fig2=figure('Position',[50,50,600,400]);
+plot(t(indexOfInterest),energy(indexOfInterest),t(indexOfInterest),W(indexOfInterest),'k.','Linewidth', 1.5) % plot on new axes
+title(['$\Omega$=' num2str(Omega/w0) '$\omega_0$  d=' num2str(d) '  $\kappa$=' num2str(kappa)], 'Fontweight','normal','Interpreter','latex');
 xlabel('t [s]')
 ylabel('Energy [J]')
 set(gca,'fontsize',15);
+lgd = legend('$E_{mec}$', '$W_{\rm{NC}}$', 'Location', 'northeast','Interpreter','latex');
+set(lgd,'FontSize', 13);
+print(fig2,'figures/energyWZoom', '-depsc');
+
+fig3=figure('Position',[50,50,600,400]);
+plot(t,energy-W, 'r.')
+title(['$\Omega$=' num2str(Omega/w0) '$\omega_0$  d=' num2str(d) '  $\kappa$=' num2str(kappa)], 'Fontweight','normal','Interpreter','latex');
+xlabel('t [s]')
+ylabel('Energy [J]')
+xlim([0 tFin])
+set(gca,'fontsize',15);
+lgd = legend('$E_{mec}-W_{\rm{NC}}$', 'Location', 'northwest','Interpreter','latex');
+set(lgd,'FontSize', 13);
 grid on
-print('figures/energy&W', '-depsc');
+print(fig1,'figures/energyW', '-depsc');
 
