@@ -3,6 +3,7 @@
 % variant un des parametres d'entree.
 %
 
+
 %% ConfigFile %%
 %%%%%%%%%%%%%%%%
 
@@ -28,85 +29,73 @@ config(T);
 repertoire = './'; % Chemin d'acces au code compile
 executable = 'performance'; % Nom de l'executable 
 
-nsimul = 20; % Nombre de simulations à faire
+nsimul = 5; % Nombre de simulations à faire
+paraName='dt'; % Nom du parametre a scanner
 
-dt = logspace(8,4,nsimul);
-Omega = linspace(9.6,10,nsimul);
-theta0 = linspace(1e-7,pi-1e-1,nsimul);
-
-paramstr = 'dt'; % Nom du parametre a scanner
-param = dt; % Valeurs du parametre a scanner
-configfileNb=0;
+if strcmp(paraName,'theta')   
+    paramstr = {"vx0"; "vy0"};
+    v=10;
+    theta = linspace(0,2*pi,nsimul+1);
+    param = [v*cos(theta(1:nsimul)); v*sin(theta(1:nsimul))]; % Valeurs du parametre a scanner
+    configfileNb=3;
+elseif strcmp(paraName,'dt')
+    change_config(0,'adaptatif','false');
+    paramstr={"dt"};
+    param=logspace(8,4,nsimul); % Valeurs du parametre a scanner
+    configfileNb=0;
+elseif strcmp(paraName,'precision')
+    change_config(0,'adaptatif','true');
+    paramstr={"precision"};
+    param=logspace(-4,-8,nsimul); % Valeurs du parametre a scanner
+    configfileNb=0;
+end
 
 %% Simulations %%
 %%%%%%%%%%%%%%%%%
 
+
+
+
+input=sprintf('configuration%d.in', configfileNb);
 output = cell(1, nsimul); % Tableau de cellules contenant le nom des fichiers de sortie
-for i = 1:nsimul
-    output{i} = ['simulations/',paramstr, '=', num2str(param(i)), '.out'];
-    waitfor(change_config(configfileNb,paramstr, param));
-    cmd = [repertoire executable];
-    disp(cmd);
+for k = 1:nsimul
+    parameter = "";
+    for i=1:size(paramstr,1)
+      parameter=parameter+sprintf('%s=%.15g ', paramstr{i,1}, param(i,k));
+    end
+    parameter=strip(parameter);
+    output{1,k} = "simulations/"+strrep(parameter, ' ', '_')+".out";
+    % Execution du programme en lui envoyant la valeur a scanner en argument
+    cmd = sprintf('%s%s %s %d %s configuration0.in 1 output=%s', repertoire, executable, input, size(param,1), parameter, output{1,k});
+    disp(cmd)
     system(cmd);
 end
 
-% %% Analyse %%
-% %%%%%%%%%%%%%
-% 
-% g=9.81;
-% L=0.1;
-% theta0petit=1e-6;
-% w0=sqrt(g/L);
-% 
-% if strcmp(paramstr, 'dt')
-%     error = zeros(1,nsimul);
-% elseif strcmp(paramstr, 'Omega')
-%     Emax = zeros(1,nsimul);
-% elseif strcmp(paramstr, 'theta0')
-%     T_num = zeros(1, nsimul);
-%     theta0_ana=linspace(1e-7,pi-1e-1,nsimul);
-%     T_ana=4/w0*ellipticK(sin(theta0_ana/2).*sin(theta0_ana/2));
-%     error = zeros(1,nsimul);
-% end
-% 
-% for i = 1:nsimul % Parcours des resultats de toutes les simulations
-%     data = load(output{i}); % Chargement du fichier de sortie de la i-ieme simulation
-%     if strcmp(paramstr, 'dt')
-%       t = data(end,1);
-%       theta = data(end,2);
-% %       theta_th = theta0petit*cos(w0*t);
-% %       error(i) = abs(theta-theta_th);
-%       error(i)=theta;
-% 
-%     elseif strcmp(paramstr, 'Omega')
-%         Emec=data(:,4);
-%         v=Emec(1);
-%         for l=1:size(Emec,1)
-%             if Emec(l)>v
-%                 v=Emec(l);
-%             end
-%         end
-%         Emax(i)= v; % TODO: Calculer le maximum de l'energie
-%     elseif strcmp(paramstr, 'theta0')
-%       t = data(:,1);
-%       theta = data(:,2);
-%       l=1;k=0;
-%       t_P=zeros(3);
-%       while (l < size(theta,1)-1 && k<3)
-%           if sign(theta(l))~=sign(theta(l+1))
-%               k=k+1;
-%               t_P(k)=t(l)+ (t(l+1)-t(l))*abs(theta(l))/abs(theta(l+1)-theta(l));
-%           end
-%           l=l+1;
-%       end
-%       T_num(i)=t_P(3)-t_P(1);
-%       error(i)=abs(T_num(i)-T_ana(i));
-%     end
-% end
-% 
-% 
-% %% Figures %%
-% %%%%%%%%%%%%%
+%% Analyse %%
+%%%%%%%%%%%%%
+
+if strcmp(paramstr, 'dt')
+    error = zeros(1,nsimul);
+elseif strcmp(paramstr, 'precision')
+    Emax = zeros(1,nsimul);
+elseif strcmp(paramstr, 'theta')
+    error = zeros(1,nsimul);
+end
+
+for i = 1:nsimul % Parcours des resultats de toutes les simulations
+    data = load(output{i}); % Chargement du fichier de sortie de la i-ieme simulation
+    if strcmp(paramstr, 'dt')
+        t = data(end,1);
+    elseif strcmp(paramstr, 'precision')
+        Emec = data(:,4);
+    elseif strcmp(paramstr, 'theta')
+        t = data(:,1);
+    end
+end
+
+
+%% Figures %%
+%%%%%%%%%%%%%
 % 
 % if strcmp(paramstr, 'dt')
 %     figure('Position',[50,50,600,400]);

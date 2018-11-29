@@ -30,7 +30,9 @@ private:
   {
     if((!force && last>=sampling) || (force && last!=1)){
       *outputFile << t;
-      for(const auto& el : y){*outputFile << " " << el;}
+      *outputFile << y[0] << " " << y[1] << " 0 " << y[2]  << " " << y[3]  << " 0 ";
+      *outputFile << y[4] << " " << y[5] << " 0 " << y[6]  << " " << y[7]  << " 0 ";
+      *outputFile << y[8] << " " << y[9] << " 0 " << y[10] << " " << y[11] << " 0 ";
       *outputFile << endl;
       last = 1;
     }
@@ -94,8 +96,29 @@ public:
 
   Exercice4(int argc, char* argv[]) : y(12)
   {
-    string inputPath("config/configuration0.in"); // Fichier d'input par defaut
-    ConfigFile configFile(inputPath); // Les parametres sont lus et stockes dans une "map" de strings.
+    string inputPath0("configuration0.in");
+    vector<string> inputPath(0); // Fichier d'input par defaut
+    vector<vector<string>> param(0);
+    int n(0);
+    int k(1);
+    while(k<=argc-2){
+    	inputPath.push_back(argv[k++]);
+      param.push_back(vector<string>(0));
+    	n=k+argv[k][0]-'0';
+    	while(++k<=n and k<=argc){
+    		 param.back().push_back(argv[k]);
+    	}
+    }
+
+    ConfigFile configFile("config/"+inputPath0);
+
+    for(size_t k(0);k<inputPath.size();k++){
+      if(inputPath[k]==inputPath0){
+        for(const auto& str : param[k]){
+          configFile.process(str);
+        }
+      }
+    }
     // Parametres généraux
     tFin      = configFile.get<double>("tFin");
     dt        = configFile.get<double>("dt");
@@ -111,8 +134,15 @@ public:
     outputFile->precision(15);
     // Ajout des corps
     for(size_t i(0); i<3; i++){
-      inputPath="config/configuration"+to_string(i+1)+".in"; // Fichier d'input par defaut
-      ConfigFile configFile(inputPath); // Les parametres sont lus et stockes dans une "map" de strings.
+      inputPath0="configuration"+to_string(i+1)+".in"; // Fichier d'input par defaut
+      ConfigFile configFile("config/"+inputPath0); // Les parametres sont lus et stockes dans une "map" de strings.
+      for(size_t k(0);k<inputPath.size();k++){
+        if(inputPath[k]==inputPath0){
+          for(const auto& str : param[k]){
+            configFile.process(str);
+          }
+        }
+      }
       y[4*i]=configFile.get<double>("x0");
       y[4*i+1]=configFile.get<double>("y0");
       y[4*i+2]=configFile.get<double>("vx0");

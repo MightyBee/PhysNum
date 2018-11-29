@@ -42,9 +42,30 @@ public:
 
   Exercice4(int argc, char* argv[])
   {
-    string inputPath("config/configuration0.in"); // Fichier d'input par defaut
+    string inputPath0("configuration0.in");
+    vector<string> inputPath(0); // Fichier d'input par defaut
+    vector<vector<string>> param(0);
+    int n(0);
+    int k(1);
+    while(k<=argc-2){
+    	inputPath.push_back(argv[k++]);
+      param.push_back(vector<string>(0));
+    	n=k+argv[k][0]-'0';
+    	while(++k<=n and k<=argc){
+    		 param.back().push_back(argv[k]);
+    	}
+    }
 
-    ConfigFile configFile(inputPath); // Les parametres sont lus et stockes dans une "map" de strings.
+    ConfigFile configFile("config/"+inputPath0);
+
+    for(size_t k(0);k<inputPath.size();k++){
+      if(inputPath[k]==inputPath0){
+        for(const auto& str : param[k]){
+          configFile.process(str);
+        }
+      }
+    }
+
     // Parametres généraux
     tFin      = configFile.get<double>("tFin");
     dt        = configFile.get<double>("dt");
@@ -62,9 +83,15 @@ public:
     double m,R,Cx;
     Corps corps;
     for(int i(1); i<=nbCorps; i++){
-      inputPath="config/configuration"+to_string(i)+".in"; // Fichier d'input par defaut
-      ConfigFile configFile(inputPath); // Les parametres sont lus et stockes dans une "map" de strings.
-
+      inputPath0="configuration"+to_string(i)+".in"; // Fichier d'input par defaut
+      ConfigFile configFile("config/"+inputPath0); // Les parametres sont lus et stockes dans une "map" de strings.
+      for(size_t k(0);k<inputPath.size();k++){
+        if(inputPath[k]==inputPath0){
+          for(const auto& str : param[k]){
+            configFile.process(str);
+          }
+        }
+      }
       nom = configFile.get<string>("nom");
       P = Vecteur(configFile.get<double>("x0"),configFile.get<double>("y0"),configFile.get<double>("z0"));
       V = Vecteur(configFile.get<double>("vx0"),configFile.get<double>("vy0"),configFile.get<double>("vz0"));
