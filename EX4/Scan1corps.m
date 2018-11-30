@@ -6,26 +6,34 @@
 %% ConfigFile %%
 %%%%%%%%%%%%%%%%
 
-v=1200;
-alpha=pi-10.86*pi/180;
-vx0=v*cos(alpha);
-vy0=v*sin(alpha);
+v0=1200;
+r0=314159000;
+G=6.674e-11;
+mT=5.972e24;
+h=10000;
+RT=6378100;
+vMax_th=sqrt(v0^2+2*G*mT*(1/(h+RT)-1/r0));
+alpha = pi-asin(vMax_th*(h+RT)/(v0*r0));
+vx0=v0*cos(alpha);
+vy0=v0*sin(alpha);
 
 rowNames  = {'x0','y0','z0','vx0','vy0','vz0','m','R','Cx'};
 varNames  = {'Terre',        'Lune',         'Apollo13'        };
-variables = [0               384748000       314159000       % x0
+variables = [0               384748000       r0              % x0
              0               0               0               % y0
              0               0               0               % z0
              0               0               vx0             % vx0
              0               0               vy0             % vy0
              0               0               0               % vz0
-             5.972e24        7.3477e8        5809            % m
-             6378100         1737000         1.95            % R
+             mT              7.3477e-22      5809            % m
+             RT              1737000         1.95            % R
              0               0               0            ]; % Cx
 
 T=table(variables(:,1),variables(:,2),variables(:,3),'VariableNames',varNames,'RowNames',rowNames);
 
 config(T);
+
+change_config(0,'tFin',60*24*60*60);
 
 %% Parametres à varier %%
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -33,11 +41,13 @@ config(T);
 repertoire = './'; % Chemin d'acces au code compile
 executable = 'performance'; % Nom de l'executable 
 
-nsimul = 1; % Nombre de simulations à faire
-paraName='dt'; % Nom du parametre a scanner
+nsimul = 10; % Nombre de simulations à faire
 
-theta = linspace(0,2*pi,nsimul+1);
-dt=logspace(8,4,nsimul); % Valeurs du parametre a scanner
+theta     = linspace(0,2*pi,nsimul+1);
+dt        = logspace(1.5,0,nsimul); % Valeurs du parametre a scanner
+precision = logspace(-4,-8,nsimul); % Valeurs du parametre a scanner
+
+paraName='dt'; % Nom du parametre a scanner
 
 if strcmp(paraName,'theta')   
     paramstr = {"vx0"; "vy0"};
@@ -52,7 +62,7 @@ elseif strcmp(paraName,'dt')
 elseif strcmp(paraName,'precision')
     change_config(0,'adaptatif','true');
     paramstr={"precision"};
-    param=logspace(-4,-8,nsimul); % Valeurs du parametre a scanner
+    param=precision;
     configfileNb=0;
 end
 
@@ -82,24 +92,36 @@ end
 
 if strcmp(paraName, 'dt')
     hmin = zeros(1,nsimul);
+    vmax = zeros(1,nsimul);
 elseif strcmp(paramstr, 'precision')
     Emax = zeros(1,nsimul);
 elseif strcmp(paramstr, 'theta')
     error = zeros(1,nsimul);
 end
 
-% 1   2  3  4  5   6   7     8  9  10  11  12  13    14 15 16  17  18  19
-% t   x1 y1 z1 vx1 vy1 vz1   x2 y2 z2  vx2 vy2 vz2   x3 y3 z3  vx3 vy3 vz3
+% 1 2    3  4  5  6   7   8     9  10 11  12  13  14    15 16 17  18  19  20
+% t acc  x1 y1 z1 vx1 vy1 vz1   x2 y2 z2  vx2 vy2 vz2   x3 y3 z3  vx3 vy3 vz3
 
 
 for i = 1:nsimul % Parcours des resultats de toutes les simulations 
     data = load(output{i}); % Chargement du fichier de sortie de la i-ieme simulation
     if strcmp(paraName, 'dt')
         t = data(:,1);
-        x = data(:,2);
-        y = data(:,3);
+        xT = data(:,3);
+        yT = data(:,4);
+        xA = data(:,15);
+        yA = data(:,16);
+        vx= data(:,17);
+        vy= data(:,19);
         R = T.Terre(8);
-        hmin(i)=min(sqrt(x.^2+y.^2));
+        [value,indice]=min(sqrt(xA.^2+yA.^2));
+        n=2;
+        r=sqrt(xA(indice-n:indice+n).^2+yA(indice-n:indice+n).^2);
+        [p,~,mu]=polyfit(t(indice-n:indice+n),r,n);
+        t1=linspace(t(indice-n),t(indice+n));
+        r1=polyval(p,t1,[],mu);
+        hmin(i)=min(r1);
+        vmax(i)=max(sqrt(vx.^2+vy.^2));
     elseif strcmp(paramstr, 'precision')
         Emec = data(:,4);
     elseif strcmp(paramstr, 'theta')
@@ -113,9 +135,18 @@ end
 % 
 
 figure
-plot(x,y)
+plot(xT,yT,'+r',xA,yA)
+grid on
 figure
-semilogx(dt,hmin);
+plot(t1,r1)
+figure
+plot(dt.^4,abs(hmin));
+xlabel('\Deltat [s]')
+ylabel('Erreur sur h_{min} [m]')
+figure
+plot(dt,vmax);
+xlabel('\Deltat [s]')
+ylabel('Erreur sur v_{vax} [m]')
 % if strcmp(paramstr, 'dt')
 %     figure('Position',[50,50,600,400]);
 % %     loglog(dt, error, 'k+')

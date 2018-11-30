@@ -29,7 +29,7 @@ private:
   void printOut(const bool& force)
   {
     if((!force && last>=sampling) || (force && last!=1)){
-      *outputFile << t << " ";
+      *outputFile << t << " " << accAstronautes() << " ";
       *outputFile << y[0] << " " << y[1] << " 0 " << y[2]  << " " << y[3]  << " 0 ";
       *outputFile << y[4] << " " << y[5] << " 0 " << y[6]  << " " << y[7]  << " 0 ";
       *outputFile << y[8] << " " << y[9] << " 0 " << y[10] << " " << y[11] << " 0 ";
@@ -39,6 +39,18 @@ private:
     else{
       last++;
     }
+  }
+
+  double accAstronautes() const{
+    valarray<double> acc(2);
+    valarray<double> r0=y[slice(0,2,1)];
+    valarray<double> r1=y[slice(4,2,1)];
+    valarray<double> r2=y[slice(8,2,1)];
+    acc=-G*(m[0]/pow(pow(r2-r0,2.0).sum(),1.5)*(r2-r0)+m[1]/pow(pow(r2-r1,2.0).sum(),1.5)*(r2-r1));
+    if(rho0!=0){
+      acc += -0.5*rho(pow(pow(r2-r0,2).sum(),0.5))*M_PI*R[2]*R[2]*Cx*pow(pow(y[slice(10,2,1)]-y[slice(2,2,1)],2.0).sum(),0.5)*(y[slice(10,2,1)]-y[slice(2,2,1)]);
+    }
+    return sqrt(pow(acc,2.0).sum());
   }
 
   double rho(const double& r) const{
