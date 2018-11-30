@@ -23,6 +23,7 @@
 
 # Ajout perso #
 ############
+*performance
 *.a
 *.stash
 *.in

@@ -36,16 +36,18 @@ executable = 'performance'; % Nom de l'executable
 nsimul = 1; % Nombre de simulations à faire
 paraName='dt'; % Nom du parametre a scanner
 
+theta = linspace(0,2*pi,nsimul+1);
+dt=logspace(8,4,nsimul); % Valeurs du parametre a scanner
+
 if strcmp(paraName,'theta')   
     paramstr = {"vx0"; "vy0"};
     v=10;
-    theta = linspace(0,2*pi,nsimul+1);
     param = [v*cos(theta(1:nsimul)); v*sin(theta(1:nsimul))]; % Valeurs du parametre a scanner
     configfileNb=3;
 elseif strcmp(paraName,'dt')
     change_config(0,'adaptatif','false');
     paramstr={"dt"};
-    param=logspace(8,4,nsimul); % Valeurs du parametre a scanner
+    param=dt;
     configfileNb=0;
 elseif strcmp(paraName,'precision')
     change_config(0,'adaptatif','true');
@@ -96,7 +98,7 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
         t = data(:,1);
         x = data(:,2);
         y = data(:,3);
-        R = T.Terre(8)
+        R = T.Terre(8);
         hmin(i)=min(sqrt(x.^2+y.^2));
     elseif strcmp(paramstr, 'precision')
         Emec = data(:,4);
@@ -112,8 +114,8 @@ end
 
 figure
 plot(x,y)
-% figure
-% semilogx(dt,hmin);
+figure
+semilogx(dt,hmin);
 % if strcmp(paramstr, 'dt')
 %     figure('Position',[50,50,600,400]);
 % %     loglog(dt, error, 'k+')
