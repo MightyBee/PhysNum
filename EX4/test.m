@@ -45,16 +45,3 @@ config(T);
 % grid on
 
 
-% Parametres physiques 
-nbCorps   = 3 
-tFin      = 3153600000 
-G         = 6.674e-11 
-rho0      = 0 
-lambda    = 100 
-
-% Parametres numeriques 
-dt        = 0 
-precision = 0.00001 
-adaptatif = false 
-output    = simulations/h.out 
-sampling  = 10 
