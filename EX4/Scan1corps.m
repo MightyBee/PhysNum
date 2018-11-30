@@ -112,8 +112,8 @@ end
 
 figure
 plot(x,y)
-figure
-semilogx(dt,hmin);
+% figure
+% semilogx(dt,hmin);
 % if strcmp(paramstr, 'dt')
 %     figure('Position',[50,50,600,400]);
 % %     loglog(dt, error, 'k+')
