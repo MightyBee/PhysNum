@@ -29,7 +29,7 @@ private:
   void printOut(const bool& force)
   {
     if((!force && last>=sampling) || (force && last!=1)){
-      *outputFile << t;
+      *outputFile << t << " ";
       *outputFile << y[0] << " " << y[1] << " 0 " << y[2]  << " " << y[3]  << " 0 ";
       *outputFile << y[4] << " " << y[5] << " 0 " << y[6]  << " " << y[7]  << " 0 ";
       *outputFile << y[8] << " " << y[9] << " 0 " << y[10] << " " << y[11] << " 0 ";

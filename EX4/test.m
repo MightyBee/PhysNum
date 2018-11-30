@@ -1,47 +1,55 @@
-rowNames  = {'x0','y0','z0','vx0','vy0','vz0','m','R','Cx'};
-varNames  = {'Soleil',  'Terre',        'Lune',         'Halley'        };
-variables = [0          147098074000    147482474000    -5285292747000  % x0
-             0          0               0               0               % y0
-             0          0               0               0               % z0
-             0          0               0               0               % vx0
-             0          30287           31282           810             % vy0
-             nan          0               0               0               % vz0
-             1.9891e30  5.9736e24       7.3477e22       1014e11         % m
-             696342000  6371000         1736000         15000           % R
-             0          0               0               0            ]; % Cx
+cd %% ConfigFile %%
+%%%%%%%%%%%%%%%%
 
-T=table(variables(:,1),variables(:,2),variables(:,3),variables(:,4),'VariableNames',varNames,'RowNames',rowNames);
+v=1200;
+alpha=pi-10.86*pi/180
+vx0=v*cos(alpha);
+vy0=v*sin(alpha);
+
+rowNames  = {'x0','y0','z0','vx0','vy0','vz0','m','R','Cx'};
+varNames  = {'Terre',        'Lune',         'Apollo13'        };
+variables = [0               384748000       314159000       % x0
+             0               0               0               % y0
+             0               0               0               % z0
+             0               0               vx0             % vx0
+             0               0               vy0             % vy0
+             0               0               0               % vz0
+             5.972e24        7.3477e8        5809            % m
+             6378100         1737000         1.95            % R
+             0               0               0            ]; % Cx
+
+T=table(variables(:,1),variables(:,2),variables(:,3),'VariableNames',varNames,'RowNames',rowNames);
 
 config(T);
-% % C = change_config(0,"dt",2000);
-% cmd = './performance';
-% % system(cmd);
-% output = load('simulations/f.out');
-% % Extraction des quantites d'interet
-% t = output(:,1);
-% x1 = output(:,2);
-% y1 = output(:,3);
+
+change_config(0,'tFin',100*24*60*60);
+change_config(0,'dt',60);
+
+cmd = './performance';
+% system(cmd);
+output = load('simulations/h.out');
+% Extraction des quantites d'interet
+t = output(:,1);
+x1 = output(:,2);
+y1 = output(:,3);
 % x2 = output(:,8);
 % y2 = output(:,9);
-% x3 = output(:,14);
-% y3 = output(:,15);
-% x4 = output(:,20);
-% y4 = output(:,21);
-% clear output
-% index = (t<76.01*365.25636567*24*60*60);
-% 
+x3 = output(:,14);
+y3 = output(:,15);
+clear output
+
+figure
+plot(x1,y1,'+', x3,y3)
+grid on 
+axis equal
 % figure
-% plot(x1(index),y1(index),'+',x2(index),y2(index), x3(index),y3(index), x4(index),y4(index))
-% grid on 
-% axis equal
-% figure
-% plot3(t(index),x1(index),y1(index),'+',t(index),x4(index),y4(index),t(index), x3(index),y3(index))
+% plot3(t,x1,y1,'+',t,t, x3,y3)
 % grid on
 % figure
-% plot3(t(index),x3(index)-x3(index),y3(index)-y3(index),'+',t(index),x4(index)-x3(index),y4(index)-y3(index))
+% plot3(t,x3-x3,y3-y3,'+',t,-x3,-y3)
 % grid on
 % figure
-% plot(t(index)/(24*60*60),sqrt((x4(index)-x3(index)).^2+(y4(index)-y3(index)).^2))
+% plot(t/(24*60*60),sqrt((-x3).^2+(-y3).^2))
 % grid on
 
 
