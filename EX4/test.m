@@ -16,7 +16,7 @@ variables = [0               384748000       314159000       % x0
              0               0               0               % vz0
              5.972e24        7.3477e8        5809            % m
              6378100         1737000         1.95            % R
-             0               0               0            ]; % Cx
+             0              0               0.3            ]; % Cx
 
 T=table(variables(:,1),variables(:,2),variables(:,3),'VariableNames',varNames,'RowNames',rowNames);
 
