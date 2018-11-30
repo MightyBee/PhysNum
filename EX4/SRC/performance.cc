@@ -29,7 +29,7 @@ private:
   void printOut(const bool& force)
   {
     if((!force && last>=sampling) || (force && last!=1)){
-      *outputFile << t << " " << accAstronautes() << " ";
+      *outputFile << t << " " << accAstronautes() << " "   <<  PT()  ;
       *outputFile << y[0] << " " << y[1] << " 0 " << y[2]  << " " << y[3]  << " 0 ";
       *outputFile << y[4] << " " << y[5] << " 0 " << y[6]  << " " << y[7]  << " 0 ";
       *outputFile << y[8] << " " << y[9] << " 0 " << y[10] << " " << y[11] << " 0 ";
@@ -57,7 +57,7 @@ private:
     return rho0*exp(-(r-R[0])/lambda);
   }
 
-double PT(const valarray<double>& y){
+double PT()const {
   valarray<double> r0=y[slice(0,2,1)];
   valarray<double> r1=y[slice(4,2,1)];
   valarray<double> r2=y[slice(8,2,1)];
