@@ -13,7 +13,7 @@ vy0=v*sin(alpha);
 
 rowNames  = {'x0','y0','z0','vx0','vy0','vz0','m','R','Cx'};
 varNames  = {'Terre',        'Lune',         'Apollo13'        };
-variables = [0               384748000       314159          % x0
+variables = [0               384748000       314159000       % x0
              0               0               0               % y0
              0               0               0               % z0
              0               0               vx0             % vx0
