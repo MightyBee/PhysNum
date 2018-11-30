@@ -57,6 +57,17 @@ private:
     return rho0*exp(-(r-R[0])/lambda);
   }
 
+double PT(const valarray<double>& y){
+  valarray<double> r0=y[slice(0,2,1)];
+  valarray<double> r1=y[slice(4,2,1)];
+  valarray<double> r2=y[slice(8,2,1)];
+  if(rho0!=0){
+    return (y[slice(10,2,1)]*(-0.5*rho(pow(pow(r2-r0,2).sum(),0.5))*M_PI*R[2]*R[2]*Cx*pow(pow(y[slice(10,2,1)]-y[slice(2,2,1)],2).sum(),0.5)*(y[slice(10,2,1)]-y[slice(2,2,1)]))).sum();
+}else{
+  return 0;
+}
+}
+
   valarray<double> f(const valarray<double>& y, const double& t) const{
     valarray<double> retour(12);
     retour[slice(0,3,4)]=y[slice(2,3,4)];
