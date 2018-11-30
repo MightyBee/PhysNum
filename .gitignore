@@ -23,7 +23,6 @@
 
 # Ajout perso #
 ############
-*Makefile
 *.a
 *.stash
 *.in

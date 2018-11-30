@@ -6,16 +6,21 @@
 %% ConfigFile %%
 %%%%%%%%%%%%%%%%
 
+v=1200;
+alpha=pi-10.86*pi/180;
+vx0=v*cos(alpha);
+vy0=v*sin(alpha);
+
 rowNames  = {'x0','y0','z0','vx0','vy0','vz0','m','R','Cx'};
 varNames  = {'Terre',        'Lune',         'Apollo13'        };
-variables = [147098074000    147482474000    147282474000    % x0
+variables = [0               384748000       314159          % x0
              0               0               0               % y0
              0               0               0               % z0
-             0               0               0               % vx0
-             0               1082            30000           % vy0
+             0               0               vx0             % vx0
+             0               0               vy0             % vy0
              0               0               0               % vz0
-             5.9736e24       1e-22           1014e11         % m
-             6371000         1736000         15000           % R
+             5.972e24        7.3477e8        5809            % m
+             6378100         1737000         1.95            % R
              0               0               0            ]; % Cx
 
 T=table(variables(:,1),variables(:,2),variables(:,3),'VariableNames',varNames,'RowNames',rowNames);
@@ -28,7 +33,7 @@ config(T);
 repertoire = './'; % Chemin d'acces au code compile
 executable = 'performance'; % Nom de l'executable 
 
-nsimul = 5; % Nombre de simulations à faire
+nsimul = 1; % Nombre de simulations à faire
 paraName='dt'; % Nom du parametre a scanner
 
 if strcmp(paraName,'theta')   
