@@ -115,7 +115,7 @@ public:
     t = 0.;
     last = 0;
     int i(0);
-    cerr << "####################" << endl;;
+    cerr << "####################" << endl;
     printOut(true);
     while( t < tFin-0.5*dt )
     {

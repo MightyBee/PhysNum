@@ -33,7 +33,7 @@ T=table(variables(:,1),variables(:,2),variables(:,3),'VariableNames',varNames,'R
 
 config(T);
 
-change_config(0,'tFin',60*24*60*60);
+change_config(0,'tFin',2*24*60*60);
 
 %% Parametres à varier %%
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -41,13 +41,13 @@ change_config(0,'tFin',60*24*60*60);
 repertoire = './'; % Chemin d'acces au code compile
 executable = 'performance'; % Nom de l'executable 
 
-nsimul = 10; % Nombre de simulations à faire
+nsimul = 30; % Nombre de simulations à faire
 
 theta     = linspace(0,2*pi,nsimul+1);
 dt        = logspace(1.5,0,nsimul); % Valeurs du parametre a scanner
-precision = logspace(-4,-8,nsimul); % Valeurs du parametre a scanner
+precision = logspace(-1,-8,nsimul); % Valeurs du parametre a scanner
 
-paraName='dt'; % Nom du parametre a scanner
+paraName='precision'; % Nom du parametre a scanner
 
 if strcmp(paraName,'theta')   
     paramstr = {"vx0"; "vy0"};
@@ -90,11 +90,10 @@ end
 %% Analyse %%
 %%%%%%%%%%%%%
 
-if strcmp(paraName, 'dt')
+if strcmp(paraName, 'dt') || strcmp(paraName, 'precision')
     hmin = zeros(1,nsimul);
     vmax = zeros(1,nsimul);
-elseif strcmp(paramstr, 'precision')
-    Emax = zeros(1,nsimul);
+    nsteps = ones(1,nsimul);
 elseif strcmp(paramstr, 'theta')
     error = zeros(1,nsimul);
 end
@@ -105,25 +104,33 @@ end
 
 for i = 1:nsimul % Parcours des resultats de toutes les simulations 
     data = load(output{i}); % Chargement du fichier de sortie de la i-ieme simulation
-    if strcmp(paraName, 'dt')
+    if strcmp(paraName, 'dt') || strcmp(paraName, 'precision')
         t = data(:,1);
         xT = data(:,3);
         yT = data(:,4);
         xA = data(:,15);
         yA = data(:,16);
-        vx= data(:,17);
+        vx= data(:,18);
         vy= data(:,19);
+        nsteps(i)=size(t,1)-1;
         R = T.Terre(8);
-        [value,indice]=min(sqrt(xA.^2+yA.^2));
-        n=2;
-        r=sqrt(xA(indice-n:indice+n).^2+yA(indice-n:indice+n).^2);
-        [p,~,mu]=polyfit(t(indice-n:indice+n),r,n);
-        t1=linspace(t(indice-n),t(indice+n));
+        [value1,indice1]=min(sqrt(xA.^2+yA.^2));
+        n=3;
+        r=sqrt(xA(indice1-n:indice1+n).^2+yA(indice1-n:indice1+n).^2);
+        [p,~,mu]=polyfit(t(indice1-n:indice1+n),r,n);
+        t1=linspace(t(indice1-n),t(indice1+n),100000);
         r1=polyval(p,t1,[],mu);
         hmin(i)=min(r1);
-        vmax(i)=max(sqrt(vx.^2+vy.^2));
-    elseif strcmp(paramstr, 'precision')
-        Emec = data(:,4);
+        [value2,indice2]=max(sqrt(vx.^2+vy.^2));
+        n=3;
+        v=sqrt(vx(indice2-n:indice2+n).^2+vy(indice2-n:indice2+n).^2);
+        [p,~,mu]=polyfit(t(indice2-n:indice2+n),v,n);
+        t2=linspace(t(indice2-n),t(indice2+n),100000);
+        v1=polyval(p,t2,[],mu);
+        vmax(i)=max(v1);
+        if strcmp(paraName, 'precision')
+            dt=t(2:end-1)-t(1:end-2); 
+        end
     elseif strcmp(paramstr, 'theta')
         t = data(:,1);
     end
@@ -134,19 +141,32 @@ end
 %%%%%%%%%%%%%
 % 
 
-figure
-plot(xT,yT,'+r',xA,yA)
-grid on
-figure
-plot(t1,r1)
-figure
-plot(dt.^4,abs(hmin));
-xlabel('\Deltat [s]')
-ylabel('Erreur sur h_{min} [m]')
-figure
-plot(dt,vmax);
-xlabel('\Deltat [s]')
-ylabel('Erreur sur v_{vax} [m]')
+if strcmp(paraName, 'dt') || strcmp(paraName, 'precision')
+    figure
+    angle=linspace(0,2*pi);
+    plot(RT*cos(angle),RT*sin(angle),'r')
+    hold on
+    plot(xT,yT,'+r',xA,yA)
+    hold off
+    axis equal
+    grid on
+    figure
+    plot(t1,r1,t(indice1-n:indice1+n),r,'+')
+    figure
+    loglog(nsteps,abs(hmin-h-RT),'+',nsteps,1e11*nsteps.^(-4),'--')
+    grid on
+    xlabel('\Deltat [s]')
+    ylabel('Erreur sur h_{min} [m]')
+    figure
+    loglog(nsteps,abs(vmax-vMax_th),'+')%,nsteps,1e11*nsteps.^(-4),'--')
+    grid on
+    xlabel('\Deltat [s]')
+    ylabel('Erreur sur v_{max} [m]')
+    if strcmp(paraName, 'precision')
+        figure
+        plot(t(1:end-2),dt)
+    end
+end
 % if strcmp(paramstr, 'dt')
 %     figure('Position',[50,50,600,400]);
 % %     loglog(dt, error, 'k+')
@@ -186,3 +206,5 @@ ylabel('Erreur sur v_{vax} [m]')
 %     grid on
 %     print(fig2,'figures/theta0error', '-depsc');
 % end
+
+clear all;
