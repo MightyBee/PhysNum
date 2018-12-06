@@ -88,7 +88,7 @@ CollectionY Systeme::f(const CollectionY& collY, double t) const{
       }
     }
     if(i!=0){
-      a+=-0.5*rho(((collY[i].P-collY[0].P).norme()))*M_PI*pow(liste[i].getR(),2)*liste[i].getCx()*(collY[i].V-collY[0].V).norme()*(collY[i].V-collY[0].V);
+      a+=-(1/liste[i].getM())*0.5*rho((collY[i].P-collY[0].P).norme())*M_PI*pow(liste[i].getR(),2)*liste[i].getCx()*(collY[i].V-collY[0].V).norme()*(collY[i].V-collY[0].V);
     }
     retour.push_back(VectY({v,a}));
   }

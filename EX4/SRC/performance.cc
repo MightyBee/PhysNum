@@ -21,9 +21,9 @@ class Exercice4
 
 private:
   double t, dt, precision, tFin;
-  double G, rho0, lambda, Cx;
+  double G, rho0, lambda;
   bool adaptatif;
-  array<double,3> m, R;
+  array<double,3> m, R, Cx;
   valarray<double> y;
   int sampling;
   int last;
@@ -51,7 +51,7 @@ private:
     valarray<double> r2=y[slice(8,2,1)];
     acc=-G*(m[0]/pow(pow(r2-r0,2.0).sum(),1.5)*(r2-r0)+m[1]/pow(pow(r2-r1,2.0).sum(),1.5)*(r2-r1));
     if(rho0!=0.0){
-      acc += -0.5*rho(norme(r2-r0))*M_PI*R[2]*R[2]*Cx*norme(y[slice(10,2,1)]-y[slice(2,2,1)])*(y[slice(10,2,1)]-y[slice(2,2,1)]);
+      acc += -(0.5/m[2])*rho(norme(r2-r0))*M_PI*R[2]*R[2]*Cx*norme(y[slice(10,2,1)]-y[slice(2,2,1)])*(y[slice(10,2,1)]-y[slice(2,2,1)]);
     }
     return norme(acc);
   }
@@ -71,13 +71,13 @@ private:
     return rho0*exp(-(r-R[0])/lambda);
   }
 
-double PT(){
+double PT() const{
   valarray<double> r0=y[slice(0 ,2,1)];
   valarray<double> v0=y[slice(2 ,2,1)];
   valarray<double> r2=y[slice(8 ,2,1)];
   valarray<double> v2=y[slice(10,2,1)];
   if(rho0!=0.0){
-    return (v2*(-0.5*rho(norme(r2-r0))*M_PI*R[2]*R[2]*Cx*norme(v2-v0)*(v2-v0))).sum();
+    return (v2*(-0.5*rho(norme(r2-r0))*M_PI*R[2]*R[2]*Cx[2]*norme(v2-v0)*(v2-v0))).sum();
 }else{
   return 0;
 }
@@ -94,7 +94,7 @@ double PT(){
     retour[slice(6,2,1)]  = -G*(m[0]/pow(pow(r1-r0,2).sum(),1.5)*(r1-r0)+m[2]/pow(pow(r1-r2,2).sum(),1.5)*(r1-r2));
     retour[slice(10,2,1)] = -G*(m[0]/pow(pow(r2-r0,2).sum(),1.5)*(r2-r0)+m[1]/pow(pow(r2-r1,2).sum(),1.5)*(r2-r1));
     if(rho0!=0.0){
-      retour[slice(10,2,1)]+= -0.5*rho(norme(r2-r0))*M_PI*R[2]*R[2]*Cx*norme(y[slice(10,2,1)]-y[slice(2,2,1)])*(y[slice(10,2,1)]-y[slice(2,2,1)]);
+      retour[slice(10,2,1)]+= -(0.5/m[2])*rho(norme(r2-r0))*M_PI*R[2]*R[2]*Cx*norme(y[slice(10,2,1)]-y[slice(2,2,1)])*(y[slice(10,2,1)]-y[slice(2,2,1)]);
     }
     return retour;
   }
@@ -190,9 +190,7 @@ public:
       y[4*i+3] = configFile.get<double>("vy0");
       m[i]     = configFile.get<double>("m");
       R[i]     = configFile.get<double>("R");
-      if(i==2){
-        Cx     = configFile.get<double>("Cx");
-      }
+      Cx[i]    =configFile.get<double>("Cx");
     }
   }
 

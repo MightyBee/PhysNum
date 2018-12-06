@@ -59,7 +59,7 @@ config(T0,T1);
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 repertoire = './'; % Chemin d'acces au code compile
-executable = 'performance'; % Nom de l'executable 
+executable = 'performance'; % Nom de l'executable
 
 nsimul = 10; % Nombre de simulations à faire
 
@@ -69,7 +69,7 @@ precision = logspace(-1,-8,nsimul); % Valeurs du parametre a scanner
 
 paraName='precision'; % Nom du parametre a scanner
 
-if strcmp(paraName,'theta')   
+if strcmp(paraName,'theta')
     paramstr = {"vx0"; "vy0"};
     v=10;
     param = [v*cos(theta(1:nsimul)); v*sin(theta(1:nsimul))]; % Valeurs du parametre a scanner
@@ -122,7 +122,7 @@ end
 % t acc en Pt    x1 y1 z1 vx1 vy1 vz1    x2 y2 z2  vx2 vy2 vz2    x3 y3 z3  vx3 vy3 vz3
 
 
-for i = 1:nsimul % Parcours des resultats de toutes les simulations 
+for i = 1:nsimul % Parcours des resultats de toutes les simulations
     data = load(output{i}); % Chargement du fichier de sortie de la i-ieme simulation
     if strcmp(paraName, 'dt') || strcmp(paraName, 'precision')
         t = data(:,1);
@@ -140,7 +140,7 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
 %         hmin(i)=min(sqrt(xA.^2+yA.^2));
 %         vmax(i)=max(sqrt(vx.^2+vy.^2));
         if strcmp(paraName, 'precision')
-            dt=t(2:end-1)-t(1:end-2); 
+            dt=t(2:end-1)-t(1:end-2);
         end
     elseif strcmp(paramstr, 'theta')
         t = data(:,1);
@@ -150,7 +150,7 @@ end
 
 %% Figures %%
 %%%%%%%%%%%%%
-% 
+%
 
 if strcmp(paraName, 'dt') || strcmp(paraName, 'precision')
     figure
@@ -161,19 +161,19 @@ if strcmp(paraName, 'dt') || strcmp(paraName, 'precision')
     hold off
     axis equal
     grid on
-    
+
     figure
     loglog(nsteps,abs(hmin-h-RT),'+',nsteps,1e11*nsteps.^(-4),'--')
     grid on
     xlabel('\Deltat [s]')
     ylabel('Erreur sur h_{min} [m]')
-    
+
     figure
     loglog(nsteps,abs(vmax-vMax_th),'+',nsteps,2e8*nsteps.^(-4),'--')
     grid on
     xlabel('\Deltat [s]')
     ylabel('Erreur sur v_{max} [m]')
-    
+
     if strcmp(paraName, 'precision')
         figure
         plot(t(1:end-2),dt)
@@ -209,7 +209,7 @@ end
 %     set(gca,'fontsize',15);
 %     grid on
 %     print(fig1,'figures/theta0', '-depsc');
-% 
+%
 %     fig2=figure('Position',[50,50,600,400]);
 %     plot(theta0, error, 'k+')
 %     xlabel('\theta_0 [rad]')
