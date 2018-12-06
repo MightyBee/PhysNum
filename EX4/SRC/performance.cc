@@ -21,9 +21,9 @@ class Exercice4
 
 private:
   double t, dt, precision, tFin;
-  double G, rho0, lambda, Cx;
+  double G, rho0, lambda;
   bool adaptatif;
-  array<double,3> m, R;
+  array<double,3> m, R, Cx;
   valarray<double> y;
   int sampling;
   int last;
@@ -32,7 +32,7 @@ private:
   void printOut(const bool& force)
   {
     if((!force && last>=sampling) || (force && last!=1)){
-      *outputFile << t << " " << accAstronautes() << " "   <<  PT()  ;
+      *outputFile << t << " " << accAstronautes() << " "   <<  PT() << " " ;
       *outputFile << y[0] << " " << y[1] << " 0 " << y[2]  << " " << y[3]  << " 0 ";
       *outputFile << y[4] << " " << y[5] << " 0 " << y[6]  << " " << y[7]  << " 0 ";
       *outputFile << y[8] << " " << y[9] << " 0 " << y[10] << " " << y[11] << " 0 ";
@@ -51,7 +51,7 @@ private:
     valarray<double> r2=y[slice(8,2,1)];
     acc=-G*(m[0]/pow(pow(r2-r0,2.0).sum(),1.5)*(r2-r0)+m[1]/pow(pow(r2-r1,2.0).sum(),1.5)*(r2-r1));
     if(rho0!=0){
-      acc += -0.5*rho(pow(pow(r2-r0,2).sum(),0.5))*M_PI*R[2]*R[2]*Cx*pow(pow(y[slice(10,2,1)]-y[slice(2,2,1)],2.0).sum(),0.5)*(y[slice(10,2,1)]-y[slice(2,2,1)]);
+      acc += -(1/m[2])*0.5*rho(pow(pow(r2-r0,2).sum(),0.5))*M_PI*R[2]*R[2]*Cx[2]*pow(pow(y[slice(10,2,1)]-y[slice(2,2,1)],2.0).sum(),0.5)*(y[slice(10,2,1)]-y[slice(2,2,1)]);
     }
     return sqrt(pow(acc,2.0).sum());
   }
@@ -65,7 +65,7 @@ double PT()const {
   valarray<double> r1=y[slice(4,2,1)];
   valarray<double> r2=y[slice(8,2,1)];
   if(rho0!=0){
-    return (y[slice(10,2,1)]*(-0.5*rho(pow(pow(r2-r0,2).sum(),0.5))*M_PI*R[2]*R[2]*Cx*pow(pow(y[slice(10,2,1)]-y[slice(2,2,1)],2).sum(),0.5)*(y[slice(10,2,1)]-y[slice(2,2,1)]))).sum();
+    return (y[slice(10,2,1)]*(-0.5*rho(pow(pow(r2-r0,2).sum(),0.5))*M_PI*R[2]*R[2]*Cx[2]*pow(pow(y[slice(10,2,1)]-y[slice(2,2,1)],2).sum(),0.5)*(y[slice(10,2,1)]-y[slice(2,2,1)]))).sum();
 }else{
   return 0;
 }
@@ -82,7 +82,7 @@ double PT()const {
     retour[slice(6,2,1)]  = -G*(m[0]/pow(pow(r1-r0,2).sum(),1.5)*(r1-r0)+m[2]/pow(pow(r1-r2,2).sum(),1.5)*(r1-r2));
     retour[slice(10,2,1)] = -G*(m[0]/pow(pow(r2-r0,2).sum(),1.5)*(r2-r0)+m[1]/pow(pow(r2-r1,2).sum(),1.5)*(r2-r1));
     if(rho0!=0){
-      retour[slice(10,2,1)]+= -0.5*rho(norme(r2-r0))*M_PI*R[2]*R[2]*Cx*norme(y[slice(10,2,1)]-y[slice(2,2,1)])*(y[slice(10,2,1)]-y[slice(2,2,1)]);
+      retour[slice(10,2,1)]+= -(1/m[2])*0.5*rho(norme(r2-r0))*M_PI*R[2]*R[2]*Cx[2]*norme(y[slice(10,2,1)]-y[slice(2,2,1)])*(y[slice(10,2,1)]-y[slice(2,2,1)]);
     }
     return retour;
   }
@@ -178,6 +178,7 @@ public:
       y[4*i+3] = configFile.get<double>("vy0");
       m[i]     = configFile.get<double>("m");
       R[i]     = configFile.get<double>("R");
+      Cx[i]    =configFile.get<double>("Cx");
     }
   }
 

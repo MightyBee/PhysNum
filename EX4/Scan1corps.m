@@ -98,20 +98,20 @@ elseif strcmp(paramstr, 'theta')
     error = zeros(1,nsimul);
 end
 
-% 1 2    3  4  5  6   7   8     9  10 11  12  13  14    15 16 17  18  19  20
-% t acc  x1 y1 z1 vx1 vy1 vz1   x2 y2 z2  vx2 vy2 vz2   x3 y3 z3  vx3 vy3 vz3
+% 1 2   3  4  5  6  7   8   9   10 11 12 13  14  15  16 17 18  19  20  21
+% t acc PT x1 y1 z1 vx1 vy1 vz1 x2 y2 z2 vx2 vy2 vz2 x3 y3 z3  vx3 vy3 vz3
 
 
 for i = 1:nsimul % Parcours des resultats de toutes les simulations 
     data = load(output{i}); % Chargement du fichier de sortie de la i-ieme simulation
     if strcmp(paraName, 'dt') || strcmp(paraName, 'precision')
         t = data(:,1);
-        xT = data(:,3);
-        yT = data(:,4);
-        xA = data(:,15);
-        yA = data(:,16);
-        vx= data(:,18);
-        vy= data(:,19);
+        xT = data(:,4);
+        yT = data(:,5);
+        xA = data(:,16);
+        yA = data(:,17);
+        vx= data(:,19);
+        vy= data(:,20);
         nsteps(i)=size(t,1)-1;
         R = T.Terre(8);
         [value1,indice1]=min(sqrt(xA.^2+yA.^2));
