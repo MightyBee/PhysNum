@@ -32,7 +32,7 @@ private:
   void printOut(const bool& force)
   {
     if((!force && last>=sampling) || (force && last!=1)){
-      *outputFile << t << " " << accAstronautes() << " ";
+      *outputFile << t << " " << accAstronautes() << " " << emec() << " " << PT() << " ";
       *outputFile << y[0] << " " << y[1] << " 0 " << y[2]  << " " << y[3]  << " 0 ";
       *outputFile << y[4] << " " << y[5] << " 0 " << y[6]  << " " << y[7]  << " 0 ";
       *outputFile << y[8] << " " << y[9] << " 0 " << y[10] << " " << y[11] << " 0 ";
@@ -50,22 +50,34 @@ private:
     valarray<double> r1=y[slice(4,2,1)];
     valarray<double> r2=y[slice(8,2,1)];
     acc=-G*(m[0]/pow(pow(r2-r0,2.0).sum(),1.5)*(r2-r0)+m[1]/pow(pow(r2-r1,2.0).sum(),1.5)*(r2-r1));
-    if(rho0!=0){
-      acc += -0.5*rho(pow(pow(r2-r0,2).sum(),0.5))*M_PI*R[2]*R[2]*Cx*pow(pow(y[slice(10,2,1)]-y[slice(2,2,1)],2.0).sum(),0.5)*(y[slice(10,2,1)]-y[slice(2,2,1)]);
+    if(rho0!=0.0){
+      acc += -0.5*rho(norme(r2-r0))*M_PI*R[2]*R[2]*Cx*norme(y[slice(10,2,1)]-y[slice(2,2,1)])*(y[slice(10,2,1)]-y[slice(2,2,1)]);
     }
-    return sqrt(pow(acc,2.0).sum());
+    return norme(acc);
+  }
+
+  double emec() const{
+    double retour(0.0);
+    valarray<double> r0=y[slice(0,2,1)];
+    valarray<double> r1=y[slice(4,2,1)];
+    valarray<double> r2=y[slice(8,2,1)];
+    retour-=G*m[0]*m[1]/norme(r0-r1);
+    retour-=G*m[0]*m[2]/norme(r0-r2);
+    retour-=G*m[1]*m[2]/norme(r1-r2);
+    return retour;
   }
 
   double rho(const double& r) const{
     return rho0*exp(-(r-R[0])/lambda);
   }
 
-double PT(const valarray<double>& y){
-  valarray<double> r0=y[slice(0,2,1)];
-  valarray<double> r1=y[slice(4,2,1)];
-  valarray<double> r2=y[slice(8,2,1)];
-  if(rho0!=0){
-    return (y[slice(10,2,1)]*(-0.5*rho(pow(pow(r2-r0,2).sum(),0.5))*M_PI*R[2]*R[2]*Cx*pow(pow(y[slice(10,2,1)]-y[slice(2,2,1)],2).sum(),0.5)*(y[slice(10,2,1)]-y[slice(2,2,1)]))).sum();
+double PT(){
+  valarray<double> r0=y[slice(0 ,2,1)];
+  valarray<double> v0=y[slice(2 ,2,1)];
+  valarray<double> r2=y[slice(8 ,2,1)];
+  valarray<double> v2=y[slice(10,2,1)];
+  if(rho0!=0.0){
+    return (v2*(-0.5*rho(norme(r2-r0))*M_PI*R[2]*R[2]*Cx*norme(v2-v0)*(v2-v0))).sum();
 }else{
   return 0;
 }
@@ -81,7 +93,7 @@ double PT(const valarray<double>& y){
     retour[slice(2,2,1)]  = -G*(m[1]/pow(pow(r0-r1,2).sum(),1.5)*(r0-r1)+m[2]/pow(pow(r0-r2,2).sum(),1.5)*(r0-r2));
     retour[slice(6,2,1)]  = -G*(m[0]/pow(pow(r1-r0,2).sum(),1.5)*(r1-r0)+m[2]/pow(pow(r1-r2,2).sum(),1.5)*(r1-r2));
     retour[slice(10,2,1)] = -G*(m[0]/pow(pow(r2-r0,2).sum(),1.5)*(r2-r0)+m[1]/pow(pow(r2-r1,2).sum(),1.5)*(r2-r1));
-    if(rho0!=0){
+    if(rho0!=0.0){
       retour[slice(10,2,1)]+= -0.5*rho(norme(r2-r0))*M_PI*R[2]*R[2]*Cx*norme(y[slice(10,2,1)]-y[slice(2,2,1)])*(y[slice(10,2,1)]-y[slice(2,2,1)]);
     }
     return retour;
@@ -104,7 +116,7 @@ double PT(const valarray<double>& y){
       int i(0);
       valarray<double> y1(12), y2(12);
       do{
-        if(i!=0){dt*=0.99*pow(precision*fact/d,0.2);}
+        if(i!=0){dt*=0.97*pow(precision*fact/d,0.2);}
         y1=one_step(y,t,dt);
         y2=one_step(one_step(y,t,0.5*dt),t+0.5*dt,0.5*dt);
         //fact/=norme(fact*y2);
@@ -178,6 +190,9 @@ public:
       y[4*i+3] = configFile.get<double>("vy0");
       m[i]     = configFile.get<double>("m");
       R[i]     = configFile.get<double>("R");
+      if(i==2){
+        Cx     = configFile.get<double>("Cx");
+      }
     }
   }
 
@@ -191,19 +206,19 @@ public:
   {
     t = 0.;
     last = 0;
-    int i(0);
-    cerr << "####################" << endl;
+    //int i(0);
+    //cerr << "####################" << endl;
     printOut(true);
-    while( t < tFin)
+    while( t < tFin and norme(valarray<double>(y[slice(8,2,1)])-valarray<double>(y[slice(0,2,1)])) > R[0] and norme(valarray<double>(y[slice(8,2,1)])-valarray<double>(y[slice(4,2,1)])) > R[1])
     {
       evolue();
       printOut(false);
-      if(i+1<t/tFin*20){
-        i++;
-        cerr << "#";
-      }
+      //if(i+1<t/tFin*20){
+      //  i++;
+      //  cerr << "#";
+      //}
     }
-    cerr << "#" << endl;
+    //cerr << "#" << endl;
     printOut(true);
   };
 
