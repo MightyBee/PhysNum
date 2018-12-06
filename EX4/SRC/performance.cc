@@ -11,6 +11,9 @@
 using namespace std;
 
 
+double norme(const valarray<double>& y){
+  return sqrt(pow(y,2.0).sum());
+}
 
 
 class Exercice4
@@ -79,7 +82,7 @@ double PT()const {
     retour[slice(6,2,1)]  = -G*(m[0]/pow(pow(r1-r0,2).sum(),1.5)*(r1-r0)+m[2]/pow(pow(r1-r2,2).sum(),1.5)*(r1-r2));
     retour[slice(10,2,1)] = -G*(m[0]/pow(pow(r2-r0,2).sum(),1.5)*(r2-r0)+m[1]/pow(pow(r2-r1,2).sum(),1.5)*(r2-r1));
     if(rho0!=0){
-      retour[slice(10,2,1)]+= -0.5*rho(pow(pow(r2-r0,2).sum(),0.5))*M_PI*R[2]*R[2]*Cx*pow(pow(y[slice(10,2,1)]-y[slice(2,2,1)],2).sum(),0.5)*(y[slice(10,2,1)]-y[slice(2,2,1)]);
+      retour[slice(10,2,1)]+= -0.5*rho(norme(r2-r0))*M_PI*R[2]*R[2]*Cx*norme(y[slice(10,2,1)]-y[slice(2,2,1)])*(y[slice(10,2,1)]-y[slice(2,2,1)]);
     }
     return retour;
   }
@@ -93,20 +96,24 @@ double PT()const {
   }
 
   void evolue(){
+    if(t+dt>tFin){
+      dt=tFin-t;
+    }
     if(adaptatif){
-      double d(0);
+      double d(0.0), fact(1.0);
       int i(0);
       valarray<double> y1(12), y2(12);
       do{
-        if(i!=0){dt*=0.99*pow(precision/d,0.1);}
+        if(i!=0){dt*=0.99*pow(precision*fact/d,0.2);}
         y1=one_step(y,t,dt);
         y2=one_step(one_step(y,t,0.5*dt),t+0.5*dt,0.5*dt);
-        d=pow(y2-y1,2).sum();
+        //fact/=norme(fact*y2);
+        d=norme(fact*y2-fact*y1);
         i++;
-      }while(d>precision);
+      }while(d>precision*fact);
       y=y2;
       t+=dt;
-      dt*=pow(precision/d,0.1);
+      dt*=pow(precision*fact/d,0.2);
     }else{
       y=one_step(y,t,dt);
       t+=dt;
@@ -146,7 +153,6 @@ public:
     tFin      = configFile.get<double>("tFin");
     dt        = configFile.get<double>("dt");
     precision = configFile.get<double>("precision");
-    precision*=precision;
     adaptatif = configFile.get<bool>("adaptatif");
     G         = configFile.get<double>("G");
     rho0      = configFile.get<double>("rho0");
@@ -166,12 +172,12 @@ public:
           }
         }
       }
-      y[4*i]=configFile.get<double>("x0");
-      y[4*i+1]=configFile.get<double>("y0");
-      y[4*i+2]=configFile.get<double>("vx0");
-      y[4*i+3]=configFile.get<double>("vy0");
-      m[i] = configFile.get<double>("m");
-      R[i] = configFile.get<double>("R");
+      y[4*i]   = configFile.get<double>("x0");
+      y[4*i+1] = configFile.get<double>("y0");
+      y[4*i+2] = configFile.get<double>("vx0");
+      y[4*i+3] = configFile.get<double>("vy0");
+      m[i]     = configFile.get<double>("m");
+      R[i]     = configFile.get<double>("R");
     }
   }
 
@@ -185,12 +191,19 @@ public:
   {
     t = 0.;
     last = 0;
+    int i(0);
+    cerr << "####################" << endl;
     printOut(true);
-    while( t < tFin-0.5*dt )
+    while( t < tFin)
     {
       evolue();
       printOut(false);
+      if(i+1<t/tFin*20){
+        i++;
+        cerr << "#";
+      }
     }
+    cerr << "#" << endl;
     printOut(true);
   };
 
