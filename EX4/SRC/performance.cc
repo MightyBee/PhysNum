@@ -51,7 +51,7 @@ private:
     valarray<double> r2=y[slice(8,2,1)];
     acc=-G*(m[0]/pow(pow(r2-r0,2.0).sum(),1.5)*(r2-r0)+m[1]/pow(pow(r2-r1,2.0).sum(),1.5)*(r2-r1));
     if(rho0!=0.0){
-      acc += -(0.5/m[2])*rho(norme(r2-r0))*M_PI*R[2]*R[2]*Cx*norme(y[slice(10,2,1)]-y[slice(2,2,1)])*(y[slice(10,2,1)]-y[slice(2,2,1)]);
+      acc += -(0.5/m[2])*rho(norme(r2-r0))*M_PI*R[2]*R[2]*Cx[2]*norme(y[slice(10,2,1)]-y[slice(2,2,1)])*(y[slice(10,2,1)]-y[slice(2,2,1)]);
     }
     return norme(acc);
   }
@@ -94,7 +94,7 @@ double PT() const{
     retour[slice(6,2,1)]  = -G*(m[0]/pow(pow(r1-r0,2).sum(),1.5)*(r1-r0)+m[2]/pow(pow(r1-r2,2).sum(),1.5)*(r1-r2));
     retour[slice(10,2,1)] = -G*(m[0]/pow(pow(r2-r0,2).sum(),1.5)*(r2-r0)+m[1]/pow(pow(r2-r1,2).sum(),1.5)*(r2-r1));
     if(rho0!=0.0){
-      retour[slice(10,2,1)]+= -(0.5/m[2])*rho(norme(r2-r0))*M_PI*R[2]*R[2]*Cx*norme(y[slice(10,2,1)]-y[slice(2,2,1)])*(y[slice(10,2,1)]-y[slice(2,2,1)]);
+      retour[slice(10,2,1)]+= -(0.5/m[2])*rho(norme(r2-r0))*M_PI*R[2]*R[2]*Cx[2]*norme(y[slice(10,2,1)]-y[slice(2,2,1)])*(y[slice(10,2,1)]-y[slice(2,2,1)]);
     }
     return retour;
   }
@@ -114,13 +114,12 @@ double PT() const{
     if(adaptatif){
       double d(0.0), fact(1.0);
       int i(0);
-      valarray<double> y1(12), y2(12);
+      valarray<double> y2(12);
       do{
         if(i!=0){dt*=0.97*pow(precision*fact/d,0.2);}
-        y1=one_step(y,t,dt);
         y2=one_step(one_step(y,t,0.5*dt),t+0.5*dt,0.5*dt);
         //fact/=norme(fact*y2);
-        d=norme(fact*y2-fact*y1);
+        d=norme(fact*y2-fact*one_step(y,t,dt));
         i++;
       }while(d>precision*fact);
       y=y2;

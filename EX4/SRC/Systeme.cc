@@ -87,7 +87,7 @@ CollectionY Systeme::f(const CollectionY& collY, double t) const{
         a+=-G*liste[k].getM()/(collY[i].P-collY[k].P).norme2()*~(collY[i].P-collY[k].P);
       }
     }
-    if(i!=0){
+    if(i!=0 and rho0!=0.0){
       a+=-(1/liste[i].getM())*0.5*rho((collY[i].P-collY[0].P).norme())*M_PI*pow(liste[i].getR(),2)*liste[i].getCx()*(collY[i].V-collY[0].V).norme()*(collY[i].V-collY[0].V);
     }
     retour.push_back(VectY({v,a}));
@@ -96,14 +96,12 @@ CollectionY Systeme::f(const CollectionY& collY, double t) const{
 }
 
 
-CollectionY Systeme::evolue(double t, double dt){
-  CollectionY yOld=getY();
-  CollectionY k1=dt*f(yOld       ,t       );
-  CollectionY k2=dt*f(yOld+0.5*k1,t+0.5*dt);
-  CollectionY k3=dt*f(yOld+0.5*k2,t+0.5*dt);
-  CollectionY k4=dt*f(yOld+    k3,t+    dt);
-  CollectionY yNew=yOld+(k1+2*k2+2*k3+k4)/6;
-  setY(yNew);
+CollectionY Systeme::evolue(const CollectionY& y, double t, double dt){
+  CollectionY k1=dt*f(y       ,t       );
+  CollectionY k2=dt*f(y+0.5*k1,t+0.5*dt);
+  CollectionY k3=dt*f(y+0.5*k2,t+0.5*dt);
+  CollectionY k4=dt*f(y+    k3,t+    dt);
+  CollectionY yNew=y+(k1+2*k2+2*k3+k4)/6;
   return yNew;
 }
 
@@ -112,21 +110,18 @@ void Systeme::evolue(double& t, double& dt, bool adaptatif, double precision){
     double d(0);
     int i(0);
     CollectionY yOld=getY();
-    CollectionY y1, y2;
+    CollectionY y2;
     do{
       if(i!=0){dt*=0.99*pow(precision/d,0.2);}
-      setY(yOld);
-      y1=evolue(t,dt);
-      setY(yOld);
-      evolue(t,0.5*dt);
-      y2=evolue(t+0.5*dt,0.5*dt);
-      d=(y2-y1).norme();
+      y2=evolue(evolue(yOld,t,0.5*dt),t+0.5*dt,0.5*dt);
+      d=(y2-evolue(yOld,t,dt)).norme();
       i++;
     }while(d>precision);
+    setY(y2);
     t+=dt;
     dt*=pow(precision/d,0.2);
   }else{
-    evolue(t,dt);
+    setY(evolue(getY(),t,dt));
     t+=dt;
   }
 }

@@ -9,7 +9,7 @@
 
 G=6.674e-11;
 rho0=0;
-tFin=100*24*3600;
+tFin=2e7;%100*24*3600;
 
 rowNames  = {'nbCorps','tFin','G','rho0','lambda','dt','precision','adaptatif','output', 'sampling'};
 varNames  = {'classique'}; % nom
@@ -18,7 +18,7 @@ variables = [3         % nbCorps
              G         % G
              rho0      % rho0
              7238.2    % lambda
-             50        % dt
+             1000        % dt
              1e-5      % precision
              "true"    % adaptatif
              "deuxCorps.out"   % output
@@ -36,8 +36,8 @@ rT=0-rG;
 rL=rL-rG;
 omega=sqrt(mL/abs(rT)*G/(rL-rT)^2);
 
-vy0T=omega*rT
-vy0L=omega*rL
+vy0T=omega*rT;
+vy0L=omega*rL;
 
 RT=6378100;
 RL=1737000;
@@ -59,58 +59,116 @@ T1=table(variables(:,1),variables(:,2),variables(:,3),'VariableNames',varNames,'
 config(T0,T1);
 
 
+%% Parametres à varier %%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+repertoire = './'; % Chemin d'acces au code compile
+executable = 'performance'; % Nom de l'executable
+
+nsimul = 3; % Nombre de simulations à faire
+precision = logspace(-1,-5,nsimul); % Valeurs du parametre a scanner
+
 %% Simulations %%
 %%%%%%%%%%%%%%%%%
 
-cmd = './performance';
-system(cmd);
-
+output = cell(1, nsimul); % Tableau de cellules contenant le nom des fichiers de sortie
+for k = 1:nsimul
+    output{k} = sprintf('simulations/deuxCorps_precision=%.15g.out',precision(k));
+    % Execution du programme en lui envoyant la valeur a scanner en argument
+    cmd = sprintf('%s%s configuration0.in 2 precision=%.15g output=%s', repertoire, executable, precision(k), output{k});
+    disp(cmd)
+    system(cmd);
+end
 
 %% Analyse %%
 %%%%%%%%%%%%
 
+t    = cell(1,nsimul);
+emec = cell(1,nsimul);
+xT   = cell(1,nsimul);
+yT   = cell(1,nsimul);
+vxT  = cell(1,nsimul);
+vyT  = cell(1,nsimul);
+xL   = cell(1,nsimul);
+yL   = cell(1,nsimul);
+vxL  = cell(1,nsimul);
+vyL  = cell(1,nsimul);
+d    = cell(1,nsimul);
+p    = cell(1,nsimul);
+nsteps=zeros(1,nsimul);
 
 % 1 2   3  4     5  6  7  8   9   10     11 12 13  14  15  16     17 18 19  20  21  22
 % t acc en Pt    x1 y1 z1 vx1 vy1 vz1    x2 y2 z2  vx2 vy2 vz2    x3 y3 z3  vx3 vy3 vz3
-
-data=load('simulations/deuxCorps.out');
-t  = data(:,1);
-emec= data(:,3);
-xT = data(:,5);
-yT = data(:,6);
-xL = data(:,11);
-yL = data(:,12);
-
-
+for i=1:nsimul
+    data=load(output{i});
+    t{i}   = data(:,1);
+    xT{i}  = data(:,5);
+    yT{i}  = data(:,6);
+    vxT{i} = data(:,8);
+    vyT{i} = data(:,9);
+    xL{i}  = data(:,11);
+    yL{i}  = data(:,12);
+    vxL{i} = data(:,14);
+    vyL{i} = data(:,15);
+    emec{i}= data(:,3)+0.5*mT*(vxT{i}.^2+vyT{i}.^2)+0.5*mL*(vxL{i}.^2+vyL{i}.^2);
+    d{i}   = sqrt((xT{i}-xL{i}).^2+(yT{i}-yL{i}).^2);
+    p{i}   = mT*sqrt(vxT{i}.^2+vyT{i}.^2)+mL*sqrt(vxL{i}.^2+vyL{i}.^2);
+    nsteps(i)=size(t{i},1)-1;
+end
 %% Figures %%
 %%%%%%%%%%%%%
 
-figure
-plot(xT,yT,xL,yL)
-% angle=linspace(0,2*pi);
-% plot(rT+RT*cos(angle),RT*sin(angle),'r',rL+RL*cos(angle),RL*sin(angle),'r')
-% hold on
-% plot(xT.*cos(omega*t)+yT.*sin(omega*t), -xT.*sin(omega*t)+yT.*cos(omega*t), 'k+')
-% hold on
-% plot(xL.*cos(omega*t)+yL.*sin(omega*t), -xL.*sin(omega*t)+yL.*cos(omega*t), 'r+')
-% hold off
-% xlabel('x [m]')
-% ylabel('y [m]')
+fig1=figure('Position',[50,50,600,400]);
+plot(xT{nsimul},yT{nsimul},xL{nsimul},yL{nsimul})
 grid on
 axis equal
-figure
-plot(t,emec)
-% figure
-% plot3(t, xT, yT, 'k', t, xL, yL, 'r', t, xA, yA)
-% xlabel('t [s]')
-% ylabel('x [m]')
-% zlabel('y [m]')
-% plot(dt.*dt,error,'k+')
-% xlabel('(\Deltat)^2 [s^2]')
-% ylabel('\theta(t_{fin}) [rad]')
-% set(gca,'fontsize',15);
-% title('$\Omega$=1$\omega_0$  $d$=0.04  $\kappa$=0', 'Fontweight','normal','Interpreter','latex');
-% grid on
-% print('figures/etudeConvDt', '-depsc');
+xlabel('x [m]')
+ylabel('y [m]')
+set(gca,'fontsize',15);
+lgd=legend('Terre','Lune');
+set(lgd,'fontsize',14,'Location','southwest');
+print(fig1,'figures/deuxCorps_tajectoire', '-depsc');
+
+fig2=figure('Position',[50,50,600,400]);
+for i = 1:nsimul
+    plot(t{i},d{i})
+    hold on
+end
+hold off
+grid on
+xlabel('Temps [s]')
+ylabel('Distance Terre-Lune [m]')
+set(gca,'fontsize',15);
+lgd=legend(sprintf('N_{steps}=%d',nsteps(1)),sprintf('N_{steps}=%d',nsteps(2)),sprintf('N_{steps}=%d',nsteps(3)));
+set(lgd,'fontsize',14,'Location','southwest');
+print(fig2,'figures/deuxCorps_d', '-depsc');
+
+fig3=figure('Position',[50,50,600,400]);
+for i = 1:nsimul
+    plot(t{i},p{i})
+    hold on
+end
+hold off
+grid on
+xlabel('Temps [s]')
+ylabel('Quantité de mouvement [kgm/s]')
+set(gca,'fontsize',15);
+lgd=legend(sprintf('N_{steps}=%d',nsteps(1)),sprintf('N_{steps}=%d',nsteps(2)),sprintf('N_{steps}=%d',nsteps(3)));
+set(lgd,'fontsize',14,'Location','northwest');
+print(fig3,'figures/deuxCorps_p', '-depsc');
+
+fig4=figure('Position',[50,50,600,400]);
+for i = 1:nsimul
+    plot(t{i},emec{i})
+    hold on
+end
+hold off
+grid on
+xlabel('Temps [s]')
+ylabel('Énergie mecanique [J]')
+set(gca,'fontsize',15);
+lgd=legend(sprintf('N_{steps}=%d',nsteps(1)),sprintf('N_{steps}=%d',nsteps(2)),sprintf('N_{steps}=%d',nsteps(3)));
+set(lgd,'fontsize',14,'Location','southwest');
+print(fig4,'figures/deuxCorps_emec', '-depsc');
 
 clear all;

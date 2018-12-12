@@ -34,7 +34,7 @@ mT=5.972e24;
 h=10000;
 RT=6378100;
 vMax_th=sqrt(v0^2+2*G*mT*(1/(h+RT)-1/r0));
-alpha = pi-asin(vMax_th*(h+RT)/(v0*r0));
+alpha = pi-asin(vMax_th*(h+RT)/(v0*r0))
 vx0=v0*cos(alpha);
 vy0=v0*sin(alpha);
 
@@ -67,11 +67,15 @@ theta     = linspace(0,2*pi,nsimul+1);
 dt        = logspace(1.5,0,nsimul); % Valeurs du parametre a scanner
 precision = logspace(-1,-8,nsimul); % Valeurs du parametre a scanner
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 paraName='precision'; % Nom du parametre a scanner
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 if strcmp(paraName,'theta')
     paramstr = {"vx0"; "vy0"};
-    v=10;
+    v=1200;
     param = [v*cos(theta(1:nsimul)); v*sin(theta(1:nsimul))]; % Valeurs du parametre a scanner
     configfileNb=3;
 elseif strcmp(paraName,'dt')
@@ -83,6 +87,11 @@ elseif strcmp(paraName,'precision')
     change_config(0,'adaptatif','true');
     paramstr={"precision"};
     param=precision;
+    configfileNb=0;
+elseif strcmp(paraName,'both')
+    paramstr = {"dt"; "precision"; "adaptatif"};
+    param = [dt dt; precision precision; zeros(1,nsimul) ones(1,nsimul)];
+    nsimul=2*nsimul;
     configfileNb=0;
 end
 
@@ -114,6 +123,9 @@ if strcmp(paraName, 'dt') || strcmp(paraName, 'precision')
     hmin = zeros(1,nsimul);
     vmax = zeros(1,nsimul);
     nsteps = ones(1,nsimul);
+elseif strcmp(paraName, 'both')
+    hmin   = zeros(2,nsimul/2);
+    nsteps =  ones(2,nsimul/2);
 elseif strcmp(paramstr, 'theta')
     error = zeros(1,nsimul);
 end
@@ -129,18 +141,32 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
         Pt = data(:,4);
         xT = data(:,5);
         yT = data(:,6);
+        vxT= data(:,8);
+        vyT= data(:,9);
         xA = data(:,17);
         yA = data(:,18);
-        vx= data(:,20);
-        vy= data(:,21);
+        vxA= data(:,20);
+        vyA= data(:,21);
         nsteps(i)=size(t,1)-1;
         R = T1.Terre(8);
-        hmin(i)=inter_min(t,sqrt(xA.^2+yA.^2),3);
-        vmax(i)=inter_max(t,sqrt(vx.^2+vy.^2),3);
-%         hmin(i)=min(sqrt(xA.^2+yA.^2));
-%         vmax(i)=max(sqrt(vx.^2+vy.^2));
+        hmin(i)=inter_min(t,sqrt((xA-xT).^2+(yA-yT).^2),3);
+        vmax(i)=inter_max(t,sqrt((vxA-vxT).^2+(vyA-vyT).^2),3);
         if strcmp(paraName, 'precision')
             dt=t(2:end-1)-t(1:end-2);
+            nsteps(i)=2*nsteps(i);
+        end
+    elseif strcmp(paraName,'both')
+        t = data(:,1);
+        xT = data(:,5);
+        yT = data(:,6);
+        xA = data(:,17);
+        yA = data(:,18);
+        if i>nsimul/2
+            nsteps(2,i-nsimul/2)=2*(size(t,1)-1);
+            hmin(2,i-nsimul/2)=inter_min(t,sqrt((xA-xT).^2+(yA-yT).^2),3);
+        else
+            nsteps(1,i)=size(t,1)-1;
+            hmin(1,i)=inter_min(t,sqrt((xA-xT).^2+(yA-yT).^2),3);
         end
     elseif strcmp(paramstr, 'theta')
         t = data(:,1);
@@ -153,70 +179,65 @@ end
 %
 
 if strcmp(paraName, 'dt') || strcmp(paraName, 'precision')
-    figure
-    angle=linspace(0,2*pi);
-    plot(RT*cos(angle),RT*sin(angle),'r')
+    fig1=figure('Position',[50,50,600,400])
+    plot(RT*cos(linspace(0,2*pi,100000)),RT*sin(linspace(0,2*pi,100000)),'r')
     hold on
-    plot(xT,yT,'+r',xA,yA)
+    plot(xA,yA)
     hold off
+    xlabel('x [m]')
+    ylabel('y [m]')
+    set(gca,'fontsize',15);
     axis equal
     grid on
+    lgd=legend('Surface terrestre',"Trajectoire d'Appolo");
+    set(lgd,'fontsize',14,'Location','northwest');
+ 
 
-    figure
-    loglog(nsteps,abs(hmin-h-RT),'+',nsteps,1e11*nsteps.^(-4),'--')
+    fig2=figure('Position',[50,50,600,400])
+    loglog(nsteps,abs(hmin-h-RT),'+',nsteps,abs(hmin(1)-h-RT)*nsteps(1)^4*nsteps.^(-4),'--')
     grid on
-    xlabel('\Deltat [s]')
+    xlabel('N_{steps}')
     ylabel('Erreur sur h_{min} [m]')
+    set(gca,'fontsize',15);
+    lgd=legend('Runge-Kutta 4','\propto 1/N^4');
+    set(lgd,'fontsize',14,'Location','southwest');
 
-    figure
-    loglog(nsteps,abs(vmax-vMax_th),'+',nsteps,2e8*nsteps.^(-4),'--')
+    fig3=figure('Position',[50,50,600,400])
+    loglog(nsteps,abs(vmax-vMax_th),'+',nsteps,abs(vmax(1)-vMax_th)*nsteps(1)^4*nsteps.^(-4),'--')
     grid on
-    xlabel('\Deltat [s]')
-    ylabel('Erreur sur v_{max} [m]')
+    xlabel('N_{steps}')
+    ylabel('Erreur sur v_{max} [m/s]')
+    set(gca,'fontsize',15);
+    lgd=legend('Runge-Kutta 4','\propto 1/N^4');
+    set(lgd,'fontsize',14,'Location','southwest');
 
-    if strcmp(paraName, 'precision')
-        figure
+    if strcmp(paraName, 'dt')
+        print(fig1,'figures/unCorpsFixe_trajectoire', '-depsc');
+        print(fig2,'figures/unCorpsFixe_convH', '-depsc');
+        print(fig3,'figures/unCorpsFixe_convV', '-depsc');  
+    else
+        fig4=figure('Position',[50,50,600,400])
         plot(t(1:end-2),dt)
+        xlabel('t [s]')
+        ylabel('\Deltat [s]')
+        set(gca,'fontsize',15);
+        grid on
+        print(fig1,'figures/unCorpsAdapt_trajectoire', '-depsc');
+        print(fig2,'figures/unCorpsAdapt_convH', '-depsc');
+        print(fig3,'figures/unCorpsAdapt_convV', '-depsc');
+        print(fig4,'figures/unCorpsAdapt_dt', '-depsc');  
     end
+elseif strcmp(paraName,'both')
+    fig1=figure('Position',[50,50,600,400]);
+    disp(nsteps)
+    disp(hmin)
+    loglog(abs(hmin(1,:)-h-RT),nsteps(1,:),'+',abs(hmin(2,:)-h-RT),nsteps(2,:),'+')%,nsteps,abs(hmin(1)-h-RT)*nsteps(1)^4*nsteps.^(-4),'--')
+    grid on
+    xlabel('Erreur sur h_{min} [m]')
+    ylabel('N_{steps}')
+    set(gca,'fontsize',15);
+    lgd=legend('Runge-Kutta 4 fixe','Runge-Kutta 4 adaptatif');
+    set(lgd,'fontsize',14,'Location','southwest');
+    print(fig1,'figures/unCorps_compFixAdapt', '-depsc');
 end
-% if strcmp(paramstr, 'dt')
-%     figure('Position',[50,50,600,400]);
-% %     loglog(dt, error, 'k+')
-% %     xlabel('\Deltat [s]')
-% %     ylabel('Erreur sur \theta(t_{fin}) [rad]')
-%     plot(dt.*dt,error,'k+')
-%     xlabel('(\Deltat)^2 [s^2]')
-%     ylabel('\theta(t_{fin}) [rad]')
-%     set(gca,'fontsize',15);
-%     title('$\Omega$=1$\omega_0$  $d$=0.04  $\kappa$=0', 'Fontweight','normal','Interpreter','latex');
-%     grid on
-%     print('figures/etudeConvDt', '-depsc');
-% elseif strcmp(paramstr, 'Omega')
-%     figure('Position',[50,50,600,400]);
-%     plot(Omega, Emax, 'k+')
-%     xlabel('\Omega [rad/s]')
-%     ylabel('max(E_{mec}(t)) [J]')
-%     set(gca,'fontsize',15);
-%     grid on
-%     print('figures/rechercheOmega', '-depsc');
-% elseif strcmp(paramstr, 'theta0')
-%     fig1=figure('Position',[50,50,600,400]);
-%     plot(theta0_ana, T_ana,'r-',theta0, T_num, 'k+')
-%     lgd=legend('Analytique','Numérique');
-%     set(lgd,'fontsize',14,'Location','northwest');
-%     xlabel('\theta_0 [rad]')
-%     ylabel('T [s]')
-%     set(gca,'fontsize',15);
-%     grid on
-%     print(fig1,'figures/theta0', '-depsc');
-%
-%     fig2=figure('Position',[50,50,600,400]);
-%     plot(theta0, error, 'k+')
-%     xlabel('\theta_0 [rad]')
-%     ylabel('Erreur sur T [s]')
-%     set(gca,'fontsize',15);
-%     grid on
-%     print(fig2,'figures/theta0error', '-depsc');
-% end
 
-clear all;

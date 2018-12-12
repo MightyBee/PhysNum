@@ -28,7 +28,7 @@ private:
   void printOut(bool force)
   {
     if((!force && last>=sampling) || (force && last!=1)){
-      *outputFile << t << " " << systeme << endl;
+      *outputFile << t << " 0 0 0 " << systeme << endl;
       last = 1;
     }
     else{
@@ -99,7 +99,6 @@ public:
       R = configFile.get<double>("R");
       Cx= configFile.get<double>("Cx");
       corps=Corps(nom,P,V,m,R,Cx);
-
       systeme.add(corps);
     }
   }

@@ -35,7 +35,7 @@ class Systeme{
     void setY(const CollectionY& s);
     double rho(double r) const;
     CollectionY f(const CollectionY& collY, double t) const;
-    CollectionY evolue(double t, double dt);
+    CollectionY evolue(const CollectionY& y, double t, double dt);
     void evolue(double& t, double& dt, bool adaptatif, double precision);
   private:
     double G;            // constante de gravitation
