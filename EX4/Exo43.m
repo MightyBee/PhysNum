@@ -1,9 +1,28 @@
 %% ConfigFile %%
 %%%%%%%%%%%%%%%%
 
+
+G=6.674e-11;
+rho0=1.2;
+tFin=2*24*3600;
+
+rowNames  = {'nbCorps','tFin','G','rho0','lambda','dt','precision','adaptatif','output', 'sampling'};
+varNames  = {'classique'}; % nom
+variables = [3         % nbCorps
+             tFin      % tFin
+             G         % G
+             rho0      % rho0
+             7238.2    % lambda
+             1000        % dt
+             1e-5      % precision
+             "true"    % adaptatif
+             "deuxCorps.out"   % output
+             0      ]; % sampling
+
+T0=table(variables,'VariableNames',varNames,'RowNames',rowNames);
+
 v0=1200;
 r0=314159000;
-G=6.674e-11;
 mT=5.972e24;
 h=10000;
 RT=6378100;
@@ -24,11 +43,11 @@ variables = [0               384748000       r0              % x0
              RT              1737000         1.95            % R
              0               0               0.3          ]; % Cx
 
-T=table(variables(:,1),variables(:,2),variables(:,3),'VariableNames',varNames,'RowNames',rowNames);
+T1=table(variables(:,1),variables(:,2),variables(:,3),'VariableNames',varNames,'RowNames',rowNames);
 
-config(T);
+config(T0,T1);
 
-change_config(0,'tFin',2*24*60*60);
+
 
 
 %% Parametres à varier %%
@@ -37,7 +56,7 @@ change_config(0,'tFin',2*24*60*60);
 repertoire = './'; % Chemin d'acces au code compile
 executable = 'performance'; % Nom de l'executable 
 
-nsimul = 30; % Nombre de simulations à faire
+nsimul = 2; % Nombre de simulations à faire
 
 precision = logspace(1,-9,nsimul); % Valeurs du parametre a scanner
 
@@ -78,12 +97,12 @@ nsteps=ones(1,nsimul);
 for i = 1:nsimul % Parcours des resultats de toutes les simulations 
     data = load(output{i}); % Chargement du fichier de sortie de la i-ieme simulation
         t = data(:,1);
-        xT = data(:,4);
+        xT = data(:,5);
         yT = data(:,5);
-        xA = data(:,16);
-        yA = data(:,17);
-        vx= data(:,19);
-        vy= data(:,20);
+        xA = data(:,17);
+        yA = data(:,18);
+        vx= data(:,20);
+        vy= data(:,21);
         nsteps(i)=size(t,1)-1;
         R = T.Terre(8);
         Acc = data(:,2);
@@ -94,7 +113,7 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
             end
         end
         maxAcc(i)= a; % 
-        PT = -data(:,3);
+        PT = -data(:,4);
         v =PT(1);
        for l=1:size(PT,1)
             if PT(l)>v
