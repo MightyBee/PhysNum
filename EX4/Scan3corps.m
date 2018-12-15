@@ -282,13 +282,13 @@ if strcmp(paraName, 'theta')
     figure
     plot(theta,acc,'p')
     xlabel('\theta_0 [rad]')
-    ylabel('\max(acc) [m/s^2]')
+    ylabel('max(acc) [m/s^2]')
     grid on
     
     figure
     plot(theta,hmin-RT,'p')
     xlabel('\theta_0 [rad]')
-    ylabel('\min(h) [m/s^2]')
+    ylabel('min(h) [m/s^2]')
     grid on
 
     figure
