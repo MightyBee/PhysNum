@@ -1,9 +1,10 @@
 %% ConfigFile %%
 %%%%%%%%%%%%%%%%
 
+
 G=6.674e-11;
 rho0=1.2;
-tFin=20*24*3600;
+tFin=2*24*3600;
 
 rowNames  = {'nbCorps','tFin','G','rho0','lambda','dt','precision','adaptatif','output', 'sampling'};
 varNames  = {'classique'}; % nom
@@ -22,7 +23,6 @@ T0=table(variables,'VariableNames',varNames,'RowNames',rowNames);
 
 v0=1200;
 r0=314159000;
-G=6.674e-11;
 mT=5.972e24;
 h=10000;
 RT=6378100;
@@ -43,20 +43,20 @@ variables = [0               384748000       r0              % x0
              RT              1737000         1.95            % R
              0               0               0.3          ]; % Cx
 
-T=table(variables(:,1),variables(:,2),variables(:,3),'VariableNames',varNames,'RowNames',rowNames);
+T1=table(variables(:,1),variables(:,2),variables(:,3),'VariableNames',varNames,'RowNames',rowNames);
 
-config(T0,T);
+config(T0,T1);
 
-change_config(0,'tFin',2*24*60*60);
+
 
 
 %% Parametres à varier %%
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 repertoire = './'; % Chemin d'acces au code compile
-executable = 'performance'; % Nom de l'executable 
+executable = 'performance'; % Nom de l'executable
 
-nsimul = 30; % Nombre de simulations à faire
+nsimul = 2; % Nombre de simulations à faire
 
 precision = logspace(1,-8,nsimul); % Valeurs du parametre a scanner
 
@@ -94,15 +94,15 @@ maxAcc=zeros(1,nsimul);
 maxPT=zeros(1,nsimul);
 nsteps=ones(1,nsimul);
 
-for i = 1:nsimul % Parcours des resultats de toutes les simulations 
+for i = 1:nsimul % Parcours des resultats de toutes les simulations
     data = load(output{i}); % Chargement du fichier de sortie de la i-ieme simulation
         t = data(:,1);
-        xT = data(:,4);
+        xT = data(:,5);
         yT = data(:,5);
-        xA = data(:,16);
-        yA = data(:,17);
-        vx= data(:,19);
-        vy= data(:,20);
+        xA = data(:,17);
+        yA = data(:,18);
+        vx= data(:,20);
+        vy= data(:,21);
         nsteps(i)=size(t,1)-1;
         R = T.Terre(8);
         Acc = data(:,2);
@@ -112,19 +112,19 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
                 a=Acc(l);
             end
         end
-        maxAcc(i)= a; % 
-        PT = -data(:,3);
+        maxAcc(i)= a; %
+        PT = -data(:,4);
         v =PT(1);
        for l=1:size(PT,1)
             if PT(l)>v
                 v=PT(l);
             end
         end
-        maxPT(i)= v; 
+        maxPT(i)= v;
 end
 
 
-figure 
+figure
 angle=linspace(0,2*pi);
     plot(RT*cos(angle),RT*sin(angle),'r')
     hold on
@@ -132,12 +132,12 @@ angle=linspace(0,2*pi);
     hold off
     axis equal
     grid on
-  
+
  figure
  loglog(nsteps , maxAcc,'+')
  grid on
- 
- 
+
+
  figure
  loglog(nsteps, maxPT,'+')
  grid on
