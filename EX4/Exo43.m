@@ -1,6 +1,25 @@
 %% ConfigFile %%
 %%%%%%%%%%%%%%%%
 
+G=6.674e-11;
+rho0=1.2;
+tFin=20*24*3600;
+
+rowNames  = {'nbCorps','tFin','G','rho0','lambda','dt','precision','adaptatif','output', 'sampling'};
+varNames  = {'classique'}; % nom
+variables = [3         % nbCorps
+             tFin      % tFin
+             G         % G
+             rho0      % rho0
+             7238.2    % lambda
+             50        % dt
+             1e-5      % precision
+             "true"    % adaptatif
+             "deuxCorps.out"   % output
+             0      ]; % sampling
+
+T0=table(variables,'VariableNames',varNames,'RowNames',rowNames);
+
 v0=1200;
 r0=314159000;
 G=6.674e-11;
@@ -26,7 +45,7 @@ variables = [0               384748000       r0              % x0
 
 T=table(variables(:,1),variables(:,2),variables(:,3),'VariableNames',varNames,'RowNames',rowNames);
 
-config(T);
+config(T0,T);
 
 change_config(0,'tFin',2*24*60*60);
 
@@ -39,7 +58,7 @@ executable = 'performance'; % Nom de l'executable
 
 nsimul = 30; % Nombre de simulations à faire
 
-precision = logspace(1,-9,nsimul); % Valeurs du parametre a scanner
+precision = logspace(1,-8,nsimul); % Valeurs du parametre a scanner
 
 
     change_config(0,'adaptatif','true');

@@ -95,6 +95,7 @@ vxL  = cell(1,nsimul);
 vyL  = cell(1,nsimul);
 d    = cell(1,nsimul);
 p    = cell(1,nsimul);
+emecMAX=zeros(1,nsimul);
 nsteps=zeros(1,nsimul);
 
 % 1 2   3  4     5  6  7  8   9   10     11 12 13  14  15  16     17 18 19  20  21  22
@@ -111,6 +112,7 @@ for i=1:nsimul
     vxL{i} = data(:,14);
     vyL{i} = data(:,15);
     emec{i}= data(:,3)+0.5*mT*(vxT{i}.^2+vyT{i}.^2)+0.5*mL*(vxL{i}.^2+vyL{i}.^2);
+    emecMAX(i)=max(abs(emec{i}));
     d{i}   = sqrt((xT{i}-xL{i}).^2+(yT{i}-yL{i}).^2);
     p{i}   = mT*sqrt(vxT{i}.^2+vyT{i}.^2)+mL*sqrt(vxL{i}.^2+vyL{i}.^2);
     nsteps(i)=size(t{i},1)-1;
@@ -170,5 +172,13 @@ set(gca,'fontsize',15);
 lgd=legend(sprintf('N_{steps}=%d',nsteps(1)),sprintf('N_{steps}=%d',nsteps(2)),sprintf('N_{steps}=%d',nsteps(3)));
 set(lgd,'fontsize',14,'Location','southwest');
 print(fig4,'figures/deuxCorps_emec', '-depsc');
+
+fig5=figure('Position',[50,50,600,400]);
+plot(nsteps.^(-4),emecMAX,'+',[0 12e-14],[abs(emec{nsimul}(1)) abs(emec{nsimul}(1))],'--')
+grid on
+xlabel('1/N_{steps}^4')
+ylabel('max|E_{mec}| [J]')
+set(gca,'fontsize',15);
+print(fig5,'figures/deuxCorps_convEmec', '-depsc');
 
 clear all;

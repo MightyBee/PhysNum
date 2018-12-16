@@ -8,7 +8,7 @@
 
 nbCorps=7;
 G=6.674e-11;
-tFin=100*24*3600;
+tFin=365*24*3600;
 
 rowNames  = {'nbCorps','tFin','G','rho0','lambda','dt','precision','adaptatif','output', 'sampling'};
 varNames  = {'classique'}; % nom
@@ -33,7 +33,7 @@ rG=mL*rTL/(mT+mL);
 rT=0-rG;
 rL=rTL-rG;
 
-deviation=0;%1000000
+deviation=10;%1000000
 Z=0;%100000
 
 x0L4=rT+rTL/2+sqrt(deviation);

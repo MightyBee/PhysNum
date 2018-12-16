@@ -18,7 +18,7 @@ variables = [3         % nbCorps
              G         % G
              rho0      % rho0
              7238.2    % lambda
-             1         % dt
+             3000      % dt
              1e-5      % precision
              "true"    % adaptatif
              "a.out"   % output
@@ -123,6 +123,8 @@ if strcmp(paraName, 'dt') || strcmp(paraName, 'precision')
     hmin = zeros(1,nsimul);
     vmax = zeros(1,nsimul);
     nsteps = ones(1,nsimul);
+    dt= cell(2,3);  
+    r = cell(1,3);
 elseif strcmp(paraName, 'both')
     hmin   = zeros(2,nsimul/2);
     nsteps =  ones(2,nsimul/2);
@@ -152,8 +154,10 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
         hmin(i)=inter_min(t,sqrt((xA-xT).^2+(yA-yT).^2),3);
         vmax(i)=inter_max(t,sqrt((vxA-vxT).^2+(vyA-vyT).^2),3);
         if strcmp(paraName, 'precision')
-            dt=t(2:end-1)-t(1:end-2);
+            dt{1,ceil(i/nsimul*3)}=t(1:end-2);
+            dt{2,ceil(i/nsimul*3)}=t(2:end-1)-t(1:end-2);
             nsteps(i)=2*nsteps(i);
+            r{ceil(i/nsimul*3)}=sqrt((xA(1:end-2)-xT(1:end-2)).^2+(yA(1:end-2)-yT(1:end-2)).^2);
         end
     elseif strcmp(paraName,'both')
         t = data(:,1);
@@ -217,15 +221,28 @@ if strcmp(paraName, 'dt') || strcmp(paraName, 'precision')
         print(fig3,'figures/unCorpsFixe_convV', '-depsc');  
     else
         fig4=figure('Position',[50,50,600,400])
-        plot(t(1:end-2),dt)
+        plot(dt{1,1},dt{2,1},dt{1,2},dt{2,2},dt{1,3},dt{2,3})
+        grid on
         xlabel('t [s]')
         ylabel('\Deltat [s]')
         set(gca,'fontsize',15);
+        lgd=legend(sprintf('N_{steps}=%d',size(dt{1,1},1)+1),sprintf('N_{steps}=%d',size(dt{1,2},1)+1),sprintf('N_{steps}=%d',size(dt{1,3},1)+1));
+        set(lgd,'fontsize',14,'Location','northeast');
+        
+        fig5=figure('Position',[50,50,600,400])
+        plot(r{1},dt{2,1},r{2},dt{2,2},r{3},dt{2,3})
         grid on
+        xlabel('Distance Terre-Appolo [m]')
+        ylabel('\Deltat [s]')
+        set(gca,'fontsize',15);
+        lgd=legend(sprintf('N_{steps}=%d',size(dt{1,1},1)+1),sprintf('N_{steps}=%d',size(dt{1,2},1)+1),sprintf('N_{steps}=%d',size(dt{1,3},1)+1));
+        set(lgd,'fontsize',14,'Location','northwest');
+        
         print(fig1,'figures/unCorpsAdapt_trajectoire', '-depsc');
         print(fig2,'figures/unCorpsAdapt_convH', '-depsc');
         print(fig3,'figures/unCorpsAdapt_convV', '-depsc');
-        print(fig4,'figures/unCorpsAdapt_dt', '-depsc');  
+        print(fig4,'figures/unCorpsAdapt_dtT', '-depsc');
+        print(fig5,'figures/unCorpsAdapt_dtR', '-depsc');    
     end
 elseif strcmp(paraName,'both')
     fig1=figure('Position',[50,50,600,400]);

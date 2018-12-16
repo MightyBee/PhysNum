@@ -8,7 +8,7 @@
 
 G=6.674e-11;
 rho0=0;
-tFin=10*24*3600;
+tFin=5*24*3600;
 
 rowNames  = {'nbCorps','tFin','G','rho0','lambda','dt','precision','adaptatif','output', 'sampling'};
 varNames  = {'classique'}; % nom
@@ -78,14 +78,14 @@ nstepsFinal=zeros(1,nbEtude);
 for l = 1:nbEtude
     nsimul = 2;
 
-    thetaM=2.9;
-    thetaP=3;
+    thetaM=3.6;
+    thetaP=3.8;
     visee=10000;
-    erreur=1e-4;
+    erreur=1;
 
     paramstr = {"vx0"; "vy0"};
     theta = [thetaM thetaP];
-    param = [v0A*cos(theta); v0A*sin(theta)];%+omega*rA]; % Valeurs du parametre a scanner
+    param = [v0A*cos(theta); v0A*sin(theta)+omega*rA]; % Valeurs du parametre a scanner
     configfileNb=3;
 
     input=sprintf('configuration%d.in', configfileNb);
@@ -140,7 +140,7 @@ for l = 1:nbEtude
     while max(hMinM,hMinP)>visee && min(hMinM,hMinP)<visee
 
         paramstr = {"vx0"; "vy0"};
-        param = [v0A*cos(theta0); v0A*sin(theta0)];%+omega*rA]; % Valeurs du parametre a scanner
+        param = [v0A*cos(theta0); v0A*sin(theta0)+omega*rA]; % Valeurs du parametre a scanner
         input=sprintf('configuration%d.in', configfileNb);
         parameter = "";
         for i=1:size(paramstr,1)
@@ -250,17 +250,21 @@ print(fig1,'figures/troisCorps_convTheta0', '-depsc');
 
 
 fig2=figure('Position',[50,50,600,400]);
-plot(rT+RT*cos(linspace(0,2*pi,10000)),RT*sin(linspace(0,2*pi,10000)),'r')
-hold on
-plot(xA.*cos(omega*t)+yA.*sin(omega*t), -xA.*sin(omega*t)+yA.*cos(omega*t))
-hold off
+% plot(rT+RT*cos(linspace(0,2*pi,10000)),RT*sin(linspace(0,2*pi,10000)),'r')
+% hold on
+% plot(xA.*cos(omega*t)+yA.*sin(omega*t), -xA.*sin(omega*t)+yA.*cos(omega*t))
+% hold on
+% plot(rL+RL*cos(linspace(0,2*pi,10000)),RL*sin(linspace(0,2*pi,10000)),'k')
+% hold off
+plot(xT,yT,xA,yA);
 grid on
 axis equal
 xlabel('x [m]')
 ylabel('y [m]')
+ylim([-2.5e8 0.5e8]);
 set(gca,'fontsize',15);
 lgd=legend('Surface terrestre',"Trajectoire d'Appolo");
-set(lgd,'fontsize',14,'Location','northwest');
+set(lgd,'fontsize',14,'Location','southeast');
 print(fig2,'figures/troisCorps_trajTheta0', '-depsc');
 
 disp({sprintf('vx0=%.15g',v0A*cos(yFit(1)));sprintf('vy0=%.15g',v0A*sin(yFit(1)))});
