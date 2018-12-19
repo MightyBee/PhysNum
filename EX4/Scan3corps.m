@@ -21,10 +21,10 @@ variables = [3         % nbCorps
              rho0      % rho0
              7238.2    % lambda
              50        % dt
-             1e-5      % precision
+             1e-6      % precision
              "true"    % adaptatif
              "deuxCorps.out"   % output
-             0      ]; % sampling
+             1      ]; % sampling
 
 T0=table(variables,'VariableNames',varNames,'RowNames',rowNames);
 
@@ -63,7 +63,7 @@ T1=table(variables(:,1),variables(:,2),variables(:,3),'VariableNames',varNames,'
 
 config(T0,T1);
 
-
+fprintf('%13s : DONE \n','Configuration')
 
 %% Parametres à varier %%
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -72,23 +72,32 @@ repertoire = './'; % Chemin d'acces au code compile
 executable = 'performance'; % Nom de l'executable 
 
 
-nsimul = 150^2; % Nombre de simulations à faire
+nsimul = 200; % Nombre de simulations à faire
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-paraName='condIn'; % Nom du parametre a scanner
+paraName='theta'; % Nom du parametre a scanner
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-trajectoire=false;
+trajectoire=true;
+dim3=false;
+interAcc=true;
 
 
 if strcmp(paraName,'theta')   
     paramstr = {"vx0"; "vy0"};
-    theta = linspace(0,2*pi,nsimul);
-%     theta = [linspace(0.18,0.32,round(nsimul/3)) linspace(3.6,4.4,round(nsimul/3)) linspace(5,5.7,nsimul-2*round(nsimul/3))];
-%     theta = [linspace(3.676,3.680,round(nsimul/3)) linspace(4.263,4.267,round(nsimul/3)) linspace(5.062,5.066,nsimul-2*round(nsimul/3))];
-    theta = theta(1:nsimul);
+%     theta = linspace(0,2*pi,nsimul+1);
+%     theta = theta(1:nsimul);
+%     theta = linspace(3.6795,3.6805,nsimul);
+%     theta = linspace(4.261,4.2635,nsimul); %200 simulations (1e-6) -> indice 76, donne une double entrée atmoshere
+%     theta = linspace(4.2615,4.2625,nsimul);
+    theta = linspace(5.067,5.068,nsimul);
+%     theta = linspace(5.6195,5.6205,nsimul);
+%     theta1= [0.18 0.32; 3.6 4.4; 5 5.7];
+%     theta1 = [3.67 3.72; 4.22 4.27; 5.06 5.11; 5.58 5.63];
+%     theta1= [3.86 3.68015; 4.2617 4.2618; 5.0673 5.0675; 5.62006 5.620014];
+%     theta = create_linspace(theta1,nsimul);
     param = [v0A*cos(theta); v0A*sin(theta)+omega*rA]; % Valeurs du parametre a scanner
     configfileNb=3;
 elseif strcmp(paraName,'condIn')   
@@ -103,16 +112,6 @@ elseif strcmp(paraName,'condIn')
     end
     nsimul = nsimul^2;
     configfileNb=3;
-elseif strcmp(paraName,'dt')
-    change_config(0,'adaptatif','false');
-    paramstr={"dt"};
-    param=logspace(8,4,nsimul); % Valeurs du parametre a scanner
-    configfileNb=0;
-elseif strcmp(paraName,'precision')
-    change_config(0,'adaptatif','true');
-    paramstr={"precision"};
-    param=logspace(-4,-8,nsimul); % Valeurs du parametre a scanner
-    configfileNb=0;
 end
 
 %% Simulations %%
@@ -135,14 +134,12 @@ for k = 1:nsimul
     system(cmd);
 end
 
+fprintf('%13s : DONE \n','Simulations')
+
 %% Analyse %%
 %%%%%%%%%%%%%
 
-if strcmp(paramstr, 'dt')
-    error = zeros(1,nsimul);
-elseif strcmp(paramstr, 'precision')
-    Emax = zeros(1,nsimul);
-elseif strcmp(paraName, 'theta')
+if strcmp(paraName, 'theta')
     t  = cell(1,nsimul);
     acc= zeros(1,nsimul);
     Pt = cell(1,nsimul);
@@ -154,6 +151,8 @@ elseif strcmp(paraName, 'theta')
     yA = cell(1,nsimul);
     hmin= zeros(1,nsimul);
     lmin= zeros(1,nsimul);
+    vAbs= cell(1,nsimul);
+    vRel= cell(1,nsimul);
     rentree=zeros(1,nsimul);
 elseif strcmp(paraName, 'condIn')
     t  = cell(1,nsimul);
@@ -174,11 +173,7 @@ end
 
 for i = 1:nsimul % Parcours des resultats de toutes les simulations
     data = load(output{i}); % Chargement du fichier de sortie de la i-ieme simulation
-    if strcmp(paramstr, 'dt')
-        t = data(end,1);
-    elseif strcmp(paramstr, 'precision')
-        Emec = data(:,3);
-    elseif strcmp(paraName, 'theta') 
+    if strcmp(paraName, 'theta') 
         t{i}  = data(:,1);
         acc(i)= max(data(:,2));
         Pt{i} = data(:,4);
@@ -190,6 +185,8 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
         yA{i} = data(:,18);
         hmin(i)=min(sqrt((xA{i}-xT{i}).^2+(yA{i}-yT{i}).^2));
         lmin(i)=min(sqrt((xA{i}-xL{i}).^2+(yA{i}-yL{i}).^2));
+        vAbs{i}= sqrt(data(:,20).^2+data(:,21).^2);
+        vRel{i}= sqrt((data(:,20)-data(:,8)).^2+(data(:,21)-data(:,9)).^2);
         if hmin(i)<=RT && lmin(i)>RL
             distAtmo=RT+120000;
             rentree(i)=1;
@@ -206,7 +203,7 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
                 iFin=iFin+1;
             end
             t{i}  = t{i}(1:iFin);
-            acc(i)= max(data(1:iFin,2));
+            acc(i)= inter_max(t{i},data(1:iFin,2),3);
             Pt{i} = Pt{i}(1:iFin);
             xT{i} = xT{i}(1:iFin);
             yT{i} = yT{i}(1:iFin);
@@ -214,6 +211,8 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
             yL{i} = yL{i}(1:iFin);
             xA{i} = xA{i}(1:iFin);
             yA{i} = yA{i}(1:iFin);
+            vAbs{i}= vAbs{i}(1:iFin);
+            vRel{i}= vRel{i}(1:iFin);
         end
         if not (hmin(i)<=RT && lmin(i)>RL && rentree(i)==1)
             t{i}  = nan;
@@ -225,6 +224,10 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
             yL{i} = nan;
             xA{i} = nan;
             yA{i} = nan;
+            vAbs{i}= nan;
+            vRel{i}= nan;
+        else
+            hmin(i)=nan;
         end
     elseif strcmp(paraName, 'condIn')
         t{i}  = data(:,1);
@@ -263,75 +266,164 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
 %         end
     end
 end
+if interAcc
+    format long
+    [minAcc,itt]=inter_min(theta,acc,3)
+end
 
+fprintf('%13s : DONE \n','Analyse')
 
 %% Figures %%
 %%%%%%%%%%%%%
 % 
 if strcmp(paraName, 'theta')
     if trajectoire
-        figure
-        angle=linspace(0,2*pi,10000);
-        plot3(rT+RT*cos(angle),RT*sin(angle),zeros(1,10000),'r',rL+RL*cos(angle),RL*sin(angle),zeros(1,10000),'r')
-        hold on
-        for i =1:nsimul
-            if t{i}(end) > 3.2e0
-    %             plot(xT{i},yT{i},xL{i},yL{i},xA{i},yA{i})
-    %             hold on
-                plot3(xT{i}.*cos(omega*t{i})+yT{i}.*sin(omega*t{i}), -xT{i}.*sin(omega*t{i})+yT{i}.*cos(omega*t{i}),t{i}(end)*ones(size(t{i})), 'k+')
-                hold on
-                plot3(xL{i}.*cos(omega*t{i})+yL{i}.*sin(omega*t{i}), -xL{i}.*sin(omega*t{i})+yL{i}.*cos(omega*t{i}),t{i}(end)*ones(size(t{i})), 'r+')
-                hold on
-                plot3(xA{i}.*cos(omega*t{i})+yA{i}.*sin(omega*t{i}), -xA{i}.*sin(omega*t{i})+yA{i}.*cos(omega*t{i}),t{i}(end)*ones(size(t{i})))
-                hold on
+        if dim3
+            figure
+            for i =1:nsimul
+                if t{i}(end) > 3.2e0
+                    plot3(xT{i},yT{i},t{i},'r+',xL{i},yL{i},t{i},'k+',xA{i},yA{i},t{i})
+                    hold on
+                end
             end
-        end
-        hold off
-        xlabel('x [m]')
-        ylabel('y [m]')
-        grid on
-        h = get(gca,'DataAspectRatio')
-        if h(3)==1
-            set(gca,'DataAspectRatio',[1 1 1/max(h(1:2))])
+            hold off
+            xlabel('x [m]')
+            ylabel('y [m]')
+            zlabel('t [s]')
+            grid on
+            h = get(gca,'DataAspectRatio')
+            if h(3)==1
+                set(gca,'DataAspectRatio',[1 1 1/max(h(1:2))])
+            else
+                set(gca,'DataAspectRatio',[1 1 h(3)])
+            end
+            
+            figure
+            hold on
+            for i =1:nsimul
+                if t{i}(end) > 3.2e0
+                    plot3(xT{i}.*cos(omega*t{i})+yT{i}.*sin(omega*t{i}), -xT{i}.*sin(omega*t{i})+yT{i}.*cos(omega*t{i}),t{i},'k+')%(end)*ones(size(t{i})), 'k+')
+                    hold on
+                    plot3(xL{i}.*cos(omega*t{i})+yL{i}.*sin(omega*t{i}), -xL{i}.*sin(omega*t{i})+yL{i}.*cos(omega*t{i}),t{i},'r+')%(end)*ones(size(t{i})), 'r+')
+                    hold on
+                    plot3(xA{i}.*cos(omega*t{i})+yA{i}.*sin(omega*t{i}), -xA{i}.*sin(omega*t{i})+yA{i}.*cos(omega*t{i}),t{i})%(end)*ones(size(t{i})))
+                    hold on
+                end
+            end
+            hold off
+            xlabel("x' [m]")
+            ylabel("y' [m]")
+            zlabel('t [s]')
+            grid on
+            h = get(gca,'DataAspectRatio')
+            if h(3)==1
+                set(gca,'DataAspectRatio',[1 1 1/max(h(1:2))])
+            else
+                set(gca,'DataAspectRatio',[1 1 h(3)])
+            end
         else
-            set(gca,'DataAspectRatio',[1 1 h(3)])
+            fig1=figure('Position',[50,50,600,400]);
+            for i =1:nsimul
+                if t{i}(end) > 3.2e0
+                    plot(xT{i},yT{i},'r',xL{i},yL{i},'k',xA{i},yA{i})
+                    hold on
+                end
+            end
+            hold off
+            xlabel('x [m]')
+            ylabel('y [m]')
+            axis equal
+            grid on
+            set(gca,'fontsize',15);
+            print(fig1,'figures/troisCorpsAdaptRho0_trajectoireR', '-depsc');
+            
+            fig2=figure('Position',[50,50,600,400]);
+            angle=linspace(0,2*pi,100000);
+            plot(rT+RT*cos(angle),RT*sin(angle),'r',rL+RL*cos(angle),RL*sin(angle),'r')
+            hold on
+            for i =1:nsimul
+                if t{i}(end) > 3.2e0
+%                     plot(xT{i}.*cos(omega*t{i})+yT{i}.*sin(omega*t{i}), -xT{i}.*sin(omega*t{i})+yT{i}.*cos(omega*t{i}),'k+')
+%                     hold on
+%                     plot(xL{i}.*cos(omega*t{i})+yL{i}.*sin(omega*t{i}), -xL{i}.*sin(omega*t{i})+yL{i}.*cos(omega*t{i}),'r+')
+%                     hold on
+                    plot(xA{i}.*cos(omega*t{i})+yA{i}.*sin(omega*t{i}), -xA{i}.*sin(omega*t{i})+yA{i}.*cos(omega*t{i}))
+                    hold on
+                end
+            end
+            hold off
+            xlabel("x' [m]")
+            ylabel("y' [m]")
+            axis equal 
+            grid on
+            set(gca,'fontsize',15);
+            print(fig2,'figures/troisCorpsAdaptRho0_trajectoireRprime', '-depsc');
         end
     end 
 
     figure
-    plot(theta, rentree,'-')
+    plot(theta, rentree,'+')
     xlabel('\theta_0 [rad]')
     ylabel('rentree (y/n)')
     grid on
     
     
-    figure
-    plot(theta,acc,'p')
+    fig3=figure('Position',[50,50,600,400]);
+    plot(theta,acc,'+')
     xlabel('\theta_0 [rad]')
     ylabel('max(acc) [m/s^2]')
     grid on
+    set(gca,'fontsize',15);
+    print(fig3,'figures/troisCorpsAdaptRho0_acc', '-depsc');
+    
+    fig4=figure('Position',[50,50,600,400]);
+    plot(theta,hmin-RT,'+')
+    xlabel('\theta_0 [rad]')
+    ylabel('min(h) [m]')
+    grid on
+    set(gca,'fontsize',15);
+    print(fig4,'figures/troisCorpsAdaptRho0_hmin', '-depsc');
+    
+    fig5=figure('Position',[50,50,600,400]);
+    yyaxis left;
+    plot(theta,hmin-RT,'+')
+    hold on
+    yyaxis right;
+    plot(theta,acc,'+')
+    hold on
+    hold off
+    yyaxis left
+    xlabel('\theta_0 [rad]')
+    ylabel('min(h) [m]')
+    yyaxis right
+    ylabel('max(acc) [m/s^2]')
+    set(gca,'fontsize',13);
+    grid on;
+    print(fig5,'figures/troisCorpsAdaptRho0_hmin&acc', '-depsc');
     
     figure
-    plot(theta,hmin-RT,'p')
-    xlabel('\theta_0 [rad]')
-    ylabel('min(h) [m/s^2]')
-    grid on
-
-    figure
-    plot(t{50},Pt{50},'p')
+    plot(t{76},Pt{76})
     xlabel('Temps [s]')
     ylabel('Puissance de traînée [J]')
     grid on
 
     figure
-    plot(t{50},sqrt(xA{50}.^2+yA{50}.^2),'p')
+    plot(t{76},sqrt((xA{76}-xT{76}).^2+(yA{76}-yT{76}).^2))
     xlabel('Temps [s]')
-    ylabel('Distance au centre de masse [m]')
+    ylabel('Distance à la Terre [m]')
     grid on
+    
+    figure
+    plot(t{76},vAbs{76},t{76},vRel{76})
+    xlabel('Temps [s]')
+    ylabel('Vitesse [m/s]')
+    grid on
+    
+    
 elseif strcmp(paraName, 'condIn')
     if trajectoire
         figure
-        angle=linspace(0,2*pi);
+        angle=linspace(0,2*pi,100000);
         plot(rT+RT*cos(angle),RT*sin(angle),'r',rL+RL*cos(angle),RL*sin(angle),'r')
         hold on
         for i =1:nsimul
@@ -358,42 +450,4 @@ elseif strcmp(paraName, 'condIn')
     grid on
 end 
 
-% if strcmp(paramstr, 'dt')
-%     figure('Position',[50,50,600,400]);
-% %     loglog(dt, error, 'k+')
-% %     xlabel('\Deltat [s]')
-% %     ylabel('Erreur sur \theta(t_{fin}) [rad]')
-%     plot(dt.*dt,error,'k+')
-%     xlabel('(\Deltat)^2 [s^2]')
-%     ylabel('\theta(t_{fin}) [rad]')
-%     set(gca,'fontsize',15);
-%     title('$\Omega$=1$\omega_0$  $d$=0.04  $\kappa$=0', 'Fontweight','normal','Interpreter','latex');
-%     grid on
-%     print('figures/etudeConvDt', '-depsc');
-% elseif strcmp(paramstr, 'Omega')
-%     figure('Position',[50,50,600,400]);
-%     plot(Omega, Emax, 'k+')
-%     xlabel('\Omega [rad/s]')
-%     ylabel('max(E_{mec}(t)) [J]')
-%     set(gca,'fontsize',15);
-%     grid on
-%     print('figures/rechercheOmega', '-depsc');
-% elseif strcmp(paramstr, 'theta0')
-%     fig1=figure('Position',[50,50,600,400]);
-%     plot(theta0_ana, T_ana,'r-',theta0, T_num, 'k+')
-%     lgd=legend('Analytique','Numérique');
-%     set(lgd,'fontsize',14,'Location','northwest');
-%     xlabel('\theta_0 [rad]')
-%     ylabel('T [s]')
-%     set(gca,'fontsize',15);
-%     grid on
-%     print(fig1,'figures/theta0', '-depsc');
-% 
-%     fig2=figure('Position',[50,50,600,400]);
-%     plot(theta0, error, 'k+')
-%     xlabel('\theta_0 [rad]')
-%     ylabel('Erreur sur T [s]')
-%     set(gca,'fontsize',15);
-%     grid on
-%     print(fig2,'figures/theta0error', '-depsc');
-% end
+

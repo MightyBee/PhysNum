@@ -21,7 +21,7 @@ variables = [nbCorps   % nbCorps
              1e-5      % precision
              "true"    % adaptatif
              "lagrange.out"   % output
-             0      ]; % sampling
+             1      ]; % sampling
 
 T0=table(variables,'VariableNames',varNames,'RowNames',rowNames);
 
@@ -33,31 +33,40 @@ rG=mL*rTL/(mT+mL);
 rT=0-rG;
 rL=rTL-rG;
 
-deviation=10;%1000000
+dev=0;%1000000
+if dev>0
+    strDev='_dev';
+else
+    strDev='';
+end
 Z=0;%100000
 
-x0L4=rT+rTL/2+sqrt(deviation);
-y0L4=sqrt(3)*rTL/2+sqrt(deviation);
-rL4=sqrt(x0L4^2+y0L4^2);
+rLag=zeros(5,2);
+vLag=zeros(5,2);
 
-x0L5=rT+rTL/2+sqrt(deviation);
-y0L5=-sqrt(3)*rTL/2-sqrt(deviation);
-rL5=sqrt(x0L5^2+y0L5^2);
 
-L1=point_lagrange( 321000000, 323000000,1e-6)+deviation;
-L2=point_lagrange( 444000000, 445000000,8e-7)+deviation;
-L3=point_lagrange(-420000000,-360000000,1e-7)-deviation;
+rLag(4,1)=rT+rTL/2;
+rLag(4,2)=sqrt(3)*rTL/2;
+rL4=sqrt(rLag(4,1)^2+rLag(4,2)^2);
+
+rLag(5,1)=rT+rTL/2;
+rLag(5,2)=-sqrt(3)*rTL/2;
+rL5=sqrt(rLag(5,1)^2+rLag(5,2)^2);
+
+rLag(1,1)=point_lagrange( 321000000, 323000000,1e-6);
+rLag(2,1)=point_lagrange( 444000000, 445000000,8e-7);
+rLag(3,1)=point_lagrange(-420000000,-360000000,1e-7);
 
 omega=sqrt(mL/abs(rT)*G/(rL-rT)^2);
-v0L1=L1*omega;
-v0L2=L2*omega;
-v0L3=L3*omega;
+vLag(1,2)=rLag(1,1)*omega;
+vLag(2,2)=rLag(2,1)*omega;
+vLag(3,2)=rLag(3,1)*omega;
 v0L4=rL4*omega;
-vx0L4=-v0L4*y0L4/rL4;
-vy0L4=v0L4*x0L4/rL4;
+vLag(4,1)=-v0L4*rLag(4,2)/rL4;
+vLag(4,2)=v0L4*rLag(4,1)/rL4;
 v0L5=rL5*omega;
-vx0L5=-v0L5*y0L5/rL5;
-vy0L5=v0L5*x0L5/rL5;
+vLag(5,1)=-v0L5*rLag(5,2)/rL5;
+vLag(5,2)=v0L5*rLag(5,1)/rL5;
 
 vy0T=omega*rT;
 vy0L=omega*rL;
@@ -66,21 +75,30 @@ RT=6378100;
 RL=1737000;
 
 rowNames  = {'x0','y0','z0','vx0','vy0','vz0','m','R','Cx'};
-varNames  = {'Terre',  'Lune',  'L4',  'L5',  'L1',  'L2',  'L3'        };
-variables = [ rT        rL       x0L4   x0L5   L1     L2     L3        % x0
-              0         0        y0L4   y0L5   0      0      0         % y0
-              0         0        Z      Z      Z      Z      Z         % z0
-              0         0        vx0L4  vx0L5  0      0      0         % vx0
-              vy0T      vy0L     vy0L4  vy0L5  v0L1   v0L2   v0L3      % vy0
-              0         0        0      0      0      0      0         % vz0
-              mT        mL       10     10     10     10     10        % m
-              RT        RL       1.95   1.95   1.95   1.95   1.95      % R
-              0         0        0.3    0.3    0.3    0.3    0.3    ]; % Cx
+varNames  = {'Terre',  'Lune', 'L1',          'L2',           'L3',         'L4',                'L5'                  };
+variables = [ rT        rL      rLag(1,1)-dev  rLag(2,1)+dev  rLag(3,1)+dev  rLag(4,1)+sqrt(dev)  rLag(5,1)+sqrt(dev)  % x0
+              0         0       0              0              0              rLag(4,2)+sqrt(dev)  rLag(5,2)-sqrt(dev)  % y0
+              0         0       Z              Z              Z              Z                    Z                    % z0
+              0         0       0              0              0              vLag(4,1)            vLag(5,1)            % vx0
+              vy0T      vy0L    vLag(1,2)      vLag(2,2)      vLag(3,2)      vLag(4,2)            vLag(5,2)            % vy0
+              0         0       0              0              0              0                    0                    % vz0
+              mT        mL      10             10             10             10                   10                   % m
+              RT        RL      1.95           1.95           1.95           1.95                 1.95                 % R
+              0         0       0              0              0              0                    0      ];      % Cx
 
-T1=table(variables(:,1),variables(:,2),variables(:,3),variables(:,4),variables(:,5),variables(:,6),variables(:,7),'VariableNames',varNames,'RowNames',rowNames);
+% iLag=[1 2 3 4 5];
+% T1=table(variables(:,1),variables(:,2),variables(:,3),variables(:,4),variables(:,5),variables(:,6),variables(:,7),'VariableNames',varNames,'RowNames',rowNames);
+
+% iLag=[3 4 5];
+% T1=table(variables(:,1),variables(:,2),variables(:,iLag(1)+2),variables(:,iLag(2)+2),variables(:,iLag(3)+2),'VariableNames',varNames([1 2 iLag+2]),'RowNames',rowNames);
+% nbCorps=size(iLag,2)+2;
+
+iLag=[4];
+T1=table(variables(:,1),variables(:,2),variables(:,iLag(1)+2),'VariableNames',varNames([1 2 iLag+2]),'RowNames',rowNames);
+nbCorps=size(iLag,2)+2;
 
 config(T0,T1);
-
+change_config(0,'nbCorps',nbCorps);
 
 %% Simulations %%
 %%%%%%%%%%%%%%%%%
@@ -137,76 +155,102 @@ for i=1:n
 end
 iT= r13 > 1e7;
 angle=linspace(0,2*pi,10000);
-figure
+
+fig1=figure('Position',[50,50,550,400]);
 plot(rT+RT*cos(angle),RT*sin(angle),'r',rL+RL*cos(angle),RL*sin(angle),'r')
 hold on
 contourf(x,y,Epot,13)
 hold on
-plot(L1,0,'rp',L2,0,'rp',L3,0,'rp',x0L4,y0L4,'rp',x0L5,y0L5,'rp','MarkerSize',10)
+plot(rLag(1,1),0,'rp',rLag(2,1),0,'rp',rLag(3,1),0,'rp',rLag(4,1),rLag(4,2),'rp',rLag(5,1),rLag(5,2),'rp','MarkerSize',10)
 hold off
+xlabel('x [m]')
+ylabel('y [m]')
+cbar = colorbar;
+cbar.Label.String = 'E_{pot} [J]';
+set(gca,'fontsize',15);
+axis equal
+print(fig1,'figures/lagrange/lagrange_Epot', '-depsc');
 
-if Z==0
-    figure
-    angle=linspace(0,2*pi,10000);
-    plot(rT+RT*cos(angle),RT*sin(angle),'r',rL+RL*cos(angle),RL*sin(angle),'r')
-    hold on
-    plot(xT.*cos(omega*t)+yT.*sin(omega*t), -xT.*sin(omega*t)+yT.*cos(omega*t), 'k+')
-    hold on
-    plot(xL.*cos(omega*t)+yL.*sin(omega*t), -xL.*sin(omega*t)+yL.*cos(omega*t), 'r+')
-    hold on
+colorspec = {[0 0.447 0.741]; [0.85 0.325 0.098]; [0.929 0.694 0.125]; [0.494 0.184 0.556]; [0.466 0.674 0.188]; [0.301 0.745 0.933]; [0.635 0.078 0.184]};
+
+% if Z==0
+    fig2=figure('Position',[50,50,550,400]);
+    if nbCorps>3
+        angle=linspace(0,2*pi,10000);
+        plot(rT+RT*cos(angle),RT*sin(angle),'r',rL+RL*cos(angle),RL*sin(angle),'Color',colorspec{1})
+        hold on
+        plot(xT.*cos(omega*t)+yT.*sin(omega*t), -xT.*sin(omega*t)+yT.*cos(omega*t), '+','Color',colorspec{1})
+        hold on
+        plot(xL.*cos(omega*t)+yL.*sin(omega*t), -xL.*sin(omega*t)+yL.*cos(omega*t), '+','Color',colorspec{2})
+        hold on
+    end
     for i=1:nbCorps-2
-        plot(xLag(1,i),yLag(1,i),'bp',xLag(:,i).*cos(omega*t)+yLag(:,i).*sin(omega*t), -xLag(:,i).*sin(omega*t)+yLag(:,i).*cos(omega*t), 'b-')
+        plot(rLag(iLag(i),1),rLag(iLag(i),2),'p','Color',colorspec{iLag(i)+2})
+        hold on
+        plot(xLag(:,i).*cos(omega*t)+yLag(:,i).*sin(omega*t), -xLag(:,i).*sin(omega*t)+yLag(:,i).*cos(omega*t), '-','Color',colorspec{iLag(i)+2})
         hold on
     end
     hold off
-    xlabel('x [m]')
-    ylabel('y [m]')
+    xlabel("x' [m]")
+    ylabel("y' [m]")
+    set(gca,'fontsize',15);
     grid on
     axis equal
-else
-    figure
-%     angle=linspace(0,2*pi,10000);
-%     plot(rT+RT*cos(angle),RT*sin(angle),'r',rL+RL*cos(angle),RL*sin(angle),'r')
+    print(fig2,sprintf('figures/lagrange/lagrange_%dpoints%s_trajectoireRprime',nbCorps-2,strDev), '-depsc');
+% else
+%     figure
+% %     angle=linspace(0,2*pi,10000);
+% %     plot(rT+RT*cos(angle),RT*sin(angle),'r',rL+RL*cos(angle),RL*sin(angle),'r')
+% %     hold on
+%     plot3(xT.*cos(omega*t)+yT.*sin(omega*t), -xT.*sin(omega*t)+yT.*cos(omega*t), zT, '+')
 %     hold on
-    plot3(xT.*cos(omega*t)+yT.*sin(omega*t), -xT.*sin(omega*t)+yT.*cos(omega*t), zT, 'k+')
-    hold on
-    plot3(xL.*cos(omega*t)+yL.*sin(omega*t), -xL.*sin(omega*t)+yL.*cos(omega*t), zL, 'r+')
-    hold on
-    for i=1:nbCorps-2
-        plot3(xLag(1,i),yLag(1,i),zLag(1,i),'bp',xLag(:,i).*cos(omega*t)+yLag(:,i).*sin(omega*t), -xLag(:,i).*sin(omega*t)+yLag(:,i).*cos(omega*t), zLag(:,i), 'b-')
-        hold on
-    end
-    hold off
-    xlabel('x [m]')
-    ylabel('y [m]')
-    zlabel('z [m]')
-    grid on
-    axis equal
-end
+%     plot3(xL.*cos(omega*t)+yL.*sin(omega*t), -xL.*sin(omega*t)+yL.*cos(omega*t), zL, '+')
+%     hold on
+%     for i=1:nbCorps-2
+%         plot3(xLag(1,i),yLag(1,i),zLag(1,i),'bp',xLag(:,i).*cos(omega*t)+yLag(:,i).*sin(omega*t), -xLag(:,i).*sin(omega*t)+yLag(:,i).*cos(omega*t), zLag(:,i), 'b-')
+%         hold on
+%     end
+%     hold off
+%     xlabel("x' [m]")
+%     ylabel("y' [m]")
+%     zlabel("z' [m]")
+%     grid on
+%     axis equal
+% end
     
 
-figure
-plot(xT,yT,xL,yL)
+fig3=figure('Position',[50,50,550,400]);
+plot(xT,yT,'Color',colorspec{1})
+hold on 
+plot(xL,yL,'Color',colorspec{2})
 hold on
 for i=1:nbCorps-2
-    plot(xLag(:,i),yLag(:,i))
+    plot(xLag(:,i),yLag(:,i),'Color',colorspec{i+2})
     hold on
 end
 hold off
 xlabel('x [m]')
 ylabel('y [m]')
+set(gca,'fontsize',15);
 grid on
 axis equal
+print(fig3,sprintf('figures/lagrange/lagrange_%dpoints%s_trajectoireR',nbCorps-2,strDev), '-depsc');
 
-figure
-plot(t,sqrt(xT.^2+yT.^2+zT.^2),t,sqrt(xL.^2+yL.^2+zL.^2))
-hold on
+fig4=figure('Position',[50,50,600,400]);
+if nbCorps>3
+    plot(t,sqrt(xT.^2+yT.^2+zT.^2),'Color',colorspec{1})
+    hold on
+    plot(t,sqrt(xL.^2+yL.^2+zL.^2),'Color',colorspec{2})
+    hold on
+end
 for i=1:nbCorps-2
-    plot(t,sqrt(xLag(:,i).^2+yLag(:,i).^2+zLag.^2))
+    plot(t,sqrt(xLag(:,i).^2+yLag(:,i).^2+zLag.^2),'Color',colorspec{i+2})
     hold on
 end
 hold off
 xlabel('t [s]')
 ylabel('r [m]')
+set(gca,'fontsize',15);
 grid on
+print(fig4,sprintf('figures/lagrange/lagrange_%dpoints%s_distance',nbCorps-2,strDev), '-depsc');
 

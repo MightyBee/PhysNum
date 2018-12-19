@@ -2,20 +2,21 @@ function x0=point_lagrange(xM,xP,epsilon)
     yM=f(xM);
     yP=f(xP);
     fun = @(x) f(x);
-    disp(sprintf('%.15g',fzero(fun,[xM xP])));
-    x0=xM-yM*(xP-xM)/(yP-yM);
-    y0=f(x0);
-    while abs(y0)>epsilon
-        if sign(yP-yM)*y0 > 0
-            xP=x0;
-            yP=y0;
-        else
-            xM=x0;
-            yM=y0;
-        end
-        x0=xM-yM*(xP-xM)/(yP-yM);
-        y0=f(x0);
-    end
+    x0=fzero(fun,[xM xP]);
+    fprintf('%.15g\n',x0);
+%     x0=xM-yM*(xP-xM)/(yP-yM);
+%     y0=f(x0);
+%     while abs(y0)>epsilon
+%         if sign(yP-yM)*y0 > 0
+%             xP=x0;
+%             yP=y0;
+%         else
+%             xM=x0;
+%             yM=y0;
+%         end
+%         x0=xM-yM*(xP-xM)/(yP-yM);
+%         y0=f(x0);
+%     end
 
 
 function y=f(x)

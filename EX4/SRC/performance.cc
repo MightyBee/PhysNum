@@ -206,7 +206,7 @@ public:
     //int i(0);
     //cerr << "####################" << endl;
     printOut(true);
-    while( t < tFin and norme(valarray<double>(y[slice(8,2,1)])-valarray<double>(y[slice(0,2,1)])) > R[0] and norme(valarray<double>(y[slice(8,2,1)])-valarray<double>(y[slice(4,2,1)])) > R[1])
+    while( t < tFin and norme(valarray<double>(y[slice(8,2,1)])-valarray<double>(y[slice(0,2,1)])) > R[0] and norme(valarray<double>(y[slice(8,2,1)])-valarray<double>(y[slice(4,2,1)])) >= R[1])
     {
       evolue();
       printOut(false);

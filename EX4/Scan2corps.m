@@ -22,7 +22,7 @@ variables = [3         % nbCorps
              1e-5      % precision
              "true"    % adaptatif
              "deuxCorps.out"   % output
-             0      ]; % sampling
+             1      ]; % sampling
 
 T0=table(variables,'VariableNames',varNames,'RowNames',rowNames);
 
@@ -115,6 +115,7 @@ for i=1:nsimul
     emecMAX(i)=max(abs(emec{i}));
     d{i}   = sqrt((xT{i}-xL{i}).^2+(yT{i}-yL{i}).^2);
     p{i}   = mT*sqrt(vxT{i}.^2+vyT{i}.^2)+mL*sqrt(vxL{i}.^2+vyL{i}.^2);
+%     p{i}   = sqrt((mT*vxT{i}+mL*vxL{i}).^2+(mT*vyT{i}+mL*vyL{i}).^2);
     nsteps(i)=size(t{i},1)-1;
 end
 %% Figures %%
@@ -179,6 +180,7 @@ grid on
 xlabel('1/N_{steps}^4')
 ylabel('max|E_{mec}| [J]')
 set(gca,'fontsize',15);
+lgd=legend('Simulations', 'E_{mec} initiale');
+set(lgd,'fontsize',14,'Location','northwest');
 print(fig5,'figures/deuxCorps_convEmec', '-depsc');
 
-clear all;

@@ -246,6 +246,16 @@ const Vecteur operator^(const Vecteur& v1, const Vecteur& v2){
 								 v1.x()*v2.y()-v1.y()*v2.x());
 }
 
+
+
+
+CollectionY::CollectionY(const double& n) : collection(n) {
+	for(auto& y : collection){
+		y.P=Vecteur(0);
+		y.V=Vecteur(0);
+	}
+}
+
 // opérateurs de comparaison //
 bool CollectionY::operator==(const CollectionY& collY2) const{
 	if(collection.size()!=collY2.collection.size()){

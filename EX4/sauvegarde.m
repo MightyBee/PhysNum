@@ -133,6 +133,7 @@ for nb=1:nTheta
 
         hmin=[0 0];
 
+%         figure
         for i=1:2
             data = load(output{i}); % Chargement du fichier de sortie de la i-ieme simulation
             t{nb}  = data(:,1);
@@ -145,7 +146,11 @@ for nb=1:nTheta
             if indice+3<=size(t{nb},1)
                 hmin(i)=inter_min(t{nb},r,3)-RT;
             end
+%             plot(xA{nb},yA{nb})
+%             hold on
         end
+%         hold off
+%         legend(num2str(hmin(1)),num2str(hmin(2)))
 
         hMinM=hmin(1);
         hMinP=hmin(2);
@@ -180,11 +185,11 @@ for nb=1:nTheta
             yL{nb} = data(:,12);
             xA{nb} = data(:,17);
             yA{nb} = data(:,18);
-            [value, indice]=min(sqrt((xA{nb}-xT{nb}).^2+(yA{nb}-yT{nb}).^2))
-            if indice+3>size(t{nb},1)
+            [value, indice]=min(sqrt((xA{nb}-xT{nb}).^2+(yA{nb}-yT{nb}).^2));
+            if indice+3>size(t,1)
                 hMin0=0;
             else
-                hMin0=inter_min(t{nb},sqrt((xA{nb}-xT{nb}).^2+(yA{nb}-yT{nb}).^2),3)-RT
+                hMin0=inter_min(t{nb},sqrt((xA{nb}-xT{nb}).^2+(yA{nb}-yT{nb}).^2),3)-RT;
             end
 
             theta=[theta theta0];
@@ -255,22 +260,18 @@ end
 fig=[];
 
 for nb=1:nTheta
-    fig=[fig figure('Position',[50,50,600,400])];
+    fig=[fig figure('Position',[50,50,500,400])];
     plot(1./nstepsFinal{nb}.^4,thetaFinal{nb},'b+')
     hold on
-    plot(xFit{nb},yFit{nb},'r--',xFit{nb}(1),yFit{nb}(1),'rp', 'MarkerSize',2)
+    plot(xFit{nb},yFit{nb},'r-',xFit{nb}(1),yFit{nb}(1),'rp', 'MarkerSize',2)
     hold off
     grid on
     xlabel('1/N_{steps}^4')
     ylabel('\theta_0 [rad]')
     set(gca,'fontsize',15);
     lgd=legend('Simulations','Régression linéaire');
-    if nb==1 || nb==3
-        set(lgd,'fontsize',14,'Location','southeast');
-    else 
-        set(lgd,'fontsize',14,'Location','northeast');    
-    end
-    print(fig(nb),"figures/troisCorps_convTheta0_"+num2str(nb), '-depsc');
+    set(lgd,'fontsize',14,'Location','northwest');
+    print(fig(nb),'figures/troisCorps_convTheta0', '-depsc');
 end 
 
 fig2=figure('Position',[50,50,600,400]);
@@ -283,11 +284,10 @@ grid on
 axis equal
 xlabel('x [m]')
 ylabel('y [m]')
-xlim([-0.5e8 5.2e8]);
-ylim([-1.5e8, 2.5e8]);
+ylim([-0.8e8 2.2e8]);
 set(gca,'fontsize',15);
-% lgd=legend('Trajectoire de la Terre','Trajectoire de la Lune',"Trajectoire d'Appolo");
-% set(lgd,'fontsize',14,'Location','northwest');
+lgd=legend('Trajectoire de la Terre','Trajectoire de la Lune',"Trajectoire d'Appolo");
+set(lgd,'fontsize',14,'Location','northwest');
 print(fig2,'figures/troisCorps_trajTheta0', '-depsc');
 
 fig3=figure('Position',[50,50,600,400]);
@@ -304,11 +304,12 @@ grid on
 axis equal
 xlabel("x' [m]")
 ylabel("y' [m]")
+ylim([-2.5e8 0.5e8]);
 set(gca,'fontsize',15);
-% lgd=legend('Surface terrestre','Surface lunaire',"Trajectoire d'Appolo");
-% set(lgd,'fontsize',14,'Location','southeast');
+lgd=legend('Surface terrestre','Surface lunaire',"Trajectoire d'Appolo");
+set(lgd,'fontsize',14,'Location','southeast');
 print(fig3,'figures/troisCorps_trajTheta0Prime', '-depsc');
 
 for nb=1:nTheta
-    fprintf('vx0=%.15g \n vy0=%.15g \n',v0A*cos(yFit{nb}(1)),v0A*sin(yFit{nb}(1)));
+    fprintf('vx0=%.15g \n vy0=%.15g',v0A*cos(yFit{nb}(1)),v0A*sin(yFit{nb}(1)));
 end

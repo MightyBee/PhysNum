@@ -1,3 +1,4 @@
-function v=inter_max(x,y,n)
-    v=-inter_min(x,-y,n);
+function [v,i]=inter_max(x,y,n)
+    [v,i]=inter_min(x,-y,n);
+    v=-v;
 end

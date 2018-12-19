@@ -15,7 +15,7 @@
 class Vecteur {
 	public:
 		//constructeurs
-		explicit Vecteur(const double& val=0); // construit un vecteur de dimension n et fait office de constructeur par defaut
+		explicit Vecteur(const double& val=0); // construit un vecteur et fait office de constructeur par defaut
 		Vecteur(const double& x, const double& y, const double& z); // construit un vecteur à partir d'une liste de double
 
 		//operateurs internes
@@ -70,6 +70,7 @@ struct VectY{
 
 class CollectionY{
   public:
+		explicit CollectionY(const double& n=0); // construit un vecteur de dimension n et fait office de constructeur par defaut
     //operateurs internes
 		bool operator==(const CollectionY& collY2) const; // retourne true si les vecteurs sont les memes, false sinon
 		bool operator!=(const CollectionY& collY2) const; // retourne true si les vecteurs sont differents, false sinon

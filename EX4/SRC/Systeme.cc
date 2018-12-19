@@ -77,20 +77,20 @@ double Systeme::rho(double r) const{
 }
 
 CollectionY Systeme::f(const CollectionY& collY, double t) const{
-  CollectionY retour;
-  Vecteur v, a;
+  CollectionY retour(collY.taille());
+  Vecteur FG;
   for(size_t i(0);i<collY.taille();i++){
-    v=collY[i].V;
-    a=Vecteur(0);
-    for(size_t k(0);k<collY.taille();k++){
+    retour[i].P=collY[i].V;
+    for(size_t k(i+1);k<collY.taille();k++){
       if(i!=k){
-        a+=-G*liste[k].getM()/(collY[i].P-collY[k].P).norme2()*~(collY[i].P-collY[k].P);
+        FG=-G*(liste[i].getM()*liste[k].getM())/(collY[i].P-collY[k].P).norme2()*~(collY[i].P-collY[k].P);
+        retour[i].V+=FG/liste[i].getM();
+        retour[k].V-=FG/liste[k].getM();
       }
     }
-    if(i!=0 and rho0!=0.0){
-      a+=-(1/liste[i].getM())*0.5*rho((collY[i].P-collY[0].P).norme())*M_PI*pow(liste[i].getR(),2)*liste[i].getCx()*(collY[i].V-collY[0].V).norme()*(collY[i].V-collY[0].V);
+    if(i!=0 and rho0!=0.0 and liste[i].getCx()!=0.0){
+      retour[i].V+=-(1/liste[i].getM())*0.5*rho((collY[i].P-collY[0].P).norme())*M_PI*pow(liste[i].getR(),2)*liste[i].getCx()*(collY[i].V-collY[0].V).norme()*(collY[i].V-collY[0].V);
     }
-    retour.push_back(VectY({v,a}));
   }
   return retour;
 }
@@ -107,7 +107,7 @@ CollectionY Systeme::evolue(const CollectionY& y, double t, double dt){
 
 void Systeme::evolue(double& t, double& dt, bool adaptatif, double precision){
   if(adaptatif){
-    double d(0);
+    double d(0.0);
     int i(0);
     CollectionY yOld=getY();
     CollectionY y2;

@@ -17,7 +17,7 @@ variables = [3         % nbCorps
              1e-5      % precision
              "true"    % adaptatif
              "deuxCorps.out"   % output
-             0      ]; % sampling
+             1      ]; % sampling
 
 T0=table(variables,'VariableNames',varNames,'RowNames',rowNames);
 
@@ -104,7 +104,6 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
         vx= data(:,20);
         vy= data(:,21);
         nsteps(i)=size(t,1)-1;
-        R = T.Terre(8);
         Acc = data(:,2);
         a=Acc(1);
         for l=1:size(Acc,1)
