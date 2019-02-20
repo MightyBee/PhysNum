@@ -33,7 +33,7 @@ rG=mL*rTL/(mT+mL);
 rT=0-rG;
 rL=rTL-rG;
 
-dev=0;%1000000
+dev=1000000
 if dev>0
     strDev='_dev';
 else
@@ -145,11 +145,11 @@ n=1000;
 r13=sqrt((x-rT).^2+(y).^2);
 r23=sqrt((x-rL).^2+(y).^2);
 r3 =sqrt(x.^2+y.^2);
-Epot=-G*(mT./r13+mL./r23)-0.5*omega^2*r3.^2;
+Pot=-G*(mT./r13+mL./r23)-0.5*omega^2*r3.^2;
 for i=1:n
     for k=1:n
-        if Epot(i,k) < -1.7e6
-            Epot(i,k)=nan;
+        if Pot(i,k) < -1.7e6
+            Pot(i,k)=nan;
         end
     end
 end
@@ -159,14 +159,14 @@ angle=linspace(0,2*pi,10000);
 fig1=figure('Position',[50,50,550,400]);
 plot(rT+RT*cos(angle),RT*sin(angle),'r',rL+RL*cos(angle),RL*sin(angle),'r')
 hold on
-contourf(x,y,Epot,13)
+contourf(x,y,Pot,13)
 hold on
 plot(rLag(1,1),0,'rp',rLag(2,1),0,'rp',rLag(3,1),0,'rp',rLag(4,1),rLag(4,2),'rp',rLag(5,1),rLag(5,2),'rp','MarkerSize',10)
 hold off
-xlabel('x [m]')
-ylabel('y [m]')
+xlabel("x' [m]")
+ylabel("y' [m]")
 cbar = colorbar;
-cbar.Label.String = 'E_{pot} [J]';
+cbar.Label.String = 'Potentiel [m^2s^{-2}]';
 set(gca,'fontsize',15);
 axis equal
 print(fig1,'figures/lagrange/lagrange_Epot', '-depsc');
@@ -225,7 +225,7 @@ hold on
 plot(xL,yL,'Color',colorspec{2})
 hold on
 for i=1:nbCorps-2
-    plot(xLag(:,i),yLag(:,i),'Color',colorspec{i+2})
+    plot(xLag(:,i),yLag(:,i),'Color',colorspec{iLag(i)+2})
     hold on
 end
 hold off
@@ -244,7 +244,7 @@ if nbCorps>3
     hold on
 end
 for i=1:nbCorps-2
-    plot(t,sqrt(xLag(:,i).^2+yLag(:,i).^2+zLag.^2),'Color',colorspec{i+2})
+    plot(t,sqrt(xLag(:,i).^2+yLag(:,i).^2+zLag.^2),'Color',colorspec{iLag(i)+2})
     hold on
 end
 hold off
