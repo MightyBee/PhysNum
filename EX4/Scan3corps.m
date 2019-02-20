@@ -72,27 +72,28 @@ repertoire = './'; % Chemin d'acces au code compile
 executable = 'performance'; % Nom de l'executable 
 
 
-nsimul = 200; % Nombre de simulations à faire
+nsimul = 100^2; % Nombre de simulations à faire
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-paraName='theta'; % Nom du parametre a scanner
+paraName='condIn'; % Nom du parametre a scanner
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-trajectoire=true;
+trajectoire=false;
 dim3=false;
-interAcc=true;
+interAcc=false;
 
 
 if strcmp(paraName,'theta')   
     paramstr = {"vx0"; "vy0"};
 %     theta = linspace(0,2*pi,nsimul+1);
 %     theta = theta(1:nsimul);
+%     theta = linspace(0.28338,0.28344,nsimul);
 %     theta = linspace(3.6795,3.6805,nsimul);
-%     theta = linspace(4.261,4.2635,nsimul); %200 simulations (1e-6) -> indice 76, donne une double entrée atmoshere
+    theta = linspace(4.261,4.2635,nsimul); %200 simulations (1e-6) -> indice 76, donne une double entrée atmoshere
 %     theta = linspace(4.2615,4.2625,nsimul);
-    theta = linspace(5.067,5.068,nsimul);
+%     theta = linspace(5.067,5.068,nsimul);
 %     theta = linspace(5.6195,5.6205,nsimul);
 %     theta1= [0.18 0.32; 3.6 4.4; 5 5.7];
 %     theta1 = [3.67 3.72; 4.22 4.27; 5.06 5.11; 5.58 5.63];
@@ -188,7 +189,7 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
         vAbs{i}= sqrt(data(:,20).^2+data(:,21).^2);
         vRel{i}= sqrt((data(:,20)-data(:,8)).^2+(data(:,21)-data(:,9)).^2);
         if hmin(i)<=RT && lmin(i)>RL
-            distAtmo=RT+120000;
+            distAtmo=RT+1000000;
             rentree(i)=1;
             iFin=1;
             while sqrt((xA{i}(iFin)-xT{i}(iFin)).^2+(yA{i}(iFin)-yT{i}(iFin)).^2)>distAtmo 
@@ -371,7 +372,7 @@ if strcmp(paraName, 'theta')
     fig3=figure('Position',[50,50,600,400]);
     plot(theta,acc,'+')
     xlabel('\theta_0 [rad]')
-    ylabel('max(acc) [m/s^2]')
+    ylabel('Acc_{max} [m/s^2]')
     grid on
     set(gca,'fontsize',15);
     print(fig3,'figures/troisCorpsAdaptRho0_acc', '-depsc');
@@ -379,7 +380,7 @@ if strcmp(paraName, 'theta')
     fig4=figure('Position',[50,50,600,400]);
     plot(theta,hmin-RT,'+')
     xlabel('\theta_0 [rad]')
-    ylabel('min(h) [m]')
+    ylabel('h_{min} [m]')
     grid on
     set(gca,'fontsize',15);
     print(fig4,'figures/troisCorpsAdaptRho0_hmin', '-depsc');
@@ -401,16 +402,20 @@ if strcmp(paraName, 'theta')
     grid on;
     print(fig5,'figures/troisCorpsAdaptRho0_hmin&acc', '-depsc');
     
-    figure
+    figure('Position',[50,50,600,400]);
     plot(t{76},Pt{76})
     xlabel('Temps [s]')
     ylabel('Puissance de traînée [J]')
+    set(gca,'fontsize',13);
     grid on
 
-    figure
-    plot(t{76},sqrt((xA{76}-xT{76}).^2+(yA{76}-yT{76}).^2))
+    figure('Position',[50,50,600,400]);
+    plot([t{76}(1) t{76}(end)], [120000 120000], '--', [t{76}(1) t{76}(end)], [0 0],'--',t{76},sqrt((xA{76}-xT{76}).^2+(yA{76}-yT{76}).^2)-RT,t{75},sqrt((xA{75}-xT{75}).^2+(yA{75}-yT{75}).^2)-RT)
     xlabel('Temps [s]')
-    ylabel('Distance à la Terre [m]')
+    ylabel('Altitude [m]')
+    set(gca,'fontsize',13);
+    lgd=legend('Limite atmosphère', 'Terre');
+    set(lgd,'fontsize',14,'Location','southwest');
     grid on
     
     figure
@@ -446,7 +451,7 @@ elseif strcmp(paraName, 'condIn')
     surf(theta,v0A,acc);
     xlabel('\theta_0 [rad]')
     ylabel('v_0 [m/s]')
-    zlabel('max(acc) [m/s^2]')
+    zlabel('Acc_{max} [m/s^2]')
     grid on
 end 
 
