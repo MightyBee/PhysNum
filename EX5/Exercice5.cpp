@@ -86,8 +86,8 @@ for(size_t i(0); i<N+1;i++){
  for(size_t j(0); j<N+1; j++){
    if(flag[i][j]==false){
      T[i][j]=T[i][j]+alpha*(T[i-1][j]+T[i+1][j]-4*T[i][j]+T[i][j+1]+T[i][j-1]);
-  if( T[i][j]>MaxdT){
-    MaxdT=T[i][j];
+  if( abs(T[i][j])>MaxdT){
+    MaxdT=abs(T[i][j]);
   }}
  }
 }
