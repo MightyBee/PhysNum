@@ -72,7 +72,11 @@ repertoire = './'; % Chemin d'acces au code compile
 executable = 'performance'; % Nom de l'executable 
 
 
+<<<<<<< HEAD
+nsimul = 210; % Nombre de simulations à faire
+=======
 nsimul = 100^2; % Nombre de simulations à faire
+>>>>>>> 2d9d03d34760fe4228507001183ab07cdab664b9
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -87,13 +91,22 @@ interAcc=false;
 
 if strcmp(paraName,'theta')   
     paramstr = {"vx0"; "vy0"};
+<<<<<<< HEAD
+    theta = [ linspace(0.21,0.29,nsimul/3) ; linspace(3.6,4.3,nsimul/3) ; linspace(5.0,5.7,nsimul/3)];
+    theta = theta(1:nsimul);
+=======
 %     theta = linspace(0,2*pi,nsimul+1);
 %     theta = theta(1:nsimul);
 %     theta = linspace(0.28338,0.28344,nsimul);
+>>>>>>> 2d9d03d34760fe4228507001183ab07cdab664b9
 %     theta = linspace(3.6795,3.6805,nsimul);
     theta = linspace(4.261,4.2635,nsimul); %200 simulations (1e-6) -> indice 76, donne une double entrée atmoshere
 %     theta = linspace(4.2615,4.2625,nsimul);
+<<<<<<< HEAD
+%    theta = linspace(5.067,5.068,nsimul);
+=======
 %     theta = linspace(5.067,5.068,nsimul);
+>>>>>>> 2d9d03d34760fe4228507001183ab07cdab664b9
 %     theta = linspace(5.6195,5.6205,nsimul);
 %     theta1= [0.18 0.32; 3.6 4.4; 5 5.7];
 %     theta1 = [3.67 3.72; 4.22 4.27; 5.06 5.11; 5.58 5.63];
@@ -104,7 +117,7 @@ if strcmp(paraName,'theta')
 elseif strcmp(paraName,'condIn')   
     paramstr = {"vx0"; "vy0"};
     nsimul=round(sqrt(nsimul));
-    theta = linspace(0,2*pi,nsimul+1);
+    theta = linspace(0,1/2*pi,nsimul+1);
     theta = theta(1:nsimul);
     v0A = linspace(10,10000,nsimul);
     param=[];
@@ -372,7 +385,11 @@ if strcmp(paraName, 'theta')
     fig3=figure('Position',[50,50,600,400]);
     plot(theta,acc,'+')
     xlabel('\theta_0 [rad]')
+<<<<<<< HEAD
+    ylabel('max_{acc} [m/s^2]')
+=======
     ylabel('Acc_{max} [m/s^2]')
+>>>>>>> 2d9d03d34760fe4228507001183ab07cdab664b9
     grid on
     set(gca,'fontsize',15);
     print(fig3,'figures/troisCorpsAdaptRho0_acc', '-depsc');
@@ -380,7 +397,11 @@ if strcmp(paraName, 'theta')
     fig4=figure('Position',[50,50,600,400]);
     plot(theta,hmin-RT,'+')
     xlabel('\theta_0 [rad]')
+<<<<<<< HEAD
+    ylabel('min_{h} [m]')
+=======
     ylabel('h_{min} [m]')
+>>>>>>> 2d9d03d34760fe4228507001183ab07cdab664b9
     grid on
     set(gca,'fontsize',15);
     print(fig4,'figures/troisCorpsAdaptRho0_hmin', '-depsc');
@@ -395,9 +416,9 @@ if strcmp(paraName, 'theta')
     hold off
     yyaxis left
     xlabel('\theta_0 [rad]')
-    ylabel('min(h) [m]')
+    ylabel('min_{h} [m]')
     yyaxis right
-    ylabel('max(acc) [m/s^2]')
+    ylabel('max_{acc} [m/s^2]')
     set(gca,'fontsize',13);
     grid on;
     print(fig5,'figures/troisCorpsAdaptRho0_hmin&acc', '-depsc');

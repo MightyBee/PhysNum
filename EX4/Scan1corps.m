@@ -77,7 +77,7 @@ theta = theta(1:nsimul);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-paraName='theta'; % Nom du parametre a scanner
+paraName='precision'; % Nom du parametre a scanner
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
