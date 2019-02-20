@@ -74,7 +74,7 @@ precision = logspace(-1,-8,nsimul); % Valeurs du parametre a scanner
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-paraName='theta'; % Nom du parametre a scanner
+paraName='precision'; % Nom du parametre a scanner
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
