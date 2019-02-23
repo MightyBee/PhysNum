@@ -1,7 +1,7 @@
 % Ce script Matlab automatise la production de resultats
 % lorsqu'on doit faire une serie de simulations en
 % variant un des parametres d'entree.
-% 
+%
 % Il utilise les arguments du programme (voir ConfigFile.h)
 % pour remplacer la valeur d'un parametre du fichier d'input
 % par la valeur scannee.
@@ -48,16 +48,16 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
     if(strcmp(paramstr,'dt'))
         data = load([output{i} '_T.out']);
         % TODO: interpoler la temperature en (xp,yp)
-        %pour trouver dans quelle cellule se trouve (xp,yp) 
+        %pour trouver dans quelle cellule se trouve (xp,yp)
         a = fix(xp/h);
         b = fix(yp/h);
-        %interpolation linéaire
+        %interpolation linï¿½aire
         T1= data(a*N+b,3);
         T2= data((a+1)*N+b,3);
         T3= data((a+1)*N+b+1,3);
         T4= data(a*N+b+1,3);
-        
-        Tp(i) = ((T2-T1)-(T3-T4))/(h*h)*(xp-a*h)*(yp-b*h);
+
+        Tp(i) = ((T3-T4)-(T2-T1))/(h*h)*(xp-a*h)*(yp-b*h);
     end
 end
 
@@ -71,6 +71,3 @@ if(strcmp(paramstr,'dt'))
     ylabel(sprintf('T(%0.2f,%0.2f) [Â°C]',xp,yp))
     grid on
 end
-
-
-
