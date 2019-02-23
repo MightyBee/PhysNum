@@ -14,7 +14,7 @@ repertoire = './'; % Chemin d'acces au code compile (NB: enlever le ./ sous Wind
 executable = 'Exercice5'; % Nom de l'executable (NB: ajouter .exe sous Windows)
 input = 'configuration.in'; % Nom du fichier d'entree de base
 
-nsimul = 10; % Nombre de simulations a faire
+nsimul = 8; % Nombre de simulations a faire
 
 dt = logspace(-5,-3, nsimul);
 
