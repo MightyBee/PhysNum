@@ -48,7 +48,16 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
     if(strcmp(paramstr,'dt'))
         data = load([output{i} '_T.out']);
         % TODO: interpoler la temperature en (xp,yp)
-        Tp(i) = 0;
+        %pour trouver dans quelle cellule se trouve (xp,yp) 
+        a = fix(xp/h);
+        b = fix(yp/h);
+        %interpolation linéaire
+        T1= data(a*N+b,3);
+        T2= data((a+1)*N+b,3);
+        T3= data((a+1)*N+b+1,3);
+        T4= data(a*N+b+1,3);
+        
+        Tp(i) = ((T2-T1)-(T3-T4))/(h*h)*(xp-a*h)*(yp-b*h);
     end
 end
 
