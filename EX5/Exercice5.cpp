@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
   size_t N = configFile.get<size_t>("N"); // Nombre d'intervalles dans chaque dimension
   double dt = configFile.get<double>("dt");
   double h = L/N;
-  double alpha = kappa * dt / h / h;
+  double alpha = kappa * dt /( h * h);
 
   // Fichiers de sortie:
   string output = configFile.get<string>("output");

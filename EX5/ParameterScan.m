@@ -16,11 +16,14 @@ input = 'configuration.in'; % Nom du fichier d'entree de base
 
 nsimul = 8; % Nombre de simulations a faire
 
-dt = logspace(-5,-3, nsimul);
+dt = logspace(-4,-1, nsimul);
 
 paramstr = 'dt'; % Nom du parametre a scanner
 param = dt; % Valeurs du parametre a scanner
 
+N = 40;
+L=0.1;
+h=L/N;
 %% Simulations %%
 %%%%%%%%%%%%%%%%%
 
@@ -39,8 +42,8 @@ end
 % Parcours des resultats de toutes les simulations
 
 if(strcmp(paramstr,'dt'))
-    xp = 0;
-    yp = 0;
+    xp = 0.06;
+    yp = 0.03;
     Tp = zeros(1,nsimul);
 end
 
@@ -57,7 +60,7 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
         T3= data((a+1)*N+b+1,3);
         T4= data(a*N+b+1,3);
 
-        Tp(i) = ((T3-T4)-(T2-T1))/(h*h)*(xp-a*h)*(yp-b*h);
+        Tp(i) = ((T3-T4)-(T2-T1))*(xp-a*h)*(yp-b*h)/(h*h);
     end
 end
 
