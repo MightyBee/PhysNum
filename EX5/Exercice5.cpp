@@ -78,18 +78,21 @@ int main(int argc, char* argv[])
 
   // Iterations:
   //////////////////////////////////////
-double MaxdT(0.0);
-double Told(0.0);
-double derivee(0.0);
+  double MaxdT(0.0);
+  double Told(0.0);
+  double derivee(0.0);
   // TODO: Modifier la condition de sortie de la boucle temporelle pour tester si l'etat stationnaire est atteint.
-  for(size_t iter(0); iter*dt<tfin and (MaxdT>eps or iter==0); ++iter){
+  size_t iter(0);
+  do{
+    MaxdT=0.0;
+  //for(size_t iter(0); iter*dt<tfin and (MaxdT>eps or iter==0); ++iter){
     // TODO: Schema a 2 niveaux et calcul de max(|dT/dt|)
     for(size_t i(0); i<N+1;i++){
       for(size_t j(0); j<N+1; j++){
         if(flag[i][j]==false){
           Told=T[i][j];
           T[i][j]=T[i][j]+alpha*(T[i-1][j]+T[i+1][j]-4*T[i][j]+T[i][j+1]+T[i][j-1]);
-          derivee=(T[i][j]-Told)/dt;
+          derivee=abs((T[i][j]-Told)/dt);
           if(derivee>MaxdT){
             MaxdT=derivee;
           }
@@ -100,8 +103,12 @@ double derivee(0.0);
     output_P << iter*dt << " " << puissance(T, kappa, h, xa, xb, ya, yb)
                         << " " << puissance(T, kappa, h, xc, xd, ya, yb)
                         << " " << puissance(T, kappa, h, xa, xd, ya, yb) << endl;
-  }
+  //}
+  iter++;
+  }while(iter*dt<tfin and MaxdT>eps);
   output_P.close();
+
+  if(MaxdT<=eps) cout << "Etat stationnaire après " << iter << " iterations." << endl;
 
   // Ecriture de la temperature finale:
   for(size_t i(0);i<N+1;++i)
