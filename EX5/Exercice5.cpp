@@ -87,7 +87,6 @@ int main(int argc, char* argv[])
     MaxdT=0.0;
   //for(size_t iter(0); iter*dt<tfin and (MaxdT>eps or iter==0); ++iter){
     // TODO: Schema a 2 niveaux et calcul de max(|dT/dt|)
-<<<<<<< HEAD
     for(size_t i(0); i<N+1;i++){
       for(size_t j(0); j<N+1; j++){
         if(flag[i][j]==false){
@@ -100,20 +99,6 @@ int main(int argc, char* argv[])
         }
       }
     }
-=======
-for(size_t i(0); i<N+1;i++){
- for(size_t j(0); j<N+1; j++){
-   if(flag[i][j]==false){
-     T[i][j]=T[i][j]+alpha*(T[i-1][j]+T[i+1][j]-4*T[i][j]+T[i][j+1]+T[i][j-1]);
-  if( abs(T[i][j])>MaxdT){
-    MaxdT=abs(T[i][j]);
-  }}
- }
-}
-}
-}while(MaxdT>eps)
-
->>>>>>> bd8357c487bef61cb0370cd453b316270f419b2d
     // Diagnostiques:
     output_P << iter*dt << " " << puissance(T, kappa, h, xa, xb, ya, yb)
                         << " " << puissance(T, kappa, h, xc, xd, ya, yb)
