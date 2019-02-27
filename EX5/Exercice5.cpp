@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
   size_t N = configFile.get<size_t>("N"); // Nombre d'intervalles dans chaque dimension
   double dt = configFile.get<double>("dt");
   double h = L/N;
-  double alpha = kappa * dt /( h * h);
+  double alpha = kappa * dt / h / h;
 
   // Fichiers de sortie:
   string output = configFile.get<string>("output");
@@ -122,55 +122,26 @@ int main(int argc, char* argv[])
 double puissance(vector<vector<double> > const& T, double const& kappa, double const& h, double const& x1, double const& x2, double const& y1, double const& y2)
 {
   double P(0.0);
-  double Pij(0.0);
   size_t indexFin(index(x2,h,false));
   size_t ind1(index(y1,h,true));
   size_t ind2(index(y2,h,false));
-  for(size_t i(index(x1,h,true));i<indexFin;i++){
-    Pij =T[i][ind2+1]+T[i+1][ind2+1]-T[i][ind2]-T[i+1][ind2];
-    Pij-=T[i][ind1+1]+T[i+1][ind1+1]-T[i][ind1]-T[i+1][ind1];
-    if(i==index(x1,h,true) || i==indexFin-1) Pij*=0.5;
-    P+=Pij;
+  for(size_t i(index(x1,h,true));i<=indexFin;i++){
+    P+=T[i][ind2+1]-T[i][ind2];
+    P-=T[i][ind1]  -T[i][ind1-1];
   }
 
   indexFin=index(y2,h,false);
   ind1=index(x1,h,true);
   ind2=index(x2,h,false);
-  for(size_t j(index(y1,h,true));j<indexFin;j++){
-    Pij =T[ind2+1][j]+T[ind2+1][j+1]-T[ind2][j]-T[ind2][j+1];
-    Pij-=T[ind1+1][j]+T[ind1+1][j+1]-T[ind1][j]-T[ind1][j+1];
-    if(j==index(y1,h,true) || j==indexFin-1) Pij*=0.5;
-    P+=Pij;
+  for(size_t j(index(y1,h,true));j<=indexFin;j++){
+    P+=T[ind2+1][j]-T[ind2][j];
+    P-=T[ind1][j]  -T[ind1-1][j];
   }
-
-  P*=-kappa*0.5;
+  P*=-kappa;
   return P;
 }
-/*
-double puissance(vector<vector<double> > const& T, double const& kappa, double const& h, double const& x1, double const& x2, double const& y1, double const& y2)
-{
-  double P(0.0);
-  size_t indexFin(index(x2,h));
-  size_t ind1(index(y1,h));
-  size_t ind2(index(y2,h));
-  for(size_t i(index(x1,h)+1);i<=indexFin;i++){
-    P+=T[i-1][ind2+1]+2*T[i][ind2+1]+T[i+1][ind2+1]-(T[i-1][ind2]+2*T[i][ind2]+T[i+1][ind2]);
-    P-=T[i-1][ind1+1]+2*T[i][ind1+1]+T[i+1][ind1+1]-(T[i-1][ind1]+2*T[i][ind1]+T[i+1][ind1]);
-  }
 
-  indexFin=index(y2,h);
-  ind1=index(x1,h);
-  ind2=index(x2,h);
-  for(size_t j(index(y1,h)+1);j<=indexFin;j++){
-    P+=T[ind2+1][j-1]+2*T[ind2+1][j]+T[ind2+1][j+1]-(T[ind2][j-1]+2*T[ind2][j]+T[ind2][j+1]);
-    P-=T[ind1+1][j-1]+2*T[ind1+1][j]+T[ind1+1][j+1]-(T[ind1][j-1]+2*T[ind1][j]+T[ind1][j+1]);
-  }
-
-  P*=-kappa*0.25;
-  return P;
-}
-*/
 size_t index(double const& x, double const& h, bool const& low){
-  if(low) return (size_t)(x/h-5.5);
-  else return (size_t)(x/h+5.5);
+  if(low) return (size_t)(x/h-0.5);
+  else return (size_t)(x/h+0.5)+1;
 }

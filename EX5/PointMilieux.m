@@ -13,9 +13,8 @@
 repertoire = './'; % Chemin d'acces au code compile (NB: enlever le ./ sous Windows)
 executable = 'Exercice5'; % Nom de l'executable (NB: ajouter .exe sous Windows)
 input = 'configuration.in'; % Nom du fichier d'entree de base
-dossier='simulations/';
 
-nsimul = 10; % Nombre de simulations a faire
+nsimul = 8; % Nombre de simulations a faire
 
 dt = logspace(-4,-1, nsimul);
 
@@ -30,7 +29,7 @@ h=L/N;
 
 output = cell(1, nsimul); % Tableau de cellules contenant le nom des fichiers de sortie
 for i = 1:nsimul
-    output{i} = [dossier,paramstr, '=', num2str(param(i))];
+    output{i} = [paramstr, '=', num2str(param(i))];
     % Execution du programme en lui envoyant la valeur a scanner en argument
     cmd = sprintf('%s%s %s %s=%.15g output=%s', repertoire, executable, input, paramstr, param(i), output{i});
     disp(cmd)
