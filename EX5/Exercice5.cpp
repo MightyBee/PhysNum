@@ -34,6 +34,7 @@ int main(int argc, char* argv[])
   double Tc = configFile.get<double>("Tc");
   double Tf = configFile.get<double>("Tf");
   double Tb = configFile.get<double>("Tb");
+  double D = configFile.get<double>("D");
   double kappa = configFile.get<double>("kappa");
 
   // Duree de la simulation:
@@ -44,7 +45,7 @@ int main(int argc, char* argv[])
   size_t N = configFile.get<size_t>("N"); // Nombre d'intervalles dans chaque dimension
   double dt = configFile.get<double>("dt");
   double h = L/N;
-  double alpha = kappa * dt / h / h;
+  double alpha = D * dt / h / h;
 
   // Fichiers de sortie:
   string output = configFile.get<string>("output");
@@ -122,6 +123,7 @@ int main(int argc, char* argv[])
 double puissance(vector<vector<double> > const& T, double const& kappa, double const& h, double const& x1, double const& x2, double const& y1, double const& y2)
 {
   double P(0.0);
+
   size_t indexFin(index(x2,h,false));
   size_t ind1(index(y1,h,true));
   size_t ind2(index(y2,h,false));

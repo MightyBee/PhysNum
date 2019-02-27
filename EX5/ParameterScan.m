@@ -17,11 +17,7 @@ dossier='simulations/';
 
 nsimul = 10; % Nombre de simulations a faire
 
-<<<<<<< HEAD
-dt = logspace(-3,-6, nsimul);
-=======
-dt = logspace(-4,0, nsimul);
->>>>>>> 0465e01c961baba0dfef5a864d4f44f7f0304d4c
+dt = logspace(-5,-3, nsimul);
 
 paramstr = 'dt'; % Nom du parametre a scanner
 param = dt; % Valeurs du parametre a scanner
@@ -64,7 +60,7 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
         T2= data((a+1)*N+b,3);
         T3= data((a+1)*N+b+1,3);
         T4= data(a*N+b+1,3);
-        
+
         Tb=T1+(T4-T1)*(xp-a*h)/h;
         Th=T2+(T3-T2)*(xp-a*h)/h;
         Tp(i) = Tb + (Th-Tb)*(yp-b*h)/h ;

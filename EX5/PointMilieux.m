@@ -13,25 +13,40 @@
 repertoire = './'; % Chemin d'acces au code compile (NB: enlever le ./ sous Windows)
 executable = 'Exercice5'; % Nom de l'executable (NB: ajouter .exe sous Windows)
 input = 'configuration.in'; % Nom du fichier d'entree de base
+dossier="simulations/";
 
-nsimul = 8; % Nombre de simulations a faire
+nsimul = 20; % Nombre de simulations a faire
 
-dt = logspace(-4,-1, nsimul);
-
-paramstr = 'dt'; % Nom du parametre a scanner
-param = dt; % Valeurs du parametre a scanner
-
-N = 40;
+N = 80;
 L=0.1;
 h=L/N;
+kappa=1.2;
+
+xa = 2*h;
+xb = xa+0.02;
+xd = L-2*h
+xc = xd-0.01;
+
+
+ind_i=floor((xb+xc)/2/h);
+x_m=(ind_i+0.5)*h
+ind_j=floor(N/2);
+y_m=(ind_j+0.5)*h
+h1=(x_m-h-xb)/(nsimul-1);
+h2=(xc-x_m-h)/(nsimul-1);
+
+d=(h1+h2)*linspace(nsimul-1,0,nsimul)+2*h;
+
+
 %% Simulations %%
 %%%%%%%%%%%%%%%%%
 
 output = cell(1, nsimul); % Tableau de cellules contenant le nom des fichiers de sortie
 for i = 1:nsimul
-    output{i} = [paramstr, '=', num2str(param(i))];
+    parameter=sprintf('xa=%.15g xb=%.15g xc=%.15g xd=%.15g', xa+(i-1)*h1, xb+(i-1)*h1, xc-(i-1)*h2, xd-(i-1)*h2);
+    output{i} = dossier+strrep(parameter, ' ', '_');
     % Execution du programme en lui envoyant la valeur a scanner en argument
-    cmd = sprintf('%s%s %s %s=%.15g output=%s', repertoire, executable, input, paramstr, param(i), output{i});
+    cmd = sprintf('%s%s %s N=%d %s output=%s', repertoire, executable, input, N, parameter, output{i});
     disp(cmd)
     system(cmd);
 end
@@ -41,36 +56,36 @@ end
 
 % Parcours des resultats de toutes les simulations
 
-if(strcmp(paramstr,'dt'))
-    xp = 0.06;
-    yp = 0.03;
-    Tp = zeros(1,nsimul);
-end
+jx = zeros(1,nsimul);
+jy = zeros(1,nsimul);
+
 
 for i = 1:nsimul % Parcours des resultats de toutes les simulations
-    if(strcmp(paramstr,'dt'))
-        data = load([output{i} '_T.out']);
-        % TODO: interpoler la temperature en (xp,yp)
-        %pour trouver dans quelle cellule se trouve (xp,yp)
-        a = fix(xp/h);
-        b = fix(yp/h);
-        %interpolation lin�aire
-        T1= data(a*N+b,3);
-        T2= data((a+1)*N+b,3);
-        T3= data((a+1)*N+b+1,3);
-        T4= data(a*N+b+1,3);
-
-        Tp(i) = ((T3-T4)-(T2-T1))*(xp-a*h)*(yp-b*h)/(h*h);
-    end
+    data = load(output{i}+"_T.out");
+    T1= data(ind_i*(N+1)+ind_j,3);
+    T2= data((ind_i+1)*(N+1)+ind_j,3);
+    T3= data((ind_i+1)*(N+1)+ind_j+1,3);
+    T4= data(ind_i*(N+1)+ind_j+1,3);
+    jx(i)=-kappa*0.5*(T2-T1+T3-T4)/h;
+    jy(i)=-kappa*0.5*(T4-T1+T3-T2)/h;
 end
+
+disp(data(ind_i*(N+1)+ind_j,1:2));
+disp(data((ind_i+1)*(N+1)+ind_j,1:2));
+disp(data((ind_i+1)*(N+1)+ind_j+1,1:2));
+disp(data(ind_i*(N+1)+ind_j+1,1:2));
 
 %% Figures %%
 %%%%%%%%%%%%%
 
-if(strcmp(paramstr,'dt'))
-    figure
-    plot(dt,Tp,'k+')
-    xlabel('\Delta t [s]')
-    ylabel(sprintf('T(%0.2f,%0.2f) [°C]',xp,yp))
-    grid on
-end
+figure
+plot(d,jx,'k+')
+xlabel('d [m]')
+ylabel('j_x [J/m^2]')
+grid on
+
+figure
+plot(1./d(1:round(0.8*nsimul)),jx(1:round(0.8*nsimul)),'k+')
+xlabel('d^{-1} [m^{-1}]')
+ylabel('j_x [J/m^2]')
+grid on

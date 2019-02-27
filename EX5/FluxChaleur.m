@@ -12,7 +12,7 @@ t = data(:,1);
 Pc = data(:,2);
 Pf = data(:,3);
 Ptot = data(:,4);
-kappa=1e-3;
+kappa=1.2;
 
 %% Analyse %%
 %%%%%%%%%%%%%
