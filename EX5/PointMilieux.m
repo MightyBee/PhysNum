@@ -13,11 +13,10 @@
 repertoire = './'; % Chemin d'acces au code compile (NB: enlever le ./ sous Windows)
 executable = 'Exercice5'; % Nom de l'executable (NB: ajouter .exe sous Windows)
 input = 'configuration.in'; % Nom du fichier d'entree de base
-dossier='simulations/';
 
-nsimul = 10; % Nombre de simulations a faire
+nsimul = 8; % Nombre de simulations a faire
 
-dt = logspace(-4,0, nsimul);
+dt = logspace(-4,-1, nsimul);
 
 paramstr = 'dt'; % Nom du parametre a scanner
 param = dt; % Valeurs du parametre a scanner
@@ -30,7 +29,7 @@ h=L/N;
 
 output = cell(1, nsimul); % Tableau de cellules contenant le nom des fichiers de sortie
 for i = 1:nsimul
-    output{i} = [dossier,paramstr, '=', num2str(param(i))];
+    output{i} = [paramstr, '=', num2str(param(i))];
     % Execution du programme en lui envoyant la valeur a scanner en argument
     cmd = sprintf('%s%s %s %s=%.15g output=%s', repertoire, executable, input, paramstr, param(i), output{i});
     disp(cmd)
@@ -60,10 +59,8 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
         T2= data((a+1)*N+b,3);
         T3= data((a+1)*N+b+1,3);
         T4= data(a*N+b+1,3);
-        
-        Tb=T1+(T4-T1)*(xp-a*h)/h;
-        Th=T2+(T3-T2)*(xp-a*h)/h;
-        Tp(i) = Tb + (Th-Tb)*(yp-b*h)/h ;
+
+        Tp(i) = ((T3-T4)-(T2-T1))*(xp-a*h)*(yp-b*h)/(h*h);
     end
 end
 
