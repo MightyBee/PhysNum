@@ -16,7 +16,7 @@ input = 'configuration.in'; % Nom du fichier d'entree de base
 
 nsimul = 8; % Nombre de simulations a faire
 
-dt = logspace(-3,0, nsimul);
+dt = logspace(-4,0, nsimul);
 
 paramstr = 'dt'; % Nom du parametre a scanner
 param = dt; % Valeurs du parametre a scanner
