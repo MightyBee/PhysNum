@@ -40,7 +40,7 @@ public:
   Epsilonr(bool const& trivial_, double const& b_, double const& c_)
     : b(b_), R(c_), trivial(trivial_) {};
 
-  inline double operator()(double const& r, bool const& left) {
+  inline double operator()(double const& r, bool const& left=true) {
   // Le booleen "left" indique s'il faut prendre la limite a gauche ou a droite en cas de discontinuite
     double eps(1e-12*b);
     if(trivial or r<=b-eps or (abs(r-b)<=eps and left))
@@ -119,13 +119,23 @@ int main(int argc, char* argv[])
   vector<double> upper(ninters,0.); // Diagonale superieure
   vector<double> rhs(npoints,0.);   // Membre de droite
 
-  // TODO: Assemblage des elements de la matrice et du membre de droite
+  double ajout_k(0.);
+  double eps_0(8.85418782e-12);
+  for(size_t i(0); i<ninters; i++){
+    // matrice
+    ajout_k=eps_0*(r[i]*epsilonr(r[i])+r[i+1]*epsilonr(r[i+1]))/h[i]*0.5;
+    diag[i]  +=ajout_k;
+    lower[i] -=ajout_k;
+    upper[i] -=ajout_k;
+    //diag[i+1]+=ajout_k;
+    // membre de droite
+    rhs[i]=h[i]*r[i]*rho_lib(r[i])*0.5;
+  }
 
-
-
-  // TODO: Condition au bord:
-
-
+  // Condition au bord:
+  lower.back()=0;
+  diag.back()=1;
+  rhs.back()=V0;
 
   // Resolution:
   vector<double> phi(solve(diag,lower,upper,rhs));
@@ -174,4 +184,3 @@ int main(int argc, char* argv[])
 
   return 0;
 }
-
