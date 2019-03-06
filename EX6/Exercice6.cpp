@@ -123,13 +123,15 @@ int main(int argc, char* argv[])
   double eps_0(8.85418782e-12);
   for(size_t i(0); i<ninters; i++){
     // matrice
-    ajout_k=eps_0*(r[i]*epsilonr(r[i])+r[i+1]*epsilonr(r[i+1]))/h[i]*0.5;
+    bool left(false);
+    if(i<N1) left=true;
+    ajout_k=(r[i]*epsilonr(r[i],left)+r[i+1]*epsilonr(r[i+1]),left)/h[i]*0.5;
     diag[i]  +=ajout_k;
     lower[i] -=ajout_k;
     upper[i] -=ajout_k;
-    //diag[i+1]+=ajout_k;
+    diag[i+1]+=ajout_k;
     // membre de droite
-    rhs[i]=h[i]*r[i]*rho_lib(r[i])*0.5;
+    rhs[i]=h[i]*r[i]*rho_lib(r[i]);
   }
 
   // Condition au bord:

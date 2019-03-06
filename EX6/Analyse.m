@@ -15,6 +15,8 @@ divDr = data(:,4);
 
 figure
 plot(r,phi)
+hold on
+plot(r,(-r.^2.+r(end)^2)/4)
 xlabel('r [m]')
 ylabel('\phi [V]')
 grid on, box on
