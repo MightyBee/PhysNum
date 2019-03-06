@@ -125,13 +125,14 @@ int main(int argc, char* argv[])
     // matrice
     bool left(false);
     if(i<N1) left=true;
-    ajout_k=(r[i]*epsilonr(r[i],left)+r[i+1]*epsilonr(r[i+1]),left)/h[i]*0.5;
+    ajout_k=(r[i]*epsilonr(r[i],left)+r[i+1]*epsilonr(r[i+1],left))/h[i]*0.5;
     diag[i]  +=ajout_k;
     lower[i] -=ajout_k;
     upper[i] -=ajout_k;
     diag[i+1]+=ajout_k;
     // membre de droite
-    rhs[i]=h[i]*r[i]*rho_lib(r[i]);
+    rhs[i]+=h[i]*r[i]*rho_lib(r[i])*0.5;
+    rhs[i+1]+=h[i]*r[i+1]*rho_lib(r[i+1])*0.5;
   }
 
   // Condition au bord:

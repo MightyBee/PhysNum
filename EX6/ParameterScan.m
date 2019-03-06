@@ -15,9 +15,9 @@ executable = 'Exercice6'; % Nom de l'executable (NB: ajouter .exe sous Windows)
 input = 'configuration.in'; % Nom du fichier d'entree de base
 dossier='simulations/';
 
-nsimul = 10; % Nombre de simulations a faire
+nsimul = 12; % Nombre de simulations a faire
 
-N = round(linspace(20,200, nsimul));
+N = round(linspace(10,1000, nsimul));
 
 paramstr = 'N'; % Nom du parametre a scanner
 param = N; % Valeurs du parametre a scanner
@@ -29,7 +29,7 @@ output = cell(1, nsimul); % Tableau de cellules contenant le nom des fichiers de
 for i = 1:nsimul
     output{i} = [dossier paramstr '=' num2str(param(i))];
     % Execution du programme en lui envoyant la valeur a scanner en argument
-    cmd = sprintf('%s%s %s N1=%g N2=%g output=%s', repertoire, executable, input, param(i), param(i), output{i})
+    cmd = sprintf('%s%s %s N1=%g N2=%g output=%s', repertoire, executable, input, param(i), param(i), output{i});
     disp(cmd)
     system(cmd);
 end
@@ -55,18 +55,21 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
     divDr = data(:,4);
 end
 
+x=0.12./(2*N);
+y=abs(int-0.12^2/4);
 
+[a,erra,yFit]=fit(log(x'),log(y));
+fprintf('Ordre de convergence : %.5g \n',a)
 
 %% Figures %%
 %%%%%%%%%%%%%
 
     figure
-    h=loglog(1./N,abs(int-0.12^2/4),'k+')
-    xlabel('\Delta t [s]','FontSize', 20)
-    %ylabel(sprintf('T[°C]',,yp),'FontSize', 20)
+    h=loglog(x,y,'+',x,exp(yFit),'--');
+    xlabel('h [m^{-1}]','FontSize', 20)
+    ylabel('|\phi(0)-\phi_0| [V]','FontSize', 20)
     set(gca,'FontSize',20)
     set(h,'MarkerSize',11)
     grid on
-    lgd=legend('Valeurs numÃ©riques', 'RÃ©gression linÃ©aire');
+    lgd=legend('Valeurs numériques', 'Régression linéaire');
     set(lgd,'fontsize',14,'Location','northwest');
-    print(fig1,'conv', '-depsc');
