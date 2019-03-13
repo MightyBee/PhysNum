@@ -17,7 +17,7 @@ dossier='simulations/';
 
 nsimul = 12; % Nombre de simulations a faire
 
-N = round(linspace(10,1000, nsimul));
+N = round(logspace(1,3, nsimul));
 
 paramstr = 'N'; % Nom du parametre a scanner
 param = N; % Valeurs du parametre a scanner
