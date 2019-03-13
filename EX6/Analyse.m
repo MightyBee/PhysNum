@@ -1,5 +1,5 @@
-function Analyse(filename)
-
+%function Analyse(filename)
+filename='output'
 data = load([filename '_Er_Dr.out']);
 rmid = data(:,1);
 Er = data(:,2);
@@ -44,4 +44,5 @@ xlabel('r')
 ylabel('\rho/\epsilon_0 [V/m^2]')
 legend('show')
 grid on, box on
+
 

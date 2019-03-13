@@ -159,8 +159,9 @@ int main(int argc, char* argv[])
   {
     rmid[i] = 0.5*r[i] + 0.5*r[i+1];
     // TODO: Calculer E_r et D_r/epsilon_0 au milieu des intervalles
-    Er[i] = (phi[i+1]-phi[i])/h[i];
-    Dr[i] = Er[i]/(epsilonr(rmid[i]));
+    Er[i] = -(phi[i+1]-phi[i])/h[i];
+
+    Dr[i] = Er[i]*epsilonr(rmid[i]);
   }
   ofs.open((output+"_Er_Dr.out").c_str());
   ofs.precision(15);
@@ -176,8 +177,8 @@ int main(int argc, char* argv[])
   {
     rmidmid[i] = 0.5*rmid[i] + 0.5*rmid[i+1];
     // TODO: Calculer div(E_r) et div(D_r)/epsilon_0 au milieu des milieu des intervalles
-    div_Er[i] = (Er[i+1]-Er[i])/(h[i]/2+h[i+1]/2);
-    div_Dr[i] = (Dr[i+1]-Dr[i])/((h[i]/2+h[i+1]/2)*epsilonr(rmidmid[i]));
+    div_Er[i] = (Er[i+1]-Er[i])/(rmid[i+1]-rmid[i]);
+    div_Dr[i] = (Dr[i+1]-Dr[i])/(rmid[i+1]-rmid[i]);
   }
   ofs.open((output+"_rholib_divEr_divDr.out").c_str());
   ofs.precision(15);
