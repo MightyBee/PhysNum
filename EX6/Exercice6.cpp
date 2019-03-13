@@ -61,10 +61,14 @@ public:
     : b(b_), a0(a0_), trivial(trivial_) {};
 
   inline double operator()(double const& r) {
-    if(trivial or r>b)
+    if(trivial){
       return 1.0;
-    else
-      return a0*(1.0-pow(r/b,2));
+    }else{
+      if(r>b)
+        return 0.0;
+      else
+        return a0*(1.0-pow(r/b,2));
+      }
   }
 
 private:
