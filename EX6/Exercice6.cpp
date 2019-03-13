@@ -87,6 +87,9 @@ int main(int argc, char* argv[])
   // Fichier de sortie :
   string output = configFile.get<string>("output");
 
+  // methode de quadrature
+  string methode = configFile.get<string>("methode");
+
   // Domaine :
   const double b(configFile.get<double>("b"));
   const double R(configFile.get<double>("R"));
@@ -121,18 +124,42 @@ int main(int argc, char* argv[])
 
   double ajout_k(0.);
   double eps_0(8.85418782e-12);
+  double r1(0.), r2(0.), r3(0.);
   for(size_t i(0); i<ninters; i++){
     // matrice
-    bool left(false);
-    if(i<N1) left=true;
-    ajout_k=(r[i]*epsilonr(r[i],left)+r[i+1]*epsilonr(r[i+1],left))/h[i]*0.5;
+    //if(methode=="T"){
+      ajout_k=(r[i]*epsilonr(r[i],false)+r[i+1]*epsilonr(r[i+1],true))/h[i]*0.5;
+    /*}else if(methode=="G2"){
+      r1=((1.0-sqrt(1.0/3.0))*r[i]+(1.0+sqrt(1.0/3.0))*r[i+1])*0.5;
+      r2=((1.0+sqrt(1.0/3.0))*r[i]+(1.0-sqrt(1.0/3.0))*r[i+1])*0.5;
+      ajout_k=(r1*epsilonr(r1,true)+r2*epsilonr(r2,false))/h[i]*0.5;
+    }else if(methode=="G3"){
+      r1=((1.0-sqrt(3.0/5.0))*r[i]+(1.0+sqrt(3.0/5.0))*r[i+1])*0.5;
+      r2=(r[i]+r[i+1])*0.5;
+      r3=((1.0+sqrt(3.0/5.0))*r[i]+(1.0-sqrt(3.0/5.0))*r[i+1])*0.5;
+      ajout_k=(5.0/9.0*r1*epsilonr(r1,true)+8.0/9.0*r2*epsilonr(r2,true)+5.0/9.0*r3*epsilonr(r3,false))/h[i]*0.5;
+    }else{
+      cerr << "Aucune methode correspond à : " << methode << endl;
+      return 0;
+    }*/
     diag[i]  +=ajout_k;
     lower[i] -=ajout_k;
     upper[i] -=ajout_k;
     diag[i+1]+=ajout_k;
     // membre de droite
-    rhs[i]+=h[i]*r[i]*rho_lib(r[i])*0.5;
-    rhs[i+1]+=h[i]*r[i+1]*rho_lib(r[i+1])*0.5;
+    //if(methode=="T"){
+      rhs[i]+=h[i]*r[i]*rho_lib(r[i])*0.5;
+      rhs[i+1]+=h[i]*r[i+1]*rho_lib(r[i+1])*0.5;
+    /*}else if(methode=="G2"){
+      rhs[i]+=h[i]*((1+sqrt(1.0/3.0))*0.5*r1*rho_lib(r1)+(1-sqrt(1.0/3.0))*0.5*r2*rho_lib(r2))*0.5;
+      rhs[i+1]+=h[i]*((1-sqrt(1.0/3.0))*0.5*r1*rho_lib(r1)+(1+sqrt(1.0/3.0))*0.5*r2*rho_lib(r2))*0.5;
+    }else if(methode=="G3"){
+        rhs[i]+=h[i]*(5.0/9.0*(1+sqrt(3.0/5.0))*0.5*r1*rho_lib(r1)+8.0/9.0*0.5*r2*rho_lib(r2)+5.0/9.0*(1-sqrt(3.0/5.0))*0.5*r3*rho_lib(r3))*0.5;
+        rhs[i+1]+=h[i]*(5.0/9.0*(1-sqrt(3.0/5.0))*0.5*r1*rho_lib(r1)+8.0/9.0*0.5*r2*rho_lib(r2)+5.0/9.0*(1+sqrt(3.0/5.0))*0.5*r3*rho_lib(r3))*0.5;
+    }else{
+      cerr << "Aucune methode correspond à : " << methode << endl;
+      return 0;
+    }*/
   }
 
   // Condition au bord:
@@ -157,10 +184,10 @@ int main(int argc, char* argv[])
   vector<double> Dr(ninters);
   for(int i(0); i<ninters; ++i)
   {
-    rmid[i] = 0.5*r[i] + 0.5*r[i+1];
+    rmid[i] = 0.5*(r[i]+r[i+1]);
     // TODO: Calculer E_r et D_r/epsilon_0 au milieu des intervalles
-    Er[i] = (phi[i+1]-phi[i])/h[i];
-    Dr[i] = Er[i]/(epsilonr(rmid[i]));
+    Er[i] = -(phi[i+1]-phi[i])/h[i];
+    Dr[i] = Er[i]*epsilonr(rmid[i]);
   }
   ofs.open((output+"_Er_Dr.out").c_str());
   ofs.precision(15);
@@ -176,8 +203,10 @@ int main(int argc, char* argv[])
   {
     rmidmid[i] = 0.5*rmid[i] + 0.5*rmid[i+1];
     // TODO: Calculer div(E_r) et div(D_r)/epsilon_0 au milieu des milieu des intervalles
-    div_Er[i] = (Er[i+1]-Er[i])/(h[i]/2+h[i+1]/2);
-    div_Dr[i] = (Dr[i+1]-Dr[i])/((h[i]/2+h[i+1]/2)*epsilonr(rmidmid[i]));
+    //div_Er[i] = (Er[i+1]-Er[i])/(h[i]/2+h[i+1]/2); rmid[i+1]-rmid[i]
+    //div_Dr[i] = (Dr[i+1]-Dr[i])/((h[i]/2+h[i+1]/2)*epsilonr(rmidmid[i]));
+    div_Er[i] = (rmid[i+1]*Er[i+1]-rmid[i]*Er[i])/((h[i]/2+h[i+1]/2)*rmidmid[i]);
+    div_Dr[i] = (rmid[i+1]*Dr[i+1]-rmid[i]*Dr[i])/((h[i]/2+h[i+1]/2)*rmidmid[i]);
   }
   ofs.open((output+"_rholib_divEr_divDr.out").c_str());
   ofs.precision(15);

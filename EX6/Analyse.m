@@ -23,7 +23,7 @@ grid on, box on
 
 figure
 hold on
-plot(rmid,Er)
+plot(rmid,Er,rmid,rmid/2,'--')
 xlabel('r [m]')
 ylabel('E_r [V/m]')
 grid on, box on
