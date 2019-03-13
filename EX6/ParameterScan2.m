@@ -29,7 +29,7 @@ output = cell(1, nsimul); % Tableau de cellules contenant le nom des fichiers de
 for i = 1:nsimul
     output{i} = [dossier paramstr '=' num2str(param(i))];
     % Execution du programme en lui envoyant la valeur a scanner en argument
-    cmd = sprintf('%s%s %s trivial=false b=0.02 N1=%g N2=%g output=%s', repertoire, executable, input, param(i), 4*param(i), output{i});
+    cmd = sprintf('%s%s %s trivial=false b=0.02 N1=%g N2=%g output=%s', repertoire, executable, input, param(i), 5*param(i), output{i});
     disp(cmd)
     system(cmd);
 end
@@ -63,7 +63,7 @@ y=int;
 %% Figures %%
 %%%%%%%%%%%%%
 
-    figure
+    fig1=figure('Position',[50,50,600,450]);
     h=plot(x.^2,y,'+',x.^2,yFit,'--');
     xlabel('1/N^2 [m^{-2}]','FontSize', 20)
     ylabel('\phi(b) [V]','FontSize', 20)
@@ -72,4 +72,4 @@ y=int;
     grid on
     lgd=legend('Valeurs numériques', 'Régression linéaire');
     set(lgd,'fontsize',14,'Location','southwest');
-    print('conv_phi_b', '-depsc');
+    print(fig1,'figures/conv_phi_b', '-depsc');
