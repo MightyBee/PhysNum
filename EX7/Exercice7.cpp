@@ -83,7 +83,11 @@ private:
 
 double energie(vector<double> const& f, double const& dx)
 {
-  return 0.;
+  double E(0.0);
+  for(size_t i(0); i<f.size()-1; i++){
+    E+=(f[i]+f[i+1])*0.5*dx;
+  }
+  return E;
 }
 
 //
@@ -232,7 +236,11 @@ int main(int argc, char* argv[])
       if (schema == "A")
 	fnext[i] = 2*(1-(*u2)(i*dx)*dt*dt/(dx*dx))*fnow[i]-fpast[i]+(*u2)(i*dx)*dt*dt/(dx*dx)*(fnow[i+1]-fnow[i-1]);// TODO : Completer le schema A
       else if(schema == "B")
+<<<<<<< HEAD
         fnext[i] = 2*fnow[i]-fpast[i]+dt*dt/(dx*dx)*(*u(i*dx)*(*u((i+1)*dx)-*u((i-1)*dx)*(fnow[i+1]-fnow[i-1]); // TODO : Completer le schema B
+=======
+        fnext[i] = 2*fnow[i]-fpast[i]+dt*dt/(dx*dx); // TODO : Completer le schema B
+>>>>>>> 90c1ea183dd25162a7016542eb886afa0e92366b
       else if(schema=="C")
         fnext[i] = ; // TODO : Completer le schema C
    // Note : La syntaxe pour evaluer u^2 au point x est (*u2)(x)
@@ -242,38 +250,38 @@ int main(int argc, char* argv[])
     switch(cb_gauche)
     {
       case fixe:
-        fnext[0] = 0.; // TODO : Completer la condition au bord gauche fixe
+        fnext[0] = fnow[0]; // TODO : Completer la condition au bord gauche fixe
         break;
 
       case libre:
-        fnext[0] = 0.; // TODO : Completer la condition au bord gauche libre
+        fnext[0] = fnext[1]; // TODO : Completer la condition au bord gauche libre
         break;
 
       case harmonique:
-        fnext[0] = 0.; // TODO : Completer la condition au bord gauche harmonique
+        fnext[0] = A*sin(omega*t); // TODO : Completer la condition au bord gauche harmonique
         break;
 
       case sortie:
-        fnext[0] = 0.; // TODO : Completer la condition au bord gauche "sortie de l'onde"
+        fnext[0] = fnow[0]+sqrt((*u2)(0.5*dx))*dt/dx*(fnow[1]-fnow[0]); // TODO : Completer la condition au bord gauche "sortie de l'onde"
         break;
     }
 
     switch(cb_droit)
     {
       case fixe:
-      fnext[N-1] = 0; // TODO : Completer la condition au bord droit fixe
+      fnext[N-1] = fnow[N-1]; // TODO : Completer la condition au bord droit fixe
         break;
 
       case libre:
-        fnext[N-1] = 0.; // TODO : Completer la condition au bord droit libre
+        fnext[N-1] = fnext[N-2]; // TODO : Completer la condition au bord droit libre
         break;
 
       case harmonique:
-        fnext[N-1] = 0.; // TODO : Completer la condition au bord droit harmonique
+        fnext[N-1] = A*sin(omega*t); // TODO : Completer la condition au bord droit harmonique
         break;
 
       case sortie:
-        fnext[N-1] = 0.; // TODO : Completer la condition au bord droit "sortie de l'onde"
+        fnext[N-1] = fnow[0]-sqrt((*u2)((N-0.5)*dx))*dt/dx*(fnow[N-1]-fnow[N-2]);; // TODO : Completer la condition au bord droit "sortie de l'onde"
         break;
     }
 
