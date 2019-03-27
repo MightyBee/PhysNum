@@ -84,7 +84,7 @@ double energie(vector<double> const& f, double const& dx)
 {
   double E(0.0);
   for(size_t i(0); i<f.size()-1; i++){
-    E+=(f[i]+f[i+1])*0.5*dx
+    E+=(f[i]+f[i+1])*0.5*dx;
   }
   return E;
 }
@@ -233,7 +233,7 @@ int main(int argc, char* argv[])
     for(int i(1); i<N-1; ++i)
     {
       if (schema == "A")
-	      fnext[i] = 2*(1-(*u2)(x)*dt*dt/(dx*dx))*fnow[i]-fpast[i]+(*u2)(x)*dt*dt/(dx*dx)*(fnow[i+1]-fnow[i-1]);// TODO : Completer le schema A
+	      fnext[i] = 2*(1-(*u2)(i*dx)*dt*dt/(dx*dx))*fnow[i]-fpast[i]+(*u2)(i*dx)*dt*dt/(dx*dx)*(fnow[i+1]-fnow[i-1]);// TODO : Completer le schema A
       else if(schema == "B")
         fnext[i] = 0.; // TODO : Completer le schema B
       else if(schema=="C")
@@ -288,7 +288,7 @@ int main(int argc, char* argv[])
   if(ecrire_f) fichier_f << t << " " << fnow << endl;
   fichier_E << t << " " << energie(fnow,dx) << endl;
 
-  fichier_f.close();fnow[0]+sqrt(*u2(0.5*dx))*dt/dx*(fnow[1]-fnow[0]);
+  fichier_f.close();
   fichier_E.close();
 
   return 0;
