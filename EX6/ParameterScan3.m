@@ -29,7 +29,7 @@ output = cell(1, nsimul); % Tableau de cellules contenant le nom des fichiers de
 for i = 1:nsimul
     output{i} = [dossier paramstr '=' num2str(param(i))];
     % Execution du programme en lui envoyant la valeur a scanner en argument
-    cmd = sprintf('%s%s %s trivial=false b=0.02 N1=%g N2=%g output=%s', repertoire, executable, input, param(i), 5*param(i), output{i});
+    cmd = sprintf('%s%s %s methode=G3 trivial=false b=0.02 N1=%g N2=%g output=%s', repertoire, executable, input, param(i), 5*param(i), output{i});
     disp(cmd)
     system(cmd);
 end
@@ -38,6 +38,7 @@ end
 %%%%%%%%%%%%%
 
 int=zeros(nsimul,1);
+tri=zeros(nsimul,1);
 rho=cell(nsimul,1);
 rcaca=cell(nsimul,1);
 for i = 1:nsimul % Parcours des resultats de toutes les simulations
@@ -56,36 +57,48 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
     rho{i}=divEr-divDr;
     rcaca{i}=rmidmid;
     int(i)=rho{i}(N(i));
+    tri(i)=(rho{i}(N(i))+rho{i}(N(i)-1))*(rmidmid(N(i))-rmidmid(N(i)-1))/2+(rho{i}(N(i)+1)+rho{i}(N(i)))*(rmidmid(N(i)+1)-rmidmid(N(i)))/2;
     fprintf('%.15g \n',rmidmid(N(i)));
 end
 
-x=N;
+x=0.02./N;
 y=int;
 
-[a,erra,yFit]=fit((x').^2,y);
+
+[a,erra,yFit]=fit(x',tri);
 
 %% Figures %%
 %%%%%%%%%%%%%
 fig4=figure('Position',[50,50,600,450]);
 hold on
 for i=1:nsimul
-plot(rcaca{i},rho{i})
+plot(rcaca{i},rho{i},'DisplayName',sprintf('N_1 + N_2 = %d',6*N(i)))
 end
 xlabel('r')
 ylabel('\rho/\epsilon_0 [V/m^2]')
 grid on, box on
 set(gca,'FontSize',20)
-%lgd=legend('show');
-%set(lgd,'fontsize',14,'Location','southeast');
-print(fig4,['figures/rhcacao_' filename], '-depsc');
+lgd=legend('show');
+set(lgd,'fontsize',14,'Location','southeast');
+%print(fig4,['figures/rhcacao_' filename], '-depsc');
 
     fig1=figure('Position',[50,50,600,450]);
-    h=plot(x,y,'+')%,x.^2,yFit,'--');
-    xlabel('1/N^2 [m^{-2}]','FontSize', 20)
-    ylabel('\phi(b) [V]','FontSize', 20)
+    h=plot(x,y,'+');
+    xlabel('h [m]','FontSize', 20)
+    ylabel('\rho_{pol}(b) [V]','FontSize', 20)
     set(gca,'FontSize',20)
     set(h,'MarkerSize',11)
     grid on
-    lgd=legend('Valeurs numériques', 'Régression linéaire');
-    set(lgd,'fontsize',14,'Location','southwest');
-    print(fig1,'figures/convaccac_phi_b', '-depsc');
+    %lgd=legend('Valeurs numériques', 'Régression linéaire');
+    %set(lgd,'fontsize',14,'Location','southwest');
+    print(fig1,'figures/nontrivial_divergence_rhoLib', '-depsc');
+fig1=figure('Position',[50,50,600,450]);
+    h=plot(x,tri,'+')%,x,yFit,'--')%,x.^2,yFit,'--');
+    xlabel('$h \ \rm [m]$','Interpreter','Latex','FontSize', 20)
+    ylabel('$\sigma_{pol}(b) \ \rm [V]$','Interpreter','Latex','FontSize', 20)
+    set(gca,'FontSize',20)
+    set(h,'MarkerSize',11)
+    grid on
+    %lgd=legend('Valeurs numériques', 'Régression linéaire');
+    %set(lgd,'fontsize',14,'Location','southwest');
+    print(fig1,'figures/nontrivial_charge_b', '-depsc');

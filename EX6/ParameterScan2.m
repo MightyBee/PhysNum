@@ -14,6 +14,7 @@ repertoire = './'; % Chemin d'acces au code compile (NB: enlever le ./ sous Wind
 executable = 'Exercice6'; % Nom de l'executable (NB: ajouter .exe sous Windows)
 input = 'configuration.in'; % Nom du fichier d'entree de base
 dossier='simulations/';
+methode='T'
 
 nsimul = 20; % Nombre de simulations a faire
 
@@ -29,7 +30,7 @@ output = cell(1, nsimul); % Tableau de cellules contenant le nom des fichiers de
 for i = 1:nsimul
     output{i} = [dossier paramstr '=' num2str(param(i))];
     % Execution du programme en lui envoyant la valeur a scanner en argument
-    cmd = sprintf('%s%s %s trivial=false b=0.02 N1=%g N2=%g output=%s', repertoire, executable, input, param(i), 5*param(i), output{i});
+    cmd = sprintf('%s%s %s trivial=false methode=%s b=0.02 N1=%g N2=%g output=%s', repertoire, executable, input, methode, param(i), 5*param(i), output{i});
     disp(cmd)
     system(cmd);
 end
@@ -40,36 +41,52 @@ end
 int=zeros(nsimul,1);
 
 for i = 1:nsimul % Parcours des resultats de toutes les simulations
-    data = load([output{i} '_Er_Dr.out']);
-    rmid = data(:,1);
-    Er = data(:,2);
-    Dr = data(:,3);
     data = load([output{i} '_phi.out']);
-    r = data(:,1);
     phi = data(:,2);
     int(i)=phi(N(i)+1);
-    data = load([output{i} '_rholib_divEr_divDr.out']);
-    rmidmid = data(:,1);
-    rholib = data(:,2);
-    divEr = data(:,3);
-    divDr = data(:,4);
 end
 
-x=1./N;
-y=int;
+x_T=0.12./(6*N);
+y_T=int;
 
-[a,erra,yFit]=fit((x').^2,y);
+[a,erra,yFit_T]=fit((x_T').^2,y_T);
+
+%% G2 %%
+
+methode='G2';
+
+output = cell(1, nsimul); % Tableau de cellules contenant le nom des fichiers de sortie
+for i = 1:nsimul
+    output{i} = [dossier paramstr '=' num2str(param(i))];
+    % Execution du programme en lui envoyant la valeur a scanner en argument
+    cmd = sprintf('%s%s %s trivial=false methode=%s b=0.02 N1=%g N2=%g output=%s', repertoire, executable, input, methode, param(i), 5*param(i), output{i});
+    disp(cmd)
+    system(cmd);
+end
+
+
+for i = 1:nsimul % Parcours des resultats de toutes les simulations
+    data = load([output{i} '_phi.out']);
+    phi = data(:,2);
+    int(i)=phi(N(i)+1);
+end
+
+x_G=0.12./(6*N);
+y_G=int;
+
+[a,erra,yFit_G]=fit((x_G').^2,y_G);
 
 %% Figures %%
 %%%%%%%%%%%%%
 
     fig1=figure('Position',[50,50,600,450]);
-    h=plot(x.^2,y,'+',x.^2,yFit,'--');
-    xlabel('1/N^2 [m^{-2}]','FontSize', 20)
+    plot(x_G.^2,y_G,'b+',x_T.^2,y_T,'r+','MarkerSize',11);
+    hold on;
+    plot(x_G.^2,yFit_G,'b--',x_T.^2,yFit_T,'r--','MarkerSize',11);
+    xlabel('h^2 [m^{2}]','FontSize', 20)
     ylabel('\phi(b) [V]','FontSize', 20)
     set(gca,'FontSize',20)
-    set(h,'MarkerSize',11)
     grid on
-    lgd=legend('Valeurs numériques', 'Régression linéaire');
+    lgd=legend('Méthode Gauss','Méthode Trapèzes');
     set(lgd,'fontsize',14,'Location','southwest');
-    print(fig1,'figures/conv_phi_b', '-depsc');
+    print(fig1,['figures/nontrivial_conv2'], '-depsc');

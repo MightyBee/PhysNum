@@ -25,7 +25,7 @@ if(strcmp(filename,'trivial'))
     lgd=legend('Valeurs numériques', 'Solution analytique');
     set(lgd,'fontsize',14,'Location','southwest');
 end
-print(fig1,['figures/phi_' filename], '-depsc');
+print(fig1,['figures/' filename '_phi'], '-depsc');
 
 fig2=figure('Position',[50,50,600,450]);
 hold on
@@ -40,7 +40,7 @@ if(strcmp(filename,'trivial'))
     lgd=legend('Valeurs numériques', 'Solution analytique');
     set(lgd,'fontsize',14,'Location','northwest');
 end
-print(fig2,['figures/Er_' filename], '-depsc');
+print(fig2,['figures/' filename '_Er'], '-depsc');
 
 fig3=figure('Position',[50,50,600,450]);
 hold on
@@ -49,19 +49,34 @@ xlabel('r [m]')
 ylabel('D_r/\epsilon_0 [V/m]')
 grid on, box on
 set(gca,'FontSize',20)
-print(fig3,['figures/Dr_' filename], '-depsc');
+print(fig3,['figures/' filename '_Dr'], '-depsc');
 
 fig4=figure('Position',[50,50,600,450]);
 hold on
 plot(rmidmid,rholib,'DisplayName','\rho_{lib}/\epsilon_0')
 plot(rmidmid,divDr,'--','DisplayName','div(D_r)/\epsilon_0')
 plot(rmidmid,divEr-divDr,'DisplayName','\rho_{pol}/\epsilon_0')
-xlabel('r')
+xlabel('r [m]')
 ylabel('\rho/\epsilon_0 [V/m^2]')
 grid on, box on
 set(gca,'FontSize',20)
 lgd=legend('show');
 set(lgd,'fontsize',14,'Location','southeast');
-print(fig4,['figures/rho_' filename], '-depsc');
+print(fig4,['figures/' filename '_rho'], '-depsc');
 
+fig5=figure('Position',[50,50,600,450]);
+hold on
+plot(rmidmid,rholib,'DisplayName','\rho_{lib}/\epsilon_0')
+plot(rmidmid,divDr,'--','DisplayName','div(D_r)/\epsilon_0')
+plot(rmidmid,divEr-divDr,'DisplayName','\rho_{pol}/\epsilon_0')
+ylim([-0.05 1.05]*1e4)
+xlabel('r [m]')
+ylabel('\rho/\epsilon_0 [V/m^2]')
+grid on, box on
+set(gca,'FontSize',20)
+lgd=legend('show');
+set(lgd,'fontsize',14,'Location','northeast');
+print(fig5,['figures/' filename '_rho_zoom'], '-depsc');
 
+figure 
+plot(rmidmid,divDr-rholib)

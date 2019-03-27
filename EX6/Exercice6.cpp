@@ -137,7 +137,9 @@ int main(int argc, char* argv[])
   for(size_t i(0); i<ninters; i++){
     // matrice
     if(methode=="T"){
+      double p(0.3);
       ajout_k=(r[i]*epsilonr(r[i],false)+r[i+1]*epsilonr(r[i+1],true))/h[i]*0.5;
+      // ajout_k=p*(r[i]*epsilonr(r[i],false)+r[i+1]*epsilonr(r[i+1],true))/h[i]*0.5+(1.0-p)*(r[i]+r[i+1])*0.5*epsilonr((r[i]+r[i+1])*0.5,false)/h[i];
     }else if(methode=="G2"){
       r1=((1.0-sqrt(1.0/3.0))*r[i]+(1.0+sqrt(1.0/3.0))*r[i+1])*0.5;
       r2=((1.0+sqrt(1.0/3.0))*r[i]+(1.0-sqrt(1.0/3.0))*r[i+1])*0.5;
