@@ -230,7 +230,7 @@ int main(int argc, char* argv[])
     for(int i(1); i<N-1; ++i)
     {
       if (schema == "A")
-	fnext[i] = 0.;// TODO : Completer le schema A
+	fnext[i] = 2*(1-(*u2)(x)*dt*dt/(dx*dx))*fnow[i]-fpast[i]+(*u2)(x)*dt*dt/(dx*dx)*(fnow[i+1]-fnow[i-1]);// TODO : Completer le schema A
       else if(schema == "B")
         fnext[i] = 0.; // TODO : Completer le schema B
       else if(schema=="C")
