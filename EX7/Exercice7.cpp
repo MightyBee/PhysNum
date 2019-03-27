@@ -238,7 +238,7 @@ int main(int argc, char* argv[])
       else if(schema == "B")
         fnext[i] = 2*fnow[i]-fpast[i]+dt*dt/(dx*dx); // TODO : Completer le schema B
       else if(schema=="C")
-        fnext[i] = ; // TODO : Completer le schema C
+        fnext[i] = 0.0; // TODO : Completer le schema C
    // Note : La syntaxe pour evaluer u^2 au point x est (*u2)(x)
     }
 
