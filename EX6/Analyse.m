@@ -1,13 +1,13 @@
 %function Analyse(filename)
-filename='nontrivial_T';
-data = load(['simulations/' filename '_Er_Dr.out']);
+filename='output';
+data = load([ filename '_Er_Dr.out']);
 rmid = data(:,1);
 Er = data(:,2);
 Dr = data(:,3);
-data = load(['simulations/' filename '_phi.out']);
+data = load([ filename '_phi.out']);
 r = data(:,1);
 phi = data(:,2);
-data = load(['simulations/' filename '_rholib_divEr_divDr.out']);
+data = load([ filename '_rholib_divEr_divDr.out']);
 rmidmid = data(:,1);
 rholib = data(:,2);
 divEr = data(:,3);

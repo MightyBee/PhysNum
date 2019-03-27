@@ -47,6 +47,7 @@ public:
       return 1.0;
     else
       return 8.0 - 6.0*(r-b)/(R-b);
+      //return 6.0*(r-b)/(R-b)+b;
   }
 
 private:
@@ -64,10 +65,14 @@ public:
     if(trivial){
       return 1.0;
     }else{
-      if(r>b)
-        return 0.0;
-      else
-        return a0*(1.0-pow(r/b,2));
+      if((r>b)and(r<4*b))
+        return a0*sin(100*r);
+      if(r<=b)
+        return 100;
+      if(r=>4*b)
+        return -100;
+
+        //return a0*sin(r);
       }
   }
 
