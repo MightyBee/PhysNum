@@ -238,11 +238,8 @@ int main(int argc, char* argv[])
       else if(schema == "B")
         fnext[i] = 2*fnow[i]-fpast[i]+dt*dt/(2*dx*dx)*sqrt((*u2)(i*dx))*(sqrt((*u2)((i+1)*dx))-sqrt((*u2)((i-1)*dx)))*(fnow[i+1]-fnow[i-1])+(*u2)(i*dx)*dt*dt/(dx*dx)*(fnow[i+1]-2*fnow[i]+fnow[i-1]); // TODO : Completer le schema B
       else if(schema=="C")
-<<<<<<< HEAD
-        fnext[i] = 0.0; // TODO : Completer le schema C
-=======
         fnext[i] = 2*fnow[i]-fpast[i]+dt*dt/(dx*dx)*((*u2)((i+1)*dx)*fnow[i+1]-2*((*u2)(i*dx))*fnow[i]+((*u2)((i+1)*dx))*fnow[i-1]); // TODO : Completer le schema C
->>>>>>> cf9142a501f1cff5d4665919dade059e6476cd92
+
    // Note : La syntaxe pour evaluer u^2 au point x est (*u2)(x)
     }
 
@@ -281,7 +278,7 @@ int main(int argc, char* argv[])
         break;
 
       case sortie:
-        fnext[N-1] = fnow[0]-sqrt((*u2)((N-0.5)*dx))*dt/dx*(fnow[N-1]-fnow[N-2]);; // TODO : Completer la condition au bord droit "sortie de l'onde"
+        fnext[N-1] = fnow[N-1]-sqrt((*u2)((N-0.5)*dx))*dt/dx*(fnow[N-1]-fnow[N-2]);; // TODO : Completer la condition au bord droit "sortie de l'onde"
         break;
     }
 
