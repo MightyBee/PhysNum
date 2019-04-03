@@ -10,6 +10,8 @@ E = data(:,2);
 data = load([fichier,'_f.out']);
 f = data(:,2:end);
 
+[X,T]=meshgrid(x,t);
+
 %% Figures %%
 %%%%%%%%%%%%%
 figure('Name',['Analyse de ' fichier])
@@ -25,7 +27,7 @@ grid
 xlabel('t [s]')
 ylabel('E [m^3]')
 
-% subplot(2,2,4)
+subplot(2,2,4)
 % pcolor(x,t,f)
 % shading interp
 % colormap jet
@@ -33,6 +35,7 @@ ylabel('E [m^3]')
 % xlabel('x [m]')
 % ylabel('t [s]')
 % ylabel(c,'f(x,t) [m]')
+surf(X,T,f);
 
 subplot(2,2,3)
 h = plot(x,f(1,:));
@@ -40,7 +43,7 @@ grid
 xlabel('x [m]')
 ylabel('f(x,t) [m]')
 ht = title('t=0 s');
-ylim([min(f(1,:)),max(f(1,:))])
+ylim([min(f(:)),max(f(:))])
 for i=2:length(t)
     pause(.01)
     if ~ishandle(h)

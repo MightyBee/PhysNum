@@ -81,11 +81,11 @@ private:
 // TODO : Calcul de l'energie de l'onde
 //
 
-double energie(vector<double> const& f, double const& dx)
+double energie(vector<double> const& f, double const& dh)
 {
   double E(0.0);
   for(size_t i(0); i<f.size()-1; i++){
-    E+=(f[i]*f[i]+f[i+1]*f[i+1])*0.5*dx;
+    E+=(f[i]*f[i]+f[i+1]*f[i+1])*0.5*dh;
   }
   return E;
 }
@@ -122,8 +122,9 @@ int main(int argc, char* argv[])
 
   // Parametres de simulation :
   double tfin    = configFile.get<double>("tfin");
-  double L       = configFile.get<double>("L");
-  int N          = configFile.get<int>("Npoints");
+  double Lx      = configFile.get<double>("Lx");
+  int Nx         = configFile.get<int>("Npoints");
+  double frac    = configFile.get<double>("frac_y");
   double CFL     = configFile.get<double>("CFL");
   string type_u2 = configFile.get<string>("type_u2");
 
@@ -138,15 +139,11 @@ int main(int argc, char* argv[])
     return -1;
   }
 
-  double dx = L / (N-1);
-  double dt = CFL * dx / sqrt(u2->max());
+
+  double dh(Lx/(Nx-1));
+  int Ny((int)ceil(Nx*frac));
+  double dt = CFL * dh / sqrt(u2->max());
   bool ecrire_f = configFile.get<bool>("ecrire_f"); // Exporter f(x,t) ou non
-  string schema = configFile.get<string>("schema");
-  if(schema != "A" && schema != "B" && schema != "C")
-  {
-    cerr << "Merci de choisir schema=""A"", ""B"" ou ""C""." << endl;
-    return -1;
-  }
 
   // Conditions aux bords (les strings sont converties en valeurs numeriques a l'aide d'un enumerateur) :
   typedef enum{fixe,libre,harmonique,sortie} Cond_bord;
@@ -188,8 +185,6 @@ int main(int argc, char* argv[])
     A = configFile.get<double>("A");
     omega = configFile.get<double>("omega");
   }
-        double C_g = configFile.get<double>("C_g");
-        double C_d = configFile.get<double>("C_d");
 
 
   // Fichiers de sortie :
@@ -198,24 +193,22 @@ int main(int argc, char* argv[])
   ofstream fichier_f((output + "_f.out").c_str());
   fichier_f.precision(15);
 
-  ofstream fichier_E((output + "_E.out").c_str());
-  fichier_E.precision(15);
-
   ofstream fichier_u((output + "_u.out").c_str());
   fichier_u.precision(15);
-  for(double x(0.); x<=L+.5*dx; x+=dx)
+  for(double x(0.); x<=Lx+.5*dh; x+=dh)
     fichier_u << x << " " << sqrt((*u2)(x)) << endl;
   fichier_u.close();
 
 
   // Initialisation des tableaux du schema numerique :
-  vector<double> fpast(N), fnow(N), fnext(N);
+  vector<vector<double>> fpast(Nx,vector<double>(Ny)), fnow(Nx,vector<double>(Ny)), fnext(Nx,vector<double>(Ny));
 
-  for(int i(0); i<N; ++i)
-  {
-    fpast[i] = 0.;
-    fnow[i] = 0.;
-   }
+  for(int i(0); i<Nx; ++i){
+    for(int j(0); j<Ny; ++j){
+        fpast[i][j] =3*exp(-(j*dh-5)*(j*dh-5)-(i*dh-2)*(i*dh-2));//+3*exp(-(j*dh-8)*(j*dh-8)-(i*dh-5)*(i*dh-5));
+        fnow[i][j] = 3*exp(-(j*dh-5)*(j*dh-5)-(i*dh-2)*(i*dh-2));//+3*exp(-(j*dh-8)*(j*dh-8)-(i*dh-5)*(i*dh-5));
+    }
+  }
 
 
   // Boucle temporelle :
@@ -228,27 +221,22 @@ int main(int argc, char* argv[])
     if(stride%n_stride == 0)
     {
       if(ecrire_f) fichier_f << t << " " << fnow << endl;
-      fichier_E << t << " " << energie(fnow,dx) << endl;
     }
     ++stride;
 
     // Evolution :
-    for(int i(1); i<N-1; ++i)
-    {
-      if (schema == "A")
-       	fnext[i] = 2*(1-(*u2)(i*dx)*dt*dt/(dx*dx))*fnow[i]-fpast[i]+(*u2)(i*dx)*dt*dt/(dx*dx)*(fnow[i+1]+fnow[i-1]);// TODO : Completer le schema A
-      else if(schema == "B")
-        fnext[i] = 2*fnow[i]-fpast[i]+dt*dt/(2*dx*dx)*sqrt((*u2)(i*dx))*(sqrt((*u2)((i+1)*dx))-sqrt((*u2)((i-1)*dx)))*(fnow[i+1]-fnow[i-1])+(*u2)(i*dx)*dt*dt/(dx*dx)*(fnow[i+1]-2*fnow[i]+fnow[i-1]); // TODO : Completer le schema B
-      else if(schema=="C")
-        fnext[i] = 2*fnow[i]-fpast[i]+dt*dt/(dx*dx)*((*u2)((i+1)*dx)*fnow[i+1]-2*((*u2)(i*dx))*fnow[i]+((*u2)((i+1)*dx))*fnow[i-1]); // TODO : Completer le schema C
-   // Note : La syntaxe pour evaluer u^2 au point x est (*u2)(x)
+    for(int i(1); i<Nx-1; ++i){
+      for(int j(1); j<Ny-1; ++j){
+        //if((i!=Nx/2 && i!=Nx/2-1 && i!=Nx/2+1) || (j>2.0*Ny/5.0 && j<3.0*Ny/5.0)){
+        fnext[i][j] = 2*(1-2*(*u2)(i*dh)*dt*dt/(dh*dh))*fnow[i][j]-fpast[i][j]+(*u2)(i*dh)*dt*dt/(dh*dh)*(fnow[i+1][j]+fnow[i-1][j]+fnow[i][j+1]+fnow[i][j-1]);// TODO : Completer le schema A
+      }//}
     }
 
     // Conditions aux bords :
     switch(cb_gauche)
     {
       case fixe:
-        fnext[0] = C_g; // TODO : Completer la condition au bord gauche fixe
+        fnext[0] = fnow[0]; // TODO : Completer la condition au bord gauche fixe
         break;
 
       case libre:
@@ -256,43 +244,60 @@ int main(int argc, char* argv[])
         break;
 
       case harmonique:
-        fnext[0] = A*sin(omega*t); // TODO : Completer la condition au bord gauche harmonique
+        fnext[0] = vector<double>(Ny,A*sin(omega*t));
+        /*fnext[Nx-1] = vector<double>(Ny,A*sin(omega*t));
+        for(auto& el : fnext){
+          el.front()=A*sin(omega*t);
+          el.back()=A*sin(omega*t);
+        }*/// TODO : Completer la condition au bord gauche harmonique
         break;
 
-      case sortie:
-        fnext[0] = fnow[0]+sqrt((*u2)(0.5*dx))*dt/dx*(fnow[1]-fnow[0]); // TODO : Completer la condition au bord gauche "sortie de l'onde"
-        break;
+      /*case sortie:
+        fnext[0] = fnow[0]+sqrt((*u2)(0.5*dh))*dt/dh*(fnow[1]-fnow[0]); // TODO : Completer la condition au bord gauche "sortie de l'onde"
+        break;*/
     }
 
     switch(cb_droit)
     {
       case fixe:
-        fnext[N-1] = C_d; // TODO : Completer la condition au bord droit fixe
+        fnext[Nx-1] = fnow[Nx-1]; // TODO : Completer la condition au bord droit fixe
         break;
 
       case libre:
-        fnext[N-1] = fnext[N-2]; // TODO : Completer la condition au bord droit libre
+        fnext[Nx-1] = fnext[Nx-2]; // TODO : Completer la condition au bord droit libre
         break;
 
-      case harmonique:
-        fnext[N-1] = A*sin(omega*t); // TODO : Completer la condition au bord droit harmonique
+      /*case harmonique:
+        fnext[Nx-1] = A*sin(omega*t); // TODO : Completer la condition au bord droit harmonique
         break;
 
-      case sortie:
-        fnext[N-1] = fnow[N-1]-sqrt((*u2)((N-0.5)*dx))*dt/dx*(fnow[N-1]-fnow[N-2]);; // TODO : Completer la condition au bord droit "sortie de l'onde"
-        break;
+      /*case sortie:
+        fnext[Nx-1] = fnow[Nx-1]-sqrt((*u2)((Nx-0.5)*dh))*dt/dh*(fnow[Nx-1]-fnow[Nx-2]);; // TODO : Completer la condition au bord droit "sortie de l'onde"
+        break;*/
     }
-
+    /*for(auto& el : fnext){
+      el.front()=el[1];
+      el.back()=el[Ny-2];
+    }*/
+    for(size_t i(0); i<Nx; i++){
+      fnext[i].front()=fnow[i].front();
+      fnext[i].back()=fnow[i].back();
+    }
+    /*for(size_t j(0); j<Ny; j++){
+      if(j<2.0*Ny/5.0 || j>3.0*Ny/5.0){
+        fnext[Nx/2][j]=fnow[Nx/2][j];
+        fnext[Nx/2-1][j]=fnext[Nx/2-2][j];
+        fnext[Nx/2+1][j]=fnext[Nx/2+2][j];
+      }
+    }*/
     // Mise a jour :
     fpast = fnow;
     fnow  = fnext;
   }
 
   if(ecrire_f) fichier_f << t << " " << fnow << endl;
-  fichier_E << t << " " << energie(fnow,dx) << endl;
 
   fichier_f.close();
-  fichier_E.close();
 
   return 0;
 }

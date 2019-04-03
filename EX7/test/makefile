@@ -1,9 +1,9 @@
 CC = g++
 CFLAGS = -std=c++0x -Wall -g
-EXEC_NAME = Exercice7
+EXEC_NAME = Ex7
 INCLUDES =
 LIBS =
-OBJ_FILES = Exercice7.o
+OBJ_FILES = Ex7.o
 
 all : $(EXEC_NAME)
 
