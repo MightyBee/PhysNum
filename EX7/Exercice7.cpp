@@ -234,7 +234,7 @@ int main(int argc, char* argv[])
     for(int i(1); i<N-1; ++i)
     {
       if (schema == "A")
-	fnext[i] = 2*(1-(*u2)(i*dx)*dt*dt/(dx*dx))*fnow[i]-fpast[i]+(*u2)(i*dx)*dt*dt/(dx*dx)*(fnow[i+1]-fnow[i-1]);// TODO : Completer le schema A
+	fnext[i] = 2*(1-(*u2)(i*dx)*dt*dt/(dx*dx))*fnow[i]-fpast[i]+(*u2)(i*dx)*dt*dt/(dx*dx)*(fnow[i+1]+fnow[i-1]);// TODO : Completer le schema A
       else if(schema == "B")
         fnext[i] = 2*fnow[i]-fpast[i]+dt*dt/(2*dx*dx)*sqrt((*u2)(i*dx))*(sqrt((*u2)((i+1)*dx))-sqrt((*u2)((i-1)*dx)))*(fnow[i+1]-fnow[i-1])+(*u2)(i*dx)*dt*dt/(dx*dx)*(fnow[i+1]-2*fnow[i]+fnow[i-1]); // TODO : Completer le schema B
       else if(schema=="C")
