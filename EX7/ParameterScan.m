@@ -12,14 +12,14 @@
 
 repertoire = './'; % Chemin d'acces au code compile (NB: enlever le ./ sous Windows)
 executable = 'Exercice7'; % Nom de l'executable (NB: ajouter .exe sous Windows)
-input = 'configuration.in'; % Nom du fichier d'entree de base
+input = 'scan_const.in'; % Nom du fichier d'entree de base
 dossier='simulations/';
 
 nsimul = 10; % Nombre de simulations a faire
 
 
 % N = round((logspace(1,3, nsimul)./4))*4+1;
-N=round(logspace(2,3, nsimul));
+N=round(logspace(2,4.5, nsimul));
 
 paramstr = 'Npoints'; % Nom du parametre a scanner
 param = N; % Valeurs du parametre a scanner
@@ -54,22 +54,25 @@ end
 for i = 1:nsimul % Parcours des resultats de toutes les simulations
     if(strcmp(paramstr,'Npoints'))
         data = load([output{i} '_f.out']);
-        f = data(:,2:end);
+        t = data(end-1:end,1);
+        f = data(end-1:end,2:end);
 %         y(i) = f(end,(N(i)-1)/4+1);
-        a = floor(x0/dx(i))
-        y(i)=f(end,a)+(f(end,a+1)-f(end,a))/dx(i)*(x0-dx(i)*a);
+        a = floor(x0/dx(i)+1);
+        y1=f(1,a)+(f(1,a+1)-f(1,a))/dx(i)*(x0-dx(i)*a);
+        y2=f(2,a)+(f(2,a+1)-f(2,a))/dx(i)*(x0-dx(i)*a);
+        y(i)=y1+(y2-y1)/(t(2)-t(1))*(1.5-t(1));
     end
 end
 
 % [a,erra,yFit]=fit(dt',Tp');
 
-
+err=abs(-sin(5/6*5-5*1.5)-y);
 %% Figures %%
 %%%%%%%%%%%%%
 
 if(strcmp(paramstr,'Npoints'))
     figure
-    h=plot(1./N,y,'k+');
+    h=loglog(1./N,err,'k+');
     xlabel('$\Delta x \ \rm [m]$','Interpreter','Latex','FontSize', 20)
     ylabel(sprintf('T[]',xp,yp),'FontSize', 20)
     set(gca,'FontSize',20)

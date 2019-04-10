@@ -123,8 +123,8 @@ int main(int argc, char* argv[])
   // Parametres de simulation :
   double tfin    = configFile.get<double>("tfin");
   double Lx      = configFile.get<double>("Lx");
+  double Ly    = configFile.get<double>("Ly");
   int Nx         = configFile.get<int>("Npoints");
-  double frac    = configFile.get<double>("frac_y");
   double CFL     = configFile.get<double>("CFL");
   string type_u2 = configFile.get<string>("type_u2");
 
@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
 
 
   double dh(Lx/(Nx-1));
-  int Ny((int)ceil(Nx*frac));
+  int Ny((int)ceil(Ly/dh)+1);
   double dt = CFL * dh / sqrt(u2->max());
   bool ecrire_f = configFile.get<bool>("ecrire_f"); // Exporter f(x,t) ou non
 
@@ -205,8 +205,8 @@ int main(int argc, char* argv[])
 
   for(int i(0); i<Nx; ++i){
     for(int j(0); j<Ny; ++j){
-        fpast[i][j] =3*exp(-(j*dh-5)*(j*dh-5)-(i*dh-2)*(i*dh-2));//+3*exp(-(j*dh-8)*(j*dh-8)-(i*dh-5)*(i*dh-5));
-        fnow[i][j] = 3*exp(-(j*dh-5)*(j*dh-5)-(i*dh-2)*(i*dh-2));//+3*exp(-(j*dh-8)*(j*dh-8)-(i*dh-5)*(i*dh-5));
+        fpast[i][j] = 3*exp(-(j*dh-5)*(j*dh-5)-(i*dh-2)*(i*dh-2))+3*exp(-0.8*(j*dh-8)*(j*dh-8)-0.07*(i*dh-5)*(i*dh-5));  cos(sqrt((j*dh-5)*(j*dh-5)+(i*dh-5)*(i*dh-5))*2);
+        fnow[i][j]  = 3*exp(-(j*dh-5)*(j*dh-5)-(i*dh-2)*(i*dh-2))+3*exp(-0.8*(j*dh-8)*(j*dh-8)-0.07*(i*dh-5)*(i*dh-5));  cos(sqrt((j*dh-5)*(j*dh-5)+(i*dh-5)*(i*dh-5))*2);
     }
   }
 
