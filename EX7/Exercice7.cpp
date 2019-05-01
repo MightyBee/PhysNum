@@ -252,7 +252,7 @@ int main(int argc, char* argv[])
     switch(cb_gauche)
     {
       case fixe:
-        fnext[0] = C_g; // TODO : Completer la condition au bord gauche fixe
+        fnext[0] = fnow[0]; // TODO : Completer la condition au bord gauche fixe
         break;
 
       case libre:
@@ -282,7 +282,7 @@ int main(int argc, char* argv[])
     switch(cb_droit)
     {
       case fixe:
-        fnext[N-1] = C_d; // TODO : Completer la condition au bord droit fixe
+        fnext[N-1] = fnow[N-1]; // TODO : Completer la condition au bord droit fixe
         break;
 
       case libre:

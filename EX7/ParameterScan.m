@@ -19,14 +19,15 @@ nsimul = 20; % Nombre de simulations a faire
 
 
 % N = round((logspace(1,3, nsimul)./4))*4+1;
-N=round(logspace(2,3.3, nsimul));
-
-paramstr = 'Npoints'; % Nom du parametre a scanner
-param = N; % Valeurs du parametre a scanner
+N=round(logspace(2,3, nsimul));
+w=3.1416*u/L*[1,2,3,4,5,6,7,8,9,10];
+paramstr = 'omega'; % Nom du parametre a scanner
+param = w; % Valeurs du parametre a scanner
 
 L=20;
 dx=L./(N-1);
 x0=5;
+u=6;
 
 %% Simulations %%
 %%%%%%%%%%%%%%%%%
@@ -67,8 +68,19 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
 end
 
 % [a,erra,yFit]=fit(dt',Tp');
+if(strcmp(paramstr,'omega'))
+      y = zeros(1,nsimul);
+    for i=1:nsimul
+        data =  load([output{i} '_E.out']);
+        E = data(:,2:end);
+        for j=1:size(E,1)
+            if E(i,2)>y(i)
+                y(i)=E(i,2)
+            end
+        end
+    end
+end
 
-err=abs(-sin(5/6*5-5*1.5)-y);
 %% Figures %%
 %%%%%%%%%%%%%
 
@@ -83,7 +95,7 @@ if(strcmp(paramstr,'Npoints'))
 %     lgd=legend('Valeurs numériques', 'Régression linéaire');
 %     set(lgd,'fontsize',14,'Location','northwest');
     print(fig1,'figures/conv0_dx', '-depsc');
-    
+
     fig2=figure('Position',[50,50,600,450]);
     h=loglog(dt,err,'k+');
     xlabel('$\Delta t \ \rm [s]$','Interpreter','Latex')
@@ -94,4 +106,10 @@ if(strcmp(paramstr,'Npoints'))
 %     lgd=legend('Valeurs numériques', 'Régression linéaire');
 %     set(lgd,'fontsize',14,'Location','northwest');
     print(fig2,'figures/conv0_dt', '-depsc');
+end
+
+if(strcmp(paramstr,'omega'))
+    figure
+    h=plot([1 10],y,'k+');
+    grid on
 end
