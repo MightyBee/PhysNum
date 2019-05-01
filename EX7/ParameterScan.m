@@ -5,7 +5,7 @@
 % Il utilise les arguments du programme (voir ConfigFile.h)
 % pour remplacer la valeur d'un parametre du fichier d'input
 % par la valeur scannee.
-%
+
 
 %% Parametres %%
 %%%%%%%%%%%%%%%%
@@ -18,16 +18,21 @@ dossier='simulations/';
 nsimul = 20; % Nombre de simulations a faire
 
 
+L=20;
+u=6;
 % N = round((logspace(1,3, nsimul)./4))*4+1;
 N=round(logspace(2,3, nsimul));
-w=3.1416*u/L*[1,2,3,4,5,6,7,8,9,10];
-paramstr = 'omega'; % Nom du parametre a scanner
-param = w; % Valeurs du parametre a scanner
 
-L=20;
+
+Omega=linspace(0,5,nsimul);
+Tfin=linspace(20,150,nsimul);
+paramstr = 'tfin'; % Nom du parametre a scanner
+param = Tfin; % Valeurs du parametre a scanner
+
+
 dx=L./(N-1);
 x0=5;
-u=6;
+
 
 %% Simulations %%
 %%%%%%%%%%%%%%%%%
@@ -39,6 +44,7 @@ for i = 1:nsimul
     cmd = sprintf('%s%s %s %s=%.15g output=%s', repertoire, executable, input, paramstr, param(i), output{i});
     disp(cmd)
     system(cmd);
+ 
 end
 
 %% Analyse %%
@@ -71,16 +77,30 @@ end
 if(strcmp(paramstr,'omega'))
       y = zeros(1,nsimul);
     for i=1:nsimul
-        data =  load([output{i} '_E.out']);
-        E = data(:,2:end);
-        for j=1:size(E,1)
-            if E(i,2)>y(i)
-                y(i)=E(i,2)
-            end
-        end
+        data =  load([output{i} '_E.out']);  
+       y(i)=max(data(:,2));
+      % y(i)=max(E);
+      %  for j=1:7961
+          %  if data(j,2)>y(i)
+            %    y(i)=data(j,2)
+           % end
+       % end
     end
 end
 
+if(strcmp(paramstr,'tfin'))
+      y = zeros(1,nsimul);
+    for i=1:nsimul
+        data =  load([output{i} '_E.out']);  
+       y(i)=max(data(:,2));
+      % y(i)=max(E);
+      %  for j=1:7961
+          %  if data(j,2)>y(i)
+            %    y(i)=data(j,2)
+           % end
+       % end
+    end
+end
 %% Figures %%
 %%%%%%%%%%%%%
 
@@ -110,6 +130,12 @@ end
 
 if(strcmp(paramstr,'omega'))
     figure
-    h=plot([1 10],y,'k+');
+    h=plot(Omega,y,'k+');
+    grid on
+end
+
+if(strcmp(paramstr,'tfin'))
+    figure
+    h=plot(Tfin,y,'k+');
     grid on
 end
