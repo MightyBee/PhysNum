@@ -237,7 +237,12 @@ double prob(vec_cmplx const& psi, int nL, int nR, double dx)
   for(size_t i(0); i<n; i++){
     psi_rogne[i]=psi[i+nL];
   }
+<<<<<<< HEAD
   return trapezes(psi_rogne,dx)};
+=======
+  return trapezes(psi_rogne,dx);
+}
+>>>>>>> 19f3cb314988aa6a0c0fb4f1f09759bed898e918
 
 
 double E(vec_cmplx const& psi, vec_cmplx const& diagH, vec_cmplx const& lowerH, vec_cmplx const& upperH, double const& dx)
@@ -284,17 +289,24 @@ double x2moy(vec_cmplx const& psi, const vector<double>& x, double const& dx)
 double pmoy(vec_cmplx const& psi, double const& dx)
 {
   vec_cmplx psi_tmp(psi.size());
-  for(size_t i(0); i<psi.size(); i++){
-    psi_tmp[i]=conj(psi[i])*x[i]*x[i]*psi[i];
+  psi_tmp[0]=complex<double>(0.0,-1.0)*conj(psi[0])*(psi[1]-psi[0])/(dx);
+  for(size_t i(1); i<psi.size()-1; i++){
+    psi_tmp[i]=complex<double>(0.0,-1.0)*conj(psi[i])*(psi[i+1]-psi[i-1])/(2*dx);
   }
+  psi_tmp[psi.size()-1]=complex<double>(0.0,-1.0)*conj(psi[psi.size()-1])*(psi[psi.size()-1]-psi[psi.size()-2])/(dx);
   return trapezes(psi_tmp,dx);
 }
 
 
 double p2moy(vec_cmplx const& psi, double const& dx)
 {
-  // TODO: calculer la moyenne du p^2
-  return 0.;
+  vec_cmplx psi_tmp(psi.size());
+  psi_tmp[0]=complex<double>(0.0,0.0);
+  for(size_t i(1); i<psi.size()-1; i++){
+    psi_tmp[i]=-conj(psi[i])*(psi[i+1]-2.0*psi[i]+psi[i-1])/(dx*dx);
+  }
+  psi_tmp[psi.size()-1]=complex<double>(0.0,0.0);
+  return trapezes(psi_tmp,dx);
 }
 
 vec_cmplx normalize(vec_cmplx const& psi, double const& dx)
