@@ -188,8 +188,7 @@ int main(int argc, char* argv[])
     A = configFile.get<double>("A");
     omega = configFile.get<double>("omega");
   }
-        double C_g = configFile.get<double>("C_g");
-        double C_d = configFile.get<double>("C_d");
+  
 
 
   // Fichiers de sortie :

@@ -51,4 +51,15 @@ for i=2:length(t)
      end
      set(h,'YData',f(i,:))
      set(ht,'String',sprintf('t=%0.2f s',t(i)))
- end
+end
+
+ figure
+ hold on
+  plot(x, -12*sin(5.338*x),'b-','LineWidth',3);
+ plot(x,f(end,:),'r+','MarkerSize',10,'LineWidth',1);
+ set(gca,'FontSize',25)
+ xlabel('x[m]');
+ ylabel('f(x)[m]');
+ axis([0 20 -12 12]);
+ grid on
+ 
