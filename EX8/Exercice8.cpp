@@ -274,15 +274,21 @@ double xmoy(vec_cmplx const& psi, const vector<double>& x, double const& dx)
 
 double x2moy(vec_cmplx const& psi, const vector<double>& x, double const& dx)
 {
-  //TODO: calculer la moyenne du x^2
-  return 0.;
+  vec_cmplx psi_tmp(psi.size());
+  for(size_t i(0); i<psi.size(); i++){
+    psi_tmp[i]=conj(psi[i])*x[i]*x[i]*psi[i];
+  }
+  return trapezes(psi_tmp,dx);
 }
 
 
 double pmoy(vec_cmplx const& psi, double const& dx)
 {
-  //TODO: calculer la moyenne de p
-  return 0.;
+  vec_cmplx psi_tmp(psi.size());
+  for(size_t i(0); i<psi.size(); i++){
+    psi_tmp[i]=conj(psi[i])*x[i]*x[i]*psi[i];
+  }
+  return trapezes(psi_tmp,dx);
 }
 
 
