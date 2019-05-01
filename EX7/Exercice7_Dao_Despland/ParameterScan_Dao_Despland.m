@@ -5,7 +5,7 @@
 % Il utilise les arguments du programme (voir ConfigFile.h)
 % pour remplacer la valeur d'un parametre du fichier d'input
 % par la valeur scannee.
-
+%
 
 %% Parametres %%
 %%%%%%%%%%%%%%%%
@@ -18,21 +18,15 @@ dossier='simulations/';
 nsimul = 20; % Nombre de simulations a faire
 
 
-L=20;
-u=6;
 % N = round((logspace(1,3, nsimul)./4))*4+1;
-N=round(logspace(2,3, nsimul));
+N=round(logspace(2,3.3, nsimul));
 
+paramstr = 'Npoints'; % Nom du parametre a scanner
+param = N; % Valeurs du parametre a scanner
 
-Omega=linspace(0,5,nsimul);
-Tfin=linspace(20,150,nsimul);
-paramstr = 'tfin'; % Nom du parametre a scanner
-param = Tfin; % Valeurs du parametre a scanner
-
-
+L=20;
 dx=L./(N-1);
 x0=5;
-
 
 %% Simulations %%
 %%%%%%%%%%%%%%%%%
@@ -44,7 +38,6 @@ for i = 1:nsimul
     cmd = sprintf('%s%s %s %s=%.15g output=%s', repertoire, executable, input, paramstr, param(i), output{i});
     disp(cmd)
     system(cmd);
- 
 end
 
 %% Analyse %%
@@ -74,33 +67,8 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
 end
 
 % [a,erra,yFit]=fit(dt',Tp');
-if(strcmp(paramstr,'omega'))
-      y = zeros(1,nsimul);
-    for i=1:nsimul
-        data =  load([output{i} '_E.out']);  
-       y(i)=max(data(:,2));
-      % y(i)=max(E);
-      %  for j=1:7961
-          %  if data(j,2)>y(i)
-            %    y(i)=data(j,2)
-           % end
-       % end
-    end
-end
 
-if(strcmp(paramstr,'tfin'))
-      y = zeros(1,nsimul);
-    for i=1:nsimul
-        data =  load([output{i} '_E.out']);  
-       y(i)=max(data(:,2));
-      % y(i)=max(E);
-      %  for j=1:7961
-          %  if data(j,2)>y(i)
-            %    y(i)=data(j,2)
-           % end
-       % end
-    end
-end
+err=abs(-sin(5/6*5-5*1.5)-y);
 %% Figures %%
 %%%%%%%%%%%%%
 
@@ -115,7 +83,7 @@ if(strcmp(paramstr,'Npoints'))
 %     lgd=legend('Valeurs numériques', 'Régression linéaire');
 %     set(lgd,'fontsize',14,'Location','northwest');
     print(fig1,'figures/conv0_dx', '-depsc');
-
+    
     fig2=figure('Position',[50,50,600,450]);
     h=loglog(dt,err,'k+');
     xlabel('$\Delta t \ \rm [s]$','Interpreter','Latex')
@@ -126,16 +94,4 @@ if(strcmp(paramstr,'Npoints'))
 %     lgd=legend('Valeurs numériques', 'Régression linéaire');
 %     set(lgd,'fontsize',14,'Location','northwest');
     print(fig2,'figures/conv0_dt', '-depsc');
-end
-
-if(strcmp(paramstr,'omega'))
-    figure
-    h=plot(Omega,y,'k+');
-    grid on
-end
-
-if(strcmp(paramstr,'tfin'))
-    figure
-    h=plot(Tfin,y,'k+');
-    grid on
 end

@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
   }
 
   // Conditions aux bords (les strings sont converties en valeurs numeriques a l'aide d'un enumerateur) :
-  typedef enum{fixe,libre,harmonique,sortie} Cond_bord;
+  typedef enum{fixe,libre,harmonique,pulse,sortie} Cond_bord;
   Cond_bord cb_gauche, cb_droit;
 
   string cb = configFile.get<string>("cb_gauche");
@@ -159,11 +159,13 @@ int main(int argc, char* argv[])
     cb_gauche = libre;
   else if(cb == "harmonique")
     cb_gauche = harmonique;
+  else if(cb == "pulse")
+    cb_gauche = pulse;
   else if(cb == "sortie")
     cb_gauche = sortie;
   else
   {
-    cerr << "Merci de choisir cb_gauche=""fixe"", ""libre"", ""harmonique"", ou ""sortie""." << endl;
+    cerr << "Merci de choisir cb_gauche=""fixe"", ""libre"", ""harmonique"", ""pulse"", ou ""sortie""." << endl;
     return -1;
   }
 
@@ -174,16 +176,18 @@ int main(int argc, char* argv[])
     cb_droit = libre;
   else if(cb == "harmonique")
     cb_droit = harmonique;
+  else if(cb == "pulse")
+    cb_droit = pulse;
   else if(cb == "sortie")
     cb_droit = sortie;
   else
   {
-    cerr << "Merci de choisir cb_droit=""fixe"", ""libre"", ""harmonique"", ou ""sortie""." << endl;
+    cerr << "Merci de choisir cb_droit=""fixe"", ""libre"", ""harmonique"", ""pulse"", ou ""sortie""." << endl;
     return -1;
   }
 
   double A, omega; // Parametres d'excitation
-  if(cb_gauche == harmonique || cb_droit == harmonique)
+  if(cb_gauche == harmonique || cb_droit == harmonique || cb_gauche == pulse || cb_droit == pulse)
   {
     A = configFile.get<double>("A");
     omega = configFile.get<double>("omega");
@@ -221,7 +225,7 @@ int main(int argc, char* argv[])
   double t;
   int stride(0);
   int n_stride(configFile.get<int>("n_stride"));
-  for(t=0.; t<tfin-.5*dt; t+=dt)
+  for(t=0.; t<tfin; t+=dt)
   {
     // Ecriture :
     if(stride%n_stride == 0)
@@ -239,7 +243,7 @@ int main(int argc, char* argv[])
       else if(schema == "B")
         fnext[i] = 2*fnow[i]-fpast[i]+dt*dt/(2*dx*dx)*sqrt((*u2)(i*dx))*(sqrt((*u2)((i+1)*dx))-sqrt((*u2)((i-1)*dx)))*(fnow[i+1]-fnow[i-1])+(*u2)(i*dx)*dt*dt/(dx*dx)*(fnow[i+1]-2*fnow[i]+fnow[i-1]); // TODO : Completer le schema B
       else if(schema=="C")
-        fnext[i] = 2*fnow[i]-fpast[i]+dt*dt/(dx*dx)*((*u2)((i+1)*dx)*fnow[i+1]-2*((*u2)(i*dx))*fnow[i]+((*u2)((i+1)*dx))*fnow[i-1]); // TODO : Completer le schema C
+        fnext[i] = 2*fnow[i]-fpast[i]+dt*dt/(dx*dx)*((*u2)((i+1)*dx)*fnow[i+1]-2*((*u2)(i*dx))*fnow[i]+((*u2)((i-1)*dx))*fnow[i-1]); // TODO : Completer le schema C
    // Note : La syntaxe pour evaluer u^2 au point x est (*u2)(x)
     }
 
@@ -256,6 +260,17 @@ int main(int argc, char* argv[])
 
       case harmonique:
         fnext[0] = A*sin(omega*t); // TODO : Completer la condition au bord gauche harmonique
+        break;
+
+      case pulse:
+        fnext[0] = -0.5*A*cos(omega*t)+0.5*A;
+        if(t>=2*M_PI/omega){
+          if(cb_droit==pulse){
+            cb_gauche=fixe;
+          }else{
+            cb_gauche=cb_droit;
+          }
+        }
         break;
 
       case sortie:
@@ -277,8 +292,19 @@ int main(int argc, char* argv[])
         fnext[N-1] = A*sin(omega*t); // TODO : Completer la condition au bord droit harmonique
         break;
 
+      case pulse:
+        fnext[N-1] = -0.5*A*cos(omega*t)+0.5*A;
+        if(t>=2*M_PI/omega){
+          if(cb_gauche==pulse){
+            cb_droit=fixe;
+          }else{
+            cb_droit=cb_gauche;
+          }
+        }
+        break;
+
       case sortie:
-        fnext[N-1] = fnow[N-1]-sqrt((*u2)((N-0.5)*dx))*dt/dx*(fnow[N-1]-fnow[N-2]);; // TODO : Completer la condition au bord droit "sortie de l'onde"
+        fnext[N-1] = fnow[N-1]-sqrt((*u2)((N-1.5)*dx))*dt/dx*(fnow[N-1]-fnow[N-2]);; // TODO : Completer la condition au bord droit "sortie de l'onde"
         break;
     }
 
