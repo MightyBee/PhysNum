@@ -109,7 +109,7 @@ int main(int argc,char **argv)
   vec_cmplx psi(Npoints);
   // TODO: initialiser le paquet d'onde, equation (4.109) du cours
   for(int i(0); i<Npoints; ++i)
-    psi[i] = 0.;
+    psi[i] = exp(i*k0*x)*exp(-(x-x0)*(x-x0)/(2*sigma_norm*sigma_norm));
   // Modifications des valeurs aux bords :
   psi[0] = complex<double> (0.,0.);
   psi[Npoints-1] = complex<double> (0.,0.);
@@ -237,8 +237,12 @@ double prob(vec_cmplx const& psi, int nL, int nR, double dx)
   for(size_t i(0); i<n; i++){
     psi_rogne[i]=psi[i+nL];
   }
+<<<<<<< HEAD
+  return trapezes(psi_rogne,dx)};
+=======
   return trapezes(psi_rogne,dx);
 }
+>>>>>>> 19f3cb314988aa6a0c0fb4f1f09759bed898e918
 
 
 double E(vec_cmplx const& psi, vec_cmplx const& diagH, vec_cmplx const& lowerH, vec_cmplx const& upperH, double const& dx)
