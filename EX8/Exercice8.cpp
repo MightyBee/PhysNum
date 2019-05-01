@@ -47,7 +47,6 @@ double V(double const& x, double const& omega, double const& delta)
   return .5*omega*omega*min((x-delta)*(x-delta),(x+delta)*(x+delta));
 }
 
-double trapezes(vec_cmplx const& f, double const& dx);
 
 // Declaration des diagnostiques de la particule d'apres sa fonction d'onde psi :
 //  - prob calcule la probabilite de trouver la particule entre les points nL.dx et nR.dx,
@@ -109,7 +108,7 @@ int main(int argc,char **argv)
   vec_cmplx psi(Npoints);
   // TODO: initialiser le paquet d'onde, equation (4.109) du cours
   for(int i(0); i<Npoints; ++i)
-    psi[i] = 0.;
+    psi[i] = exp(i*k0*x[i])*exp(-(x[i]-x0)*(x[i]-x0)/(2*sigma_norm*sigma_norm);
   // Modifications des valeurs aux bords :
   psi[0] = complex<double> (0.,0.);
   psi[Npoints-1] = complex<double> (0.,0.);
@@ -125,31 +124,9 @@ int main(int argc,char **argv)
 
   // TODO: calculer les elements des matrices A, B et H.
   // Ces matrices sont stockees sous forme tridiagonale, d:diagonale, c et a: diagonales superieures et inferieures
-  for(size_t i(0); i<Npoints; i++){
-    dH[i]=1.0/(dx*dx)+V(i*dx,omega,delta);
-    dA[i]=complex<double>(1.0,0.0)+complex<double>(0.0,1.0)*dt*0.5*dH[i];
-    dB[i]=complex<double>(1.0,0.0)-complex<double>(0.0,1.0)*dt*0.5*dH[i];
-  }
-
-  for(size_t i(0); i<Ninters; i++){
-    aH[i]=-1.0/(2.0*dx*dx);
-    cH[i]=-1.0/(2.0*dx*dx);
-    aA[i]=complex<double>(0.0,1.0)*dt*0.5*aH[i];
-    cA[i]=complex<double>(0.0,1.0)*dt*0.5*cH[i];
-    aB[i]=-complex<double>(0.0,1.0)*dt*0.5*aH[i];
-    cB[i]=-complex<double>(0.0,1.0)*dt*0.5*cH[i];
-  }
 
   // Conditions aux limites: psi nulle aux deux bords
   // TODO: Modifier les matrices A et B pour satisfaire les conditions aux limites
-  dA[0]=1;
-  cA[0]=0;
-  dB[0]=1;
-  cB[0]=0;
-  dA[Npoints-1]=1;
-  aA[Ninters-1]=0;
-  dB[Npoints-1]=1;
-  aB[Ninters-1]=0;
 
   // Fichiers de sortie :
   string output = configFile.get<string>("output");
@@ -220,24 +197,10 @@ int main(int argc,char **argv)
 }
 
 
-
-double trapezes(vec_cmplx const& f, double const& dx){
-  double retour(0.0);
-  for(size_t i(0); i<f.size()-1;i++){
-    retour+=real((f[i]+f[i+1])*0.5*dx);
-  }
-  return retour;
-}
-
 double prob(vec_cmplx const& psi, int nL, int nR, double dx)
 {
   // TODO: calculer la probabilite de trouver la particule entre les points nL.dx et nR.dx
-  size_t n(abs(nR-nL)+1);
-  vec_cmplx psi_rogne(n);
-  for(size_t i(0); i<n; i++){
-    psi_rogne[i]=psi[i+nL];
-  }
-  return trapezes(psi_rogne,dx);
+  return 0.;
 }
 
 
@@ -249,26 +212,18 @@ double E(vec_cmplx const& psi, vec_cmplx const& diagH, vec_cmplx const& lowerH, 
 
   // H(psi)
   // On utilise la matrice H calculée plus haut
-  psi_tmp[0]=diagH[0]*psi[0]+upperH[0]*psi[1];
-  for(size_t i(1); i<psi.size()-1; i++){
-    psi_tmp[i]=lowerH[i-1]*psi[i-1]+diagH[i]*psi[i]+upperH[i]*psi[i+1];
-  }
-  psi_tmp[psi.size()-1]=lowerH[psi.size()-2]*psi[psi.size()-2]+diagH[psi.size()-1]*psi[psi.size()-1];
+  //...
   // Integrale de psi* H(psi) dx
-  for(size_t i(0); i<psi.size(); i++){
-    psi_tmp[i]=conj(psi[i])*psi_tmp[i];
-  }
-  return trapezes(psi_tmp,dx);
+  //...
+
+  return 0.;
 }
 
 
 double xmoy(vec_cmplx const& psi, const vector<double>& x, double const& dx)
 {
-  vec_cmplx psi_tmp(psi.size());
-  for(size_t i(0); i<psi.size(); i++){
-    psi_tmp[i]=conj(psi[i])*x[i]*psi[i];
-  }
-  return trapezes(psi_tmp,dx);
+  //TODO: calculer la moyenne de la position
+  return 0.;
 }
 
 
