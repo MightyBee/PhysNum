@@ -237,9 +237,7 @@ double prob(vec_cmplx const& psi, int nL, int nR, double dx)
   for(size_t i(0); i<n; i++){
     psi_rogne[i]=psi[i+nL];
   }
-  
-  return trapezes(psi_rogne,dx);
-}
+  return trapezes(psi_rogne,dx)}
 
 
 double E(vec_cmplx const& psi, vec_cmplx const& diagH, vec_cmplx const& lowerH, vec_cmplx const& upperH, double const& dx)
