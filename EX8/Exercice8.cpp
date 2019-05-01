@@ -237,6 +237,7 @@ double prob(vec_cmplx const& psi, int nL, int nR, double dx)
   for(size_t i(0); i<n; i++){
     psi_rogne[i]=psi[i+nL];
   }
+  
   return trapezes(psi_rogne,dx);
 }
 
