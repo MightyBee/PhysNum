@@ -224,7 +224,7 @@ int main(int argc,char **argv)
 double trapezes(vec_cmplx const& f, double const& dx){
   double retour(0.0);
   for(size_t i(0); i<f.size()-1;i++){
-    retour+=real((f[i]+f[i+1])*0.5*dx);
+    retour+=abs((f[i]+f[i+1])*0.5*dx);
   }
   return retour;
 }
