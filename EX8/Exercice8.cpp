@@ -108,8 +108,9 @@ int main(int argc,char **argv)
   // Initialisation de la fonction d'onde :
   vec_cmplx psi(Npoints);
   // TODO: initialiser le paquet d'onde, equation (4.109) du cours
-  for(int i(0); i<Npoints; ++i)
+  for(int i(0); i<Npoints; ++i){
     psi[i] = exp(complex<double>(0.0,1.0)*k0*x[i])*exp(-(x[i]-x0)*(x[i]-x0)/(2*sigma0*sigma0));
+  }
   // Modifications des valeurs aux bords :
   psi[0] = complex<double>(0.,0.);
   psi[Npoints-1] = complex<double>(0.,0.);
