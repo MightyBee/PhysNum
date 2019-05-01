@@ -24,15 +24,17 @@ end
 %% Figures %%
 %%%%%%%%%%%%%
 
+i=800;
+
 %%% plot %%%
 fig1=figure('Name',['Analyse de ' fichier]);
-h = surf(X,Y,f(:,:,1));
+h = surf(X,Y,f(:,:,i));
 
 %%% legendes %%%
 xlabel('x [m]')
 ylabel('y [m]')
 zlabel('f(x,y,t) [m]')
-ht = title('t=0 s');
+ht = title(sprintf('t=%0.2f s',t(i)));
 
 %%% axes %%%
 Axy=min(x(end)-x(1),y(end)-y(1));
@@ -50,7 +52,7 @@ caxis([min(f(:)),max(f(:))])        % une couleur = une valeur donnee pour toute
 % h.FaceLighting='gouraud';           % eclairage different
 h.FaceColor='interp';               % interpole les couleurs entre les points de maillages
 
-print(fig1,'vague_2d_0', '-djpeg');
+print(fig1,sprintf('vague_2d_%d',i), '-djpeg');
 
 %%% animation %%%
 % w=waitforbuttonpress;
