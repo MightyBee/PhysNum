@@ -42,9 +42,38 @@ template <class T> void triangular_solve(vector<T> const& diag,
 
 
 // Potentiel V(x) :
-double V(double const& x, double const& omega, double const& delta)
+double V(double const& x, double const& omega, double const& delta, double const& L, double E0, int const& choix)
 {
-  return .5*omega*omega*min((x-delta)*(x-delta),(x+delta)*(x+delta));
+  switch(choix) {
+    case 1 : {
+              return .5*omega*omega*min((x-delta)*(x-delta),(x+delta)*(x+delta));
+             }
+    case 2 : {
+              E0*=1.5;
+              double retour(0.0);
+              if(x<-L/2){
+                double a(E0/pow(delta-L/2,2));
+                double b(-2*a*delta);
+                double c(a*delta*delta+E0/3);
+                retour=a*pow(x+2*delta,2)+b*(x+2*delta)+c;
+              } else if(x<=L/2){
+                double c(0.0);
+                double b(0.0);
+                double a(abs(E0-c)/(L*L/4));
+                retour=a*pow(x,2)+b*x+c;
+              } else {
+                double a(E0/pow(delta-L/2,2));
+                double b(-2*a*delta);
+                double c(a*delta*delta+E0/3);
+                retour=a*pow(x,2)+b*x+c;
+              }
+              return retour;
+             }
+    default : {
+                cerr << "Le choix " << choix << " n'existe pas pour le potentiel" << endl;
+                return 0.;
+              }
+    }
 }
 
 double trapezes(vec_cmplx const& f, double const& dx);
@@ -71,7 +100,7 @@ vec_cmplx normalize(vec_cmplx const& psi, double const& dx);
 
 int main(int argc,char **argv)
 {
-  complex<double> complex_i = complex<double> (0,1); // Nombre imaginaire i
+  complex<double> complex_i = complex<double> (0.0,1.0); // Nombre imaginaire i
 
   string inputPath("configuration.in"); // Fichier d'input par defaut
   if(argc>1) // Fichier d'input specifie par l'utilisateur ("./Exercice8 config_perso.in")
@@ -90,6 +119,9 @@ int main(int argc,char **argv)
   double xR      = configFile.get<double>("xR");
   double omega   = configFile.get<double>("omega");
   double delta   = configFile.get<double>("delta");
+  double L       = configFile.get<double>("L");
+  double E0      = configFile.get<double>("E0");
+  int choix      = configFile.get<int>("choix");
   double x0      = configFile.get<double>("x0");
   double k0      = 2. * M_PI * configFile.get<int>("n") / (xR-xL);
   double sigma0  = configFile.get<double>("sigma_norm") * (xR-xL);
@@ -108,14 +140,9 @@ int main(int argc,char **argv)
   // Initialisation de la fonction d'onde :
   vec_cmplx psi(Npoints);
   // TODO: initialiser le paquet d'onde, equation (4.109) du cours
-<<<<<<< HEAD
   for(int i(0); i<Npoints; ++i){
-    psi[i] = exp(complex<double>(0.0,1.0)*k0*x[i])*exp(-(x[i]-x0)*(x[i]-x0)/(2*sigma0*sigma0));
+    psi[i] = exp(complex_i*k0*x[i])*exp(-(x[i]-x0)*(x[i]-x0)/(2*sigma0*sigma0));
   }
-=======
-  for(int i(0); i<Npoints; ++i)
-    psi[i] = exp(complex<double>(0.0,1.0)*k0*x[i])*exp(-(x[i]-x0)*(x[i]-x0)/(2*sigma0*sigma0));
->>>>>>> a52627c57072b2816957de48109c714de64d7eda
   // Modifications des valeurs aux bords :
   psi[0] = complex<double>(0.,0.);
   psi[Npoints-1] = complex<double>(0.,0.);
@@ -132,18 +159,18 @@ int main(int argc,char **argv)
   // TODO: calculer les elements des matrices A, B et H.
   // Ces matrices sont stockees sous forme tridiagonale, d:diagonale, c et a: diagonales superieures et inferieures
   for(size_t i(0); i<Npoints; i++){
-    dH[i]=1.0/(dx*dx)+V(i*dx,omega,delta);
-    dA[i]=complex<double>(1.0,0.0)+complex<double>(0.0,1.0)*dt*0.5*dH[i];
-    dB[i]=complex<double>(1.0,0.0)-complex<double>(0.0,1.0)*dt*0.5*dH[i];
+    dH[i]=hbar*hbar/(m*dx*dx)+V(x[i],omega,delta,L,E0,choix);
+    dA[i]=complex<double>(1.0,0.0)+complex_i*dt*hbar*0.5*dH[i];
+    dB[i]=complex<double>(1.0,0.0)-complex_i*dt*hbar*0.5*dH[i];
   }
 
   for(size_t i(0); i<Ninters; i++){
-    aH[i]=-1.0/(2.0*dx*dx);
-    cH[i]=-1.0/(2.0*dx*dx);
-    aA[i]=complex<double>(0.0,1.0)*dt*0.5*aH[i];
-    cA[i]=complex<double>(0.0,1.0)*dt*0.5*cH[i];
-    aB[i]=-complex<double>(0.0,1.0)*dt*0.5*aH[i];
-    cB[i]=-complex<double>(0.0,1.0)*dt*0.5*cH[i];
+    aH[i]=-hbar*hbar/(2.0*m*dx*dx);
+    cH[i]=aH[i];
+    aA[i]=complex_i*dt*hbar*0.5*aH[i];
+    cA[i]=complex_i*dt*hbar*0.5*cH[i];
+    aB[i]=-complex_i*dt*hbar*0.5*aH[i];
+    cB[i]=-complex_i*dt*hbar*0.5*cH[i];
   }
 
   // Conditions aux limites: psi nulle aux deux bords
@@ -163,7 +190,7 @@ int main(int argc,char **argv)
   ofstream fichier_potentiel((output + "_pot.out").c_str());
   fichier_potentiel.precision(15);
   for(int i(0); i<Npoints; ++i)
-    fichier_potentiel << x[i] << " " << V(x[i], omega, delta) << endl;
+    fichier_potentiel << x[i] << " " << V(x[i], omega, delta, L, E0, choix) << endl;
   fichier_potentiel.close();
 
   ofstream fichier_psi((output + "_psi2.out").c_str());
@@ -229,8 +256,8 @@ int main(int argc,char **argv)
 
 double trapezes(vec_cmplx const& f, double const& dx){
   double retour(0.0);
-  for(size_t i(0); i<f.size()-1;i++){
-    retour+=abs((f[i]+f[i+1])*0.5*dx);
+  for(size_t i(0); i<f.size()-1; i++){
+    retour+=real((f[i]+f[i+1])*0.5*dx);
   }
   return retour;
 }
@@ -241,7 +268,7 @@ double prob(vec_cmplx const& psi, int nL, int nR, double dx)
   size_t n(abs(nR-nL)+1);
   vec_cmplx psi_rogne(n);
   for(size_t i(0); i<n; i++){
-    psi_rogne[i]=psi[i+nL];
+    psi_rogne[i]=norm(psi[i+nL]);
   }
   return trapezes(psi_rogne,dx);
 }
@@ -290,12 +317,13 @@ double x2moy(vec_cmplx const& psi, const vector<double>& x, double const& dx)
 
 double pmoy(vec_cmplx const& psi, double const& dx)
 {
+  complex<double> complex_i = complex<double> (0.0,1.0); // Nombre imaginaire i
   vec_cmplx psi_tmp(psi.size());
-  psi_tmp[0]=complex<double>(0.0,-1.0)*conj(psi[0])*(psi[1]-psi[0])/(dx);
+  psi_tmp[0]=(-complex_i)*conj(psi[0])*(psi[1]-psi[0])/(dx);
   for(size_t i(1); i<psi.size()-1; i++){
-    psi_tmp[i]=complex<double>(0.0,-1.0)*conj(psi[i])*(psi[i+1]-psi[i-1])/(2*dx);
+    psi_tmp[i]=(-complex_i)*conj(psi[i])*(psi[i+1]-psi[i-1])/(2*dx);
   }
-  psi_tmp[psi.size()-1]=complex<double>(0.0,-1.0)*conj(psi[psi.size()-1])*(psi[psi.size()-1]-psi[psi.size()-2])/(dx);
+  psi_tmp[psi.size()-1]=(-complex_i)*conj(psi[psi.size()-1])*(psi[psi.size()-1]-psi[psi.size()-2])/(dx);
   return trapezes(psi_tmp,dx);
 }
 
