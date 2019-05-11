@@ -78,6 +78,8 @@ double V(double const& x, double const& omega, double const& delta, double const
 
 double trapezes(vec_cmplx const& f, double const& dx);
 
+void detecteur(vec_cmplx& psi, vector<double> const& x, double const& dx);
+
 // Declaration des diagnostiques de la particule d'apres sa fonction d'onde psi :
 //  - prob calcule la probabilite de trouver la particule entre les points nL.dx et nR.dx,
 //  - E calcule son energie,
@@ -125,6 +127,7 @@ int main(int argc,char **argv)
   double x0      = configFile.get<double>("x0");
   double k0      = 2. * M_PI * configFile.get<int>("n") / (xR-xL);
   double sigma0  = configFile.get<double>("sigma_norm") * (xR-xL);
+  double t_detect = configFile.get<double>("t_detect");
 
   // Parametres numeriques :
   double dt      = configFile.get<double>("dt");
@@ -203,6 +206,13 @@ int main(int argc,char **argv)
   double t;
   for(t=0.; t+dt/2.<tfin; t+=dt)
   {
+
+    // Detetction de la particule
+    if(t-dt/2.<t_detect && t+dt/2.>=t_detect){
+      detecteur(psi,x,dx);
+    }
+
+
     // Ecriture de |psi|^2 :
     for(int i(0); i<Npoints; ++i)
       fichier_psi << abs(psi[i]) * abs(psi[i]) << " ";
@@ -260,6 +270,13 @@ double trapezes(vec_cmplx const& f, double const& dx){
     retour+=real((f[i]+f[i+1])*0.5*dx);
   }
   return retour;
+}
+
+void detecteur(vec_cmplx& psi, vector<double> const& x, double const& dx){
+  for(size_t i(0); x[i]<=0. && i<psi.size() ; i++){ //(i==0 || (i>0 && x[i-1]<=0.)) && i<psi.size() ; i++){
+    psi[i]=complex<double>(0.,0.);
+  }
+  psi=normalize(psi,dx);
 }
 
 double prob(vec_cmplx const& psi, int nL, int nR, double dx)

@@ -1,6 +1,6 @@
 %% Chargement des resultats %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-fichier = 'output_test';
+fichier = 'output';
 
 data = load([fichier,'_obs.out']);
 t      = data(:,1);
@@ -26,7 +26,11 @@ omega=0.003;
 %%%%%%%%%%%%%
 dxmoy=sqrt(x2moy-xmoy.^2);
 dpmoy=sqrt(p2moy-pmoy.^2);
-A=sqrt(2*E(1))/omega;
+
+
+P0=2*pi*14/400;
+E0=P0^2/2; %mean(data(:,4));
+A=sqrt(2*E0)/omega;
 A=max(xmoy);
 fprintf('\n E=%.15g \n\n',E(1))
 
@@ -49,6 +53,18 @@ grid on
 lgd=legend('show','Interpreter','Latex');
 set(lgd,'fontsize',17,'Location','southeast');
 print(fig1,'figures/prob', '-depsc');
+
+fig1b=figure('Position',[50,50,600,450]);
+plot(t,abs(prob_g+prob_d-1),'--','DisplayName','$ P_{x<0}+P_{x>0} $')
+xlabel('$ t \ \rm [s]$','Interpreter','Latex')
+ylabel("Erreur sur la probabilit\'{e}",'Interpreter','Latex') %$f(5{\rm m},1.5{\rm s}) \ \rm [m]$
+xlim([0 5000])
+% ylim([0 1.1])
+set(gca,'FontSize',25)
+grid on
+lgd=legend('show','Interpreter','Latex');
+set(lgd,'fontsize',17,'Location','southeast');
+print(fig1b,'figures/prob_zoom', '-depsc');
 
 fig2=figure('Position',[50,50,600,450]);
 hold on
@@ -83,7 +99,8 @@ hold off
 xlabel('$ t \ \rm [s]$','Interpreter','Latex')
 ylabel('$\langle \Delta x \rangle \cdot \langle \Delta p \rangle  \ \rm [kg \, m^2/s]$','Interpreter','Latex') %$f(5{\rm m},1.5{\rm s}) \ \rm [m]$
 xlim([0 5000])
-ylim([0.4 0.8])
+yl=ylim;
+ylim([0.4 yl(2)])
 set(gca,'FontSize',22)
 pos=get(gca,'position');  % retrieve the current values
 pos(3)=0.9*pos(3);        % try reducing width 10%
@@ -158,12 +175,22 @@ xlabel('x [m]')
 ylabel('V(x) [J]')
 ht = title('t=0 s');
 
+
 w=waitforbuttonpress;
-for i=2:10:length(t)
+stop=1;
+
+for i=2:1:length(t)
     pause(.01)
     if ~ishandle(h)
-         break % Arrete l'animation si la fenetre est fermee
-     end
-     set(h,'YData',psi(i,:))
-     set(ht,'String',sprintf('t=%0.2f s',t(i)))
+        break % Arrete l'animation si la fenetre est fermee
+    end
+    if t(i)>=1000 && stop
+        w=waitforbuttonpress;
+        stop=0;
+        set(h,'YData',psi(i,:))
+        set(ht,'String',sprintf('t=%0.2f s',t(i)))
+        w=waitforbuttonpress;
+    end
+    set(h,'YData',psi(i,:))
+    set(ht,'String',sprintf('t=%0.2f s',t(i)))
 end
