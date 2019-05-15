@@ -15,8 +15,8 @@ executable = 'Exercice8'; % Nom de l'executable (NB: ajouter .exe sous Windows)
 input = 'configuration.in'; % Nom du fichier d'entree de base
 dossier='simulations/';
 
-nsimul = 11; % Nombre de simulations a faire
-paraName='V0';
+nsimul = 151; % Nombre de simulations a faire
+paraName='delta';
 
 m=1;
 omega=0.003;
@@ -32,12 +32,14 @@ elseif strcmp(paraName,'Ninters')
     paramstr = {"Ninters"}; % Nom du parametre a scanner
     param = [Ninters]; % Valeurs du parametre a scanner
 elseif strcmp(paraName,'delta')
-    delta=linspace(0,150,nsimul);
+%     delta=linspace(0,150,nsimul);
+    V0=linspace(0,2.5,nsimul)*E0;
+    delta=sqrt(2*V0/(m*omega^2));
     paramstr = {"delta"; "x0"}; % Nom du parametre a scanner
     param = [delta; -delta]; % Valeurs du parametre a scanner
 elseif strcmp(paraName,'V0')
-    V0=[0.1 1 3.1]*E0;
-    nsimul=3;
+    V0=[0.8 1 1.2]*E0;
+    nsimul=length(V0);
     delta=sqrt(2*V0/(m*omega^2));
     paramstr = {"delta"; "x0"}; % Nom du parametre a scanner
     param = [delta; -delta]; % Valeurs du parametre a scanner
@@ -94,7 +96,6 @@ elseif(strcmp(paraName,'delta'))
     prob_g = cell(1,nsimul);
     prob_d = cell(1,nsimul);
     prob_dmax = zeros(1,nsimul);
-    V0=0.5*omega^2*delta.^2;
 elseif(strcmp(paraName,'V0'))
     prob_g = cell(1,nsimul);
     prob_d = cell(1,nsimul);
@@ -140,8 +141,7 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
         t=data(:,1);
         prob_g{i}=data(:,2);
         prob_d{i}=data(:,3);
-        prob_dmax(i)=max(data(:,3));
-        E0=mean(data(:,4));
+        prob_dmax(i)=max(prob_d{i}(1:round(2*length(t)/5)));
     elseif(strcmp(paraName,'V0'))
         data = load([output{i},'_obs.out']);
         t=data(:,1);
@@ -302,16 +302,17 @@ elseif(strcmp(paraName,'delta') || strcmp(paraName,'V0'))
     
     fig1=figure('Position',[50,50,600,450]);
     hold on
-    h=plot(V0, prob_dmax,[E0 E0],[0 1],'r--');
+    plot(V0/E0, prob_dmax,'DisplayName','Quantique');
+    plot([0 1 1 2.5],[1 1 0 0],'r--','DisplayName','Classique');
     hold off
-    xlabel('$V_0 \ \rm [J]$','Interpreter','Latex')
-    ylabel('$\max_t{P_{x>0}}$','Interpreter','Latex') %$f(5{\rm m},1.5{\rm s}) \ \rm [m]$
+    xlim([0 2.5])
+    xlabel('$V_0/E_0$','Interpreter','Latex')
+    ylabel('$P_{\rm trans}$','Interpreter','Latex') %$f(5{\rm m},1.5{\rm s}) \ \rm [m]$
     set(gca,'FontSize',25)
-    set(h,'MarkerSize',11)
     grid on
-%     lgd=legend('show');
-%     set(lgd,'fontsize',14,'Location','northwest');
-    print(fig1,'figures/delta', '-depsc');
+    lgd=legend('show');
+    set(lgd,'fontsize',14,'Location','northeast');
+    print(fig1,'figures/V0_scan', '-depsc');
     
     if nsimul<6
         fig2=figure('Position',[50,50,600,450]);
@@ -327,7 +328,7 @@ elseif(strcmp(paraName,'delta') || strcmp(paraName,'V0'))
         grid on
         lgd=legend(h,'Interpreter','Latex');
         set(lgd,'fontsize',14,'Location','southeast');
-        print(fig2,'figures/delta', '-depsc');
+        print(fig2,'figures/prob_tunnel', '-depsc');
         
         for i=1:nsimul
             fig(i)=figure('Position',[50,50,650,450]);
@@ -354,7 +355,7 @@ elseif(strcmp(paraName,'n'))
     hold on
     l=round(3*length(t)/5);
     for i=1:nsimul
-        h=plot(t(1:l), prob_d{i}(1:l),'DisplayName',sprintf('n = %d',n(i)));
+        h=plot(t(1:l), prob_d{i}(1:l),'DisplayName',sprintf('$n=%d$',n(i)));
     end
     hold off
     xlabel('$t \ \rm [s] $','Interpreter','Latex')
@@ -363,8 +364,8 @@ elseif(strcmp(paraName,'n'))
     set(h,'MarkerSize',11)
     grid on
     ylim([0 1])
-    lgd=legend('show');
-    set(lgd,'fontsize',14,'Location','northeast');
+    lgd=legend('show','Interpreter','Latex');
+    set(lgd,'fontsize',17,'Location','northeast');
     print(fig1,'figures/n_scan', '-depsc');
    
 end
