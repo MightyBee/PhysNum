@@ -6,7 +6,9 @@ set(0,'defaultLegendInterpreter','latex');
 %% Chargement des resultats %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-fichier = 'output_moins';
+close all;
+
+fichier = 'quasi_stat';
 
 data = load([fichier,'_obs.out']);
 t      = data(:,1);
@@ -44,7 +46,6 @@ fprintf('\n E=%.15g \n\n',E(1))
 
 %% Figures %%
 %%%%%%%%%%%%%
-%%{
 %%
 fig1=figure('Position',[50,50,600,450]);
 hold on
@@ -63,28 +64,6 @@ set(lgd,'fontsize',15,'Location','southeast');
 print(fig1,'figures/prob', '-depsc');
 
 %%
-fig1b=figure('Position',[50,50,600,450]);
-plot(t,abs(prob_g+prob_d-1))
-set(gca,'FontSize',15)
-xlabel('$t$','Interpreter','Latex','FontSize',22)
-ylabel("$|P_{x<0}+P_{x>0}-1|$",'Interpreter','Latex','FontSize',22)
-xlim([0 5000])
-ax = gca;
-ax.YAxis.Exponent = -14;
-grid on
-print(fig1b,'figures/prob_zoom', '-depsc');
-
-%%
-fig2=figure('Position',[50,50,600,450]);
-plot(t,E-E(1))
-set(gca,'FontSize',15)
-xlabel('$ t $','Interpreter','Latex','FontSize',22)
-ylabel('$E(t)-E(0)$','Interpreter','Latex','FontSize',22) 
-xlim([0 5000])
-grid on
-print(fig2,'figures/E_diff', '-depsc');
-
-%%
 fig3=figure('Position',[50,50,600,450]);
 plot(t,E)
 set(gca,'FontSize',15)
@@ -97,52 +76,23 @@ print(fig3,'figures/E_abs', '-depsc');
 
 %%
 fig4=figure('Position',[50,50,600,450]);
-hold on;
-plot(t,dxmoy.*dpmoy,'DisplayName','$ \langle \Delta x \rangle \cdot \langle \Delta p \rangle $')
-plot([t(1) t(end)],[0.5 0.5],'--','DisplayName','$ \hbar/2 $')
-set(gca,'FontSize',15)
-xlabel('$ t $','Interpreter','Latex','FontSize',22)
-ylabel('$\langle \Delta x \rangle \cdot \langle \Delta p \rangle $','Interpreter','Latex','FontSize',22) 
-xlim([0 5000])
-yl=ylim;
-ylim([0.4 yl(2)])
-pos=get(gca,'position');  % retrieve the current values
-pos(3)=0.9*pos(3);        % try reducing width 10%
-set(gca,'position',pos);  % write the new values
-grid on;
-hold off;
-lgd=legend('show','Interpreter','Latex');
-set(lgd,'fontsize',15,'Location','southeast');
-print(fig4,'figures/dx_dp', '-depsc');
-
-%%
-fig4=figure('Position',[50,50,600,450]);
-hold on
-plot(t,xmoy,'DisplayName',"Th\'eorie quantique")
-plot(t,A*sin(omega*t),'--','DisplayName',"Th\'eorie classique")
-hold off
+plot(t,xmoy)
 set(gca,'FontSize',15)
 xlabel('Temps','Interpreter','Latex','FontSize',22)
 ylabel('Position','Interpreter','Latex','FontSize',22)
 xlim([0 5000])
 grid on
-lgd=legend('show','Interpreter','Latex');
-set(lgd,'fontsize',15,'Location','southeast');
 print(fig4,'figures/x_th', '-depsc');
 
 %%
 fig5=figure('Position',[50,50,600,450]);
 hold on
-plot(t,pmoy,'DisplayName',"Th\'eorie quantique")
-plot(t,A*omega*cos(omega*t),'--','DisplayName',"Th\'eorie classique")
-hold off
+plot(t,pmoy)
 set(gca,'FontSize',15)
 xlabel('Temps','Interpreter','Latex','FontSize',22)
 ylabel("Quantit\'e de mouvement",'Interpreter','Latex','FontSize',22)
 xlim([0 5000])
 grid on
-lgd=legend('show','Interpreter','Latex');
-set(lgd,'fontsize',15,'Location','southeast');
 print(fig5,'figures/p_th', '-depsc');
 
 %%
@@ -156,19 +106,9 @@ grid on
 print(fig6,'figures/dx_moy', '-depsc');
 
 %%
-fig7=figure('Position',[50,50,600,450]);
-plot(t,dpmoy)
-set(gca,'FontSize',15)
-xlabel('$ t $','Interpreter','Latex','FontSize',22)
-ylabel('$\langle \Delta p \rangle $','Interpreter','Latex','FontSize',22) 
-xlim([0 5000])
-grid on
-print(fig7,'figures/dp_moy', '-depsc');
-%}
-%%
 fig8=figure('Position',[50,50,650,450]);
 pcolor(x,t,psi2)
-set(gca,'FontSize',15)
+set(gca,'FontSize',16)
 shading interp
 colormap jet
 c = colorbar;
@@ -182,29 +122,51 @@ set(gca,'position',pos);  % write the new values
 print(fig8,sprintf('figures/psi2_%s',fichier), '-depsc');
 
 %%
-fig9=figure('Position',[50,50,750,400]);
+fig9=figure('Position',[50,50,650/59*40,400]);
 plot(x,V)
-set(gca,'FontSize',15)
+set(gca,'FontSize',16)
 xlabel('$ x $','Interpreter','Latex','FontSize',22)
 ylabel('$ V $','Interpreter','Latex','FontSize',22)
 grid on
-print(fig9,'figures/potentiel', '-depsc');
+print(fig9,sprintf('figures/potentiel_%s',fichier), '-depsc');
 
-%}
+%%
+fig10=figure('Position',[50,50,700,700]);
+
+subplot('Position',[0.16,0.1,0.6,0.5])
+pcolor(x,t,psi2)
+set(gca,'FontSize',14)
+shading interp
+colormap jet
+c = colorbar;
+xlabel('$x$','Interpreter','Latex','FontSize',22)
+ylabel('$t$','Interpreter','Latex','FontSize',22)
+ylabel(c,'$|\psi(x,t)|^2$','Interpreter','Latex','FontSize',22)
+grid on, box on
+pos=get(gca,'position');  % retrieve the current values
+pos(3)=1.225*pos(3);        % try reducing width 10%
+set(gca,'position',pos);  % write the new values
+subplot('Position',[0.16,0.69,0.6,0.28])
+plot(x,V)
+set(gca,'FontSize',14)
+xlabel('$ x $','Interpreter','Latex','FontSize',22)
+ylabel('$ V $','Interpreter','Latex','FontSize',22)
+grid on, box off
+print(fig10,sprintf('figures/duo_%s',fichier), '-depsc');
 
 %%{
 %%
 figure
 yyaxis left
 h = plot(x,psi(1,:));
-ylabel('\psi(x,t) [m]')
+ylabel('$\psi(x,t)$')
 ylim([min(psi(:)),max(psi(:))])
 yyaxis right
 plot(x,V,'--')
 grid
-xlabel('x [m]')
-ylabel('V(x) [J]')
-ht = title('t=0 s');
+xlabel('$x$')
+ylabel('$V(x)$')
+ht = title('$t=0 $');
 
 w=waitforbuttonpress;
 
@@ -214,7 +176,7 @@ for i=2:3:length(t)
         break % Arrete l'animation si la fenetre est fermee
     end
     set(h,'YData',psi(i,:))
-    set(ht,'String',sprintf('t=%0.2f s',t(i)))
+    set(ht,'String',sprintf('$t=%0.2f$',t(i)))
 end
 %}
 

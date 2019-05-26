@@ -49,10 +49,28 @@ double V(double const& x, double const& omega, double const& delta, double const
               return .5*omega*omega*min((x-delta)*(x-delta),(x+delta)*(x+delta));
              }
     case 2 : {
-              E0*=1.5;
+              if(x<L-0.5*delta || x>L+0.5*delta){
+                return 0;
+              }else{
+                return E0;
+              }
+             }
+    case 3 : {
+              return omega*omega*x*x*pow(cos(0.5*x),2);
+             }
+    case 4 : {
+              if(x<L-0.5*delta){
+                return omega*omega*pow(x-(L-0.5*delta),2);
+              }else if(x<L+0.5*delta){
+                return 0.;
+              }else{
+                return E0*E0*pow(x-(L+0.5*delta),2);
+              }
+             }
+    case 5 : {
               double retour(0.0);
               if(x<-L/2){
-                double a(E0/pow(delta-L/2,2));
+                double a(2.0/3.0*E0/pow(delta-L/2,2));
                 double b(-2*a*delta);
                 double c(a*delta*delta+E0/3);
                 retour=a*pow(x+2*delta,2)+b*(x+2*delta)+c;
@@ -62,12 +80,22 @@ double V(double const& x, double const& omega, double const& delta, double const
                 double a(abs(E0-c)/(L*L/4));
                 retour=a*pow(x,2)+b*x+c;
               } else {
-                double a(E0/pow(delta-L/2,2));
+                double a(2.0/3.0*E0/pow(delta-L/2,2));
                 double b(-2*a*delta);
                 double c(a*delta*delta+E0/3);
                 retour=a*pow(x,2)+b*x+c;
               }
               return retour;
+             }
+    case 6 : {
+              if(x<=0){
+                return 0;
+              } else {
+                return E0;
+              }
+             }
+    case 7 : {
+              return E0*cos(0.5*x);
              }
     default : {
                 cerr << "Le choix " << choix << " n'existe pas pour le potentiel" << endl;
@@ -78,7 +106,7 @@ double V(double const& x, double const& omega, double const& delta, double const
 
 double trapezes(vec_cmplx const& f, double const& dx);
 
-void detecteur(vec_cmplx& psi, vector<double> const& x, double const& dx);
+void detecteur(vec_cmplx& psi, vector<double> const& x, double const& dx, size_t const& choix);
 
 // Declaration des diagnostiques de la particule d'apres sa fonction d'onde psi :
 //  - prob calcule la probabilite de trouver la particule entre les points nL.dx et nR.dx,
@@ -125,9 +153,10 @@ int main(int argc,char **argv)
   double E0      = configFile.get<double>("E0");
   int choix      = configFile.get<int>("choix");
   double x0      = configFile.get<double>("x0");
-  double k0      = 2. * M_PI * configFile.get<int>("n") / (xR-xL);
+  double k0      = 2. * M_PI * configFile.get<double>("n") / (xR-xL);
   double sigma0  = configFile.get<double>("sigma_norm") * (xR-xL);
   double t_detect = configFile.get<double>("t_detect");
+  size_t n_detect = configFile.get<size_t>("n_detect");
 
   // Parametres numeriques :
   double dt      = configFile.get<double>("dt");
@@ -208,9 +237,15 @@ int main(int argc,char **argv)
   {
 
     // Detetction de la particule
+    //if((t-dt/2.<t_detect && t+dt/2.>=t_detect) || (t-dt/2.<2.5*t_detect && t+dt/2.>=2.5*t_detect)){
     if(t-dt/2.<t_detect && t+dt/2.>=t_detect){
-      detecteur(psi,x,dx);
+      detecteur(psi,x,dx,n_detect);
     }
+
+    /*
+    if(t-dt/2.<3*t_detect && t+dt/2.>=3*t_detect){
+      detecteur(psi,x,dx);
+    }//*/
 
 
     // Ecriture de |psi|^2 :
@@ -272,9 +307,24 @@ double trapezes(vec_cmplx const& f, double const& dx){
   return retour;
 }
 
-void detecteur(vec_cmplx& psi, vector<double> const& x, double const& dx){
-  for(size_t i(0); x[i]<=0. && i<psi.size() ; i++){ //(i==0 || (i>0 && x[i-1]<=0.)) && i<psi.size() ; i++){
-    psi[i]=complex<double>(0.,0.);
+void detecteur(vec_cmplx& psi, vector<double> const& x, double const& dx, size_t const& choix){
+  switch(choix){
+    case 1 : {
+      for(size_t i(0); i<psi.size(); i++){ //(i==0 || (i>0 && x[i-1]<=0.)) && i<psi.size() ; i++){
+        if(x[i]<=0.0){
+          psi[i]=complex<double>(0.,0.);
+        }
+      }
+      break;
+    }
+    case 2 : {
+      for(size_t i(0); i<psi.size(); i++){ //(i==0 || (i>0 && x[i-1]<=0.)) && i<psi.size() ; i++){
+        if(x[i]>0.0){
+          psi[i]=complex<double>(0.,0.);
+        }
+      }
+      break;
+    }
   }
   psi=normalize(psi,dx);
 }

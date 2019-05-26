@@ -23,12 +23,14 @@ omega=0.003;
 P0=2*pi*14/400;
 E0=P0^2/2; %mean(data(:,4));
 
+
 if strcmp(paraName,'dt')
-    dt=logspace(-0.2,1, nsimul);
+    N=round(logspace(3,4, nsimul));
+    dt=5000./N;
     paramstr = {"dt"}; % Nom du parametre a scanner
     param = dt; % Valeurs du parametre a scanner
 elseif strcmp(paraName,'Ninters')
-    Ninters=logspace(2.1,3.1,nsimul);
+    Ninters=round(logspace(1.9,3.1,nsimul));
     paramstr = {"Ninters"}; % Nom du parametre a scanner
     param = [Ninters]; % Valeurs du parametre a scanner
 elseif strcmp(paraName,'delta')
@@ -38,7 +40,7 @@ elseif strcmp(paraName,'delta')
     paramstr = {"delta"; "x0"}; % Nom du parametre a scanner
     param = [delta; -delta]; % Valeurs du parametre a scanner
 elseif strcmp(paraName,'V0')
-    V0=[0.8 1 1.2]*E0;
+    V0=[0.2 1 2]*E0;
     nsimul=length(V0);
     delta=sqrt(2*V0/(m*omega^2));
     paramstr = {"delta"; "x0"}; % Nom du parametre a scanner
@@ -51,8 +53,12 @@ elseif strcmp(paraName,'n')
     delta = 64*ones(1,nsimul);
     paramstr = {"n"; "delta"; "x0"}; % Nom du parametre a scanner
     param = [n; delta; -delta]; % Valeurs du parametre a scanner
+elseif strcmp(paraName,'n_cont')
+    n=linspace(11,12,nsimul);
+    delta = 64*ones(1,nsimul);
+    paramstr = {"n"; "delta"; "x0"}; % Nom du parametre a scanner
+    param = [n; delta; -delta]; % Valeurs du parametre a scanner
 end
-
 
 %% Simulations %%
 %%%%%%%%%%%%%%%%%
@@ -70,7 +76,7 @@ for i = 1:nsimul
     % Execution du programme en lui envoyant la valeur a scanner en argument
     cmd = sprintf('%s%s %s %s output=%s', repertoire, executable, input, parameter, output{i});
     disp(cmd)
-    system(cmd);
+%     system(cmd);
 end
 
 %% Analyse %%
@@ -96,13 +102,16 @@ elseif(strcmp(paraName,'delta'))
     prob_g = cell(1,nsimul);
     prob_d = cell(1,nsimul);
     prob_dmax = zeros(1,nsimul);
+    E_m = zeros(1,nsimul);
 elseif(strcmp(paraName,'V0'))
     prob_g = cell(1,nsimul);
     prob_d = cell(1,nsimul);
     prob_dmax = zeros(1,nsimul);
     psi2 = cell(1,nsimul);
-elseif(strcmp(paraName,'n'))
+    V=cell(1,nsimul);
+elseif(strcmp(paraName,'n') || strcmp(paraName,'n_cont'))
     prob_d = cell(1,nsimul);
+    prob_dmax = zeros(1,nsimul);
 end
 
 for i = 1:nsimul % Parcours des resultats de toutes les simulations
@@ -142,6 +151,7 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
         prob_g{i}=data(:,2);
         prob_d{i}=data(:,3);
         prob_dmax(i)=max(prob_d{i}(1:round(2*length(t)/5)));
+        E_m=mean(data(:,4));
     elseif(strcmp(paraName,'V0'))
         data = load([output{i},'_obs.out']);
         t=data(:,1);
@@ -150,11 +160,13 @@ for i = 1:nsimul % Parcours des resultats de toutes les simulations
         prob_dmax(i)=max(data(:,3));
         data = load([output{i},'_pot.out']);
         x = data(:,1);
+        V{i}=data(:,2);
         psi2{i} = load([output{i},'_psi2.out']);
-    elseif(strcmp(paraName,'n'))
+    elseif(strcmp(paraName,'n') || strcmp(paraName,'n_cont'))
         data = load([output{i},'_obs.out']);
         t=data(:,1);
         prob_d{i}=data(:,3);
+        prob_dmax(i)=max(prob_d{i}(1:round(2*length(t)/5)));
     end
 end
 
@@ -165,153 +177,135 @@ end
 if(strcmp(paraName,'dt'))
     fig1=figure('Position',[50,50,600,450]);
     h=plot(dt.^2,xmoy,'k+');
-    xlabel('$(\Delta t)^2 \ \rm [s^2]$','Interpreter','Latex')
-    ylabel('$\langle x \rangle \ \rm [m]$','Interpreter','Latex') %$f(5{\rm m},1.5{\rm s}) \ \rm [m]$
-    set(gca,'FontSize',25)
+    set(gca,'FontSize',15)
     set(h,'MarkerSize',11)
+    xlabel('$(\Delta t)^2$','Interpreter','Latex','FontSize',22)
+    ylabel('$\langle x \rangle$','Interpreter','Latex','FontSize',22)
     grid on
-%     lgd=legend('Valeurs numériques', 'Régression linéaire');
-%     set(lgd,'fontsize',14,'Location','northwest');
     print(fig1,'figures/conv0_dt_x', '-depsc');
 
     fig2=figure('Position',[50,50,600,450]);
     h=plot(dt.^2,dxmoy,'k+');
-    xlabel('$(\Delta t)^2 \ \rm [s^2]$','Interpreter','Latex')
-    ylabel('$\langle \Delta x \rangle \ \rm [m]$','Interpreter','Latex') %$f(5{\rm m},1.5{\rm s}) \ \rm [m]$
-    set(gca,'FontSize',25)
+    set(gca,'FontSize',15)
     set(h,'MarkerSize',11)
+    xlabel('$(\Delta t)^2$','Interpreter','Latex','FontSize',22)
+    ylabel('$\langle \Delta x \rangle$','Interpreter','Latex','FontSize',22) 
     grid on
-%     lgd=legend('Valeurs numériques', 'Régression linéaire');
-%     set(lgd,'fontsize',14,'Location','northwest');
     print(fig2,'figures/conv0_dt_dx', '-depsc');
     
     fig3=figure('Position',[50,50,600,450]);
     h=plot(dt.^2,pmoy,'k+');
-    xlabel('$(\Delta t)^2 \ \rm [s^2]$','Interpreter','Latex')
-    ylabel('$\langle p \rangle \ \rm [kg \ m/s]$','Interpreter','Latex') %$f(5{\rm m},1.5{\rm s}) \ \rm [m]$
-    set(gca,'FontSize',25)
+    set(gca,'FontSize',15)
     set(h,'MarkerSize',11)
+    lgd=legend('show','Interpreter','Latex');
+    set(lgd,'FontSize',15,'Location','northeast');
+    xlabel('$(\Delta t)^2$','Interpreter','Latex','FontSize',22)
+    ylabel('$\langle p \rangle$','Interpreter','Latex','FontSize',22) 
     grid on
-%     lgd=legend('Valeurs numériques', 'Régression linéaire');
-%     set(lgd,'fontsize',14,'Location','northwest');
     print(fig3,'figures/conv0_dt_p', '-depsc');
 
     fig4=figure('Position',[50,50,600,450]);
     h=plot(dt.^2,dpmoy,'k+');
-    xlabel('$(\Delta t)^2 \ \rm [s^2]$','Interpreter','Latex')
-    ylabel('$\langle \Delta p \rangle \ \rm [kg \, m/s]$','Interpreter','Latex') %$f(5{\rm m},1.5{\rm s}) \ \rm [m]$
-    set(gca,'FontSize',25)
+    set(gca,'FontSize',15)
     set(h,'MarkerSize',11)
+    xlabel('$(\Delta t)^2$','Interpreter','Latex','FontSize',22)
+    ylabel('$\langle \Delta p \rangle$','Interpreter','Latex','FontSize',22)
     grid on
-%     lgd=legend('Valeurs numériques', 'Régression linéaire');
-%     set(lgd,'fontsize',14,'Location','northwest');
     print(fig4,'figures/conv0_dt_dp', '-depsc');
 
     fig5=figure('Position',[50,50,600,450]);
     h=plot(dt.^2, errx,'k+');
-    xlabel('$(\Delta t)^2 \ \rm [s^2]$','Interpreter','Latex')
-    ylabel('$\max_t{|\frac{\langle x \rangle - x_{\rm th}}{A_0}|} \quad \rm [m]$','Interpreter','Latex') %$f(5{\rm m},1.5{\rm s}) \ \rm [m]$
-    set(gca,'FontSize',25)
+    set(gca,'FontSize',15)
     set(h,'MarkerSize',11)
+    xlabel('$(\Delta t)^2$','Interpreter','Latex','FontSize',22)
+    ylabel('$\max_t{|\frac{\langle x \rangle - x_{\rm th}}{A_0}|}$','Interpreter','Latex','FontSize',22)
     grid on
-%     lgd=legend('Valeurs numériques', 'Régression linéaire');
-%     set(lgd,'fontsize',14,'Location','northwest');
     print(fig5,'figures/conv0_dt_x_th', '-depsc');
 
     fig6=figure('Position',[50,50,600,450]);
     h=plot(dt.^2, errp,'k+');
-    xlabel('$(\Delta t)^2 \ \rm [s^2]$','Interpreter','Latex')
-    ylabel('$\max_t{|\frac{\langle p \rangle - p_{\rm th}}{A_0 \omega}|} \quad \rm [kg \, m/s]$','Interpreter','Latex') %$f(5{\rm m},1.5{\rm s}) \ \rm [m]$
-    set(gca,'FontSize',25)
+    set(gca,'FontSize',15)
     set(h,'MarkerSize',11)
+    xlabel('$(\Delta t)^2$','Interpreter','Latex','FontSize',22)
+    ylabel('$\max_t{|\frac{\langle p \rangle - p_{\rm th}}{A_0 \omega}|}$','Interpreter','Latex','FontSize',22)
     grid on
-%     lgd=legend('Valeurs numériques', 'Régression linéaire');
-%     set(lgd,'fontsize',14,'Location','northwest');
     print(fig6,'figures/conv0_dt_p_th', '-depsc');
     
    
 elseif(strcmp(paraName,'Ninters'))
+    
     fig1=figure('Position',[50,50,600,450]);
     h=plot((400./Ninters).^2,xmoy,'k+');
-    xlabel('$(\Delta x)^2 \ \rm [m^2]$','Interpreter','Latex')
-    ylabel('$\langle x \rangle \ \rm [m]$','Interpreter','Latex') %$f(5{\rm m},1.5{\rm s}) \ \rm [m]$
-    set(gca,'FontSize',25)
+    set(gca,'FontSize',15)
     set(h,'MarkerSize',11)
+    xlabel('$(\Delta h)^2$','Interpreter','Latex','FontSize',22)
+    ylabel('$\langle x \rangle$','Interpreter','Latex','FontSize',22)
     grid on
-%     lgd=legend('Valeurs numériques', 'Régression linéaire');
-%     set(lgd,'fontsize',14,'Location','northwest');
-    print(fig1,'figures/conv0_dx_x', '-depsc');
+    print(fig1,'figures/conv0_dh_x', '-depsc');
 
     fig2=figure('Position',[50,50,600,450]);
     h=plot((400./Ninters).^2,dxmoy,'k+');
-    xlabel('$(\Delta x)^2 \ \rm [m^2]$','Interpreter','Latex')
-    ylabel('$\langle \Delta x \rangle \ \rm [m]$','Interpreter','Latex') %$f(5{\rm m},1.5{\rm s}) \ \rm [m]$
-    set(gca,'FontSize',25)
+    set(gca,'FontSize',15)
     set(h,'MarkerSize',11)
+    xlabel('$(\Delta h)^2$','Interpreter','Latex','FontSize',22)
+    ylabel('$\langle \Delta x \rangle$','Interpreter','Latex','FontSize',22) 
     grid on
-%     lgd=legend('Valeurs numériques', 'Régression linéaire');
-%     set(lgd,'fontsize',14,'Location','northwest');
-    print(fig2,'figures/conv0_dx_dx', '-depsc');
+    print(fig2,'figures/conv0_dh_dx', '-depsc');
     
     fig3=figure('Position',[50,50,600,450]);
     h=plot((400./Ninters).^2,pmoy,'k+');
-    xlabel('$(\Delta x)^2 \ \rm [m^2]$','Interpreter','Latex')
-    ylabel('$\langle p \rangle \ \rm [kg \ m/s]$','Interpreter','Latex') %$f(5{\rm m},1.5{\rm s}) \ \rm [m]$
-    set(gca,'FontSize',25)
+    set(gca,'FontSize',15)
     set(h,'MarkerSize',11)
+    xlabel('$(\Delta h)^2$','Interpreter','Latex','FontSize',22)
+    ylabel('$\langle p \rangle$','Interpreter','Latex','FontSize',22) 
     grid on
-%     lgd=legend('Valeurs numériques', 'Régression linéaire');
-%     set(lgd,'fontsize',14,'Location','northwest');
-    print(fig3,'figures/conv0_dx_p', '-depsc');
+    print(fig3,'figures/conv0_dh_p', '-depsc');
 
     fig4=figure('Position',[50,50,600,450]);
     h=plot((400./Ninters).^2,dpmoy,'k+');
-    xlabel('$(\Delta x)^2 \ \rm [m^2]$','Interpreter','Latex')
-    ylabel('$\langle \Delta p \rangle \ \rm [kg \, m/s]$','Interpreter','Latex') %$f(5{\rm m},1.5{\rm s}) \ \rm [m]$
-    set(gca,'FontSize',25)
+    set(gca,'FontSize',15)
     set(h,'MarkerSize',11)
+    xlabel('$(\Delta h)^2$','Interpreter','Latex','FontSize',22)
+    ylabel('$\langle \Delta p \rangle$','Interpreter','Latex','FontSize',22)
     grid on
-%     lgd=legend('Valeurs numériques', 'Régression linéaire');
-%     set(lgd,'fontsize',14,'Location','northwest');
-    print(fig4,'figures/conv0_dx_dp', '-depsc');
+    print(fig4,'figures/conv0_dh_dp', '-depsc');
 
     fig5=figure('Position',[50,50,600,450]);
-    h=plot((400./Ninters).^2, errx,'k+');
-    xlabel('$(\Delta x)^2 \ \rm [m^2]$','Interpreter','Latex')
-    ylabel('$\max_t{|\frac{\langle x \rangle - x_{\rm th}}{A_0}|} \quad \rm [m]$','Interpreter','Latex') %$f(5{\rm m},1.5{\rm s}) \ \rm [m]$
-    set(gca,'FontSize',25)
-    set(h,'MarkerSize',11)
+    h=loglog(400./Ninters, errx,'k+');
+    set(gca,'FontSize',18)
+    set(h,'MarkerSize',12)
+    xlabel('$\Delta h$','Interpreter','Latex','FontSize',26)
+    ylabel('$\max_t{|\frac{\langle x \rangle - x_{\rm th}}{A_0}|}$','Interpreter','Latex','FontSize',26)
+    xticks([0.5 1 2 3 4 5])
     grid on
-%     lgd=legend('Valeurs numériques', 'Régression linéaire');
-%     set(lgd,'fontsize',14,'Location','northwest');
-    print(fig5,'figures/conv0_dx_x_th', '-depsc');
+    print(fig5,'figures/conv0_dh_x_th', '-depsc');
 
     fig6=figure('Position',[50,50,600,450]);
-    h=plot((400./Ninters).^2, errp,'k+');
-    xlabel('$(\Delta x)^2 \ \rm [m^2]$','Interpreter','Latex')
-    ylabel('$\max_t{|\frac{\langle p \rangle - p_{\rm th}}{A_0 \omega}|} \quad \rm [kg \, m/s]$','Interpreter','Latex') %$f(5{\rm m},1.5{\rm s}) \ \rm [m]$
-    set(gca,'FontSize',25)
-    set(h,'MarkerSize',11)
+    h=loglog(400./Ninters, errp,'k+');
+    set(gca,'FontSize',18)
+    set(h,'MarkerSize',12)
+    xlabel('$\Delta h$','Interpreter','Latex','FontSize',26)
+    ylabel('$\max_t{|\frac{\langle p \rangle - p_{\rm th}}{A_0 \omega}|}$','Interpreter','Latex','FontSize',26)
+    xticks([0.5 1 2 3 4 5])
     grid on
-%     lgd=legend('Valeurs numériques', 'Régression linéaire');
-%     set(lgd,'fontsize',14,'Location','northwest');
-    print(fig6,'figures/conv0_dx_p_th', '-depsc');
+    print(fig6,'figures/conv0_dh_p_th', '-depsc');
+
     
     
 elseif(strcmp(paraName,'delta') || strcmp(paraName,'V0'))
     
     fig1=figure('Position',[50,50,600,450]);
     hold on
-    plot(V0/E0, prob_dmax,'DisplayName','Quantique');
+    plot(V0./E_m, prob_dmax,'DisplayName','Quantique');
     plot([0 1 1 2.5],[1 1 0 0],'r--','DisplayName','Classique');
     hold off
     xlim([0 2.5])
-    xlabel('$V_0/E_0$','Interpreter','Latex')
-    ylabel('$P_{\rm trans}$','Interpreter','Latex') %$f(5{\rm m},1.5{\rm s}) \ \rm [m]$
-    set(gca,'FontSize',25)
+    set(gca,'FontSize',15)
+    xlabel('$V_0/E_0$','Interpreter','Latex','FontSize',22)
+    ylabel('$P_{\rm trans}$','Interpreter','Latex','FontSize',22)
     grid on
-    lgd=legend('show');
-    set(lgd,'fontsize',14,'Location','northeast');
+    lgd=legend('show','Interpreter','Latex');
+    set(lgd,'FontSize',15,'Location','northeast');
     print(fig1,'figures/V0_scan', '-depsc');
     
     if nsimul<6
@@ -322,12 +316,12 @@ elseif(strcmp(paraName,'delta') || strcmp(paraName,'V0'))
             h(i)=plot(t, prob_d{i} ,'-','DisplayName',sprintf('$V_0 = %.1fE_0$',V0(i)/E0),'Color',get(p,'Color'));
         end
         hold off
-        xlabel('$t \ \rm [s]$','Interpreter','Latex')
-        ylabel("Probabilit\'{e}",'Interpreter','Latex') %$f(5{\rm m},1.5{\rm s}) \ \rm [m]$
-        set(gca,'FontSize',25)
+        set(gca,'FontSize',15)
+        xlabel('$t$','Interpreter','Latex','FontSize',22)
+        ylabel("Probabilit\'{e}",'Interpreter','Latex','FontSize',22)
         grid on
         lgd=legend(h,'Interpreter','Latex');
-        set(lgd,'fontsize',14,'Location','southeast');
+        set(lgd,'fontsize',15,'Location','southeast');
         print(fig2,'figures/prob_tunnel', '-depsc');
         
         for i=1:nsimul
@@ -336,16 +330,24 @@ elseif(strcmp(paraName,'delta') || strcmp(paraName,'V0'))
             shading interp
             colormap jet
             c = colorbar;
-            xlabel('$x \ \rm [m]$','Interpreter','Latex')
-            ylabel('$t \ \rm [s]$','Interpreter','Latex')
-            ylabel(c,'$|\psi(x,t)|^2$','Interpreter','Latex')
+            set(gca,'FontSize',15)
+            xlabel('$x$','Interpreter','Latex','FontSize',22)
+            ylabel('$t$','Interpreter','Latex','FontSize',22)
+            ylabel(c,'$|\psi(x,t)|^2$','Interpreter','Latex','FontSize',22)
             grid on, box on
-            set(gca,'FontSize',22)
             title(sprintf('$V_0 = %.1fE_0$',V0(i)/E0),'Interpreter','Latex')
             pos=get(gca,'position');  % retrieve the current values
             pos(3)=0.9*pos(3);        % try reducing width 10%
             set(gca,'position',pos);  % write the new values
             print(fig(i),sprintf('figures/V0_%d',i), '-depsc');
+            
+            fig2(i)=figure('Position',[50,50,600,450]);
+            plot(x,V{i})
+            set(gca,'FontSize',15)
+            xlabel('$x$','Interpreter','Latex','FontSize',22)
+            ylabel('$V$','Interpreter','Latex','FontSize',22)
+            grid on
+            print(fig2(i),sprintf('figures/potentiel_scan%d',i), '-depsc');
         end
     end
     
@@ -358,14 +360,28 @@ elseif(strcmp(paraName,'n'))
         h=plot(t(1:l), prob_d{i}(1:l),'DisplayName',sprintf('$n=%d$',n(i)));
     end
     hold off
-    xlabel('$t \ \rm [s] $','Interpreter','Latex')
-    ylabel('$P_{x>0}$','Interpreter','Latex') %$f(5{\rm m},1.5{\rm s}) \ \rm [m]$
-    set(gca,'FontSize',25)
+    set(gca,'FontSize',15)
+    xlabel('$t$','Interpreter','Latex','FontSize',22)
+    ylabel('$P_{x>0}$','Interpreter','Latex','FontSize',22)
     set(h,'MarkerSize',11)
     grid on
     ylim([0 1])
+    yticks([0 0.25 0.5 0.75 1])
     lgd=legend('show','Interpreter','Latex');
-    set(lgd,'fontsize',17,'Location','northeast');
+    set(lgd,'fontsize',15,'Location','northeast');
     print(fig1,'figures/n_scan', '-depsc');
+
+elseif(strcmp(paraName,'n_cont'))
    
+    fig1=figure('Position',[50,50,600,450]);
+    hold on
+    plot(n, prob_dmax,'+', 'MarkerSize',11);
+    plot(n,0.5*ones(size(n)),'--')
+    hold off
+    set(gca,'FontSize',16)
+    xlabel('$n$','Interpreter','Latex','FontSize',25)
+    ylabel('$P_{\rm trans}$','Interpreter','Latex','FontSize',25)
+    grid on, box on
+    print(fig1,'figures/n_cont_scan', '-depsc');
+    
 end
